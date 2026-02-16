@@ -1,6 +1,6 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { Collection, Db } from 'mongodb';
-import { DATABASE_CONNECTION } from './database.module';
+import { DATABASE_CONNECTION } from './database.constants';
 import { ConversationDoc } from '../chat/interfaces/conversation.interface';
 import { MessageDoc } from '../chat/interfaces/message.interface';
 

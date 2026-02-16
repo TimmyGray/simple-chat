@@ -2,17 +2,18 @@ import { Global, Inject, Module, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MongoClient, Db } from 'mongodb';
 import { DatabaseService } from './database.service';
-
-export const DATABASE_CONNECTION = 'DATABASE_CONNECTION';
-export const MONGO_CLIENT = 'MONGO_CLIENT';
+import { DATABASE_CONNECTION, MONGO_CLIENT } from './database.constants';
 
 @Global()
 @Module({
   providers: [
     {
       provide: MONGO_CLIENT,
-      useFactory: async (configService: ConfigService): Promise<MongoClient> => {
+      useFactory: async (
+        configService: ConfigService,
+      ): Promise<MongoClient> => {
         const uri = configService.get<string>('mongodb.uri');
+        if (!uri) throw new Error('MongoDB URI not configured');
         const client = new MongoClient(uri);
         await client.connect();
         return client;

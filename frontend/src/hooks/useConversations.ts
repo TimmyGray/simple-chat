@@ -5,12 +5,16 @@ import * as api from '../api/client';
 export function useConversations() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetch = useCallback(async () => {
+    setError(null);
     try {
       const data = await api.getConversations();
       setConversations(data);
     } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to fetch conversations';
+      setError(msg);
       console.error('Failed to fetch conversations:', err);
     } finally {
       setLoading(false);
@@ -46,5 +50,5 @@ export function useConversations() {
     setConversations((prev) => prev.filter((c) => c._id !== id));
   }, []);
 
-  return { conversations, loading, refresh: fetch, create, update, remove };
+  return { conversations, loading, error, refresh: fetch, create, update, remove };
 }

@@ -6,19 +6,22 @@ import {
   Delete,
   Body,
   Param,
+  Req,
   Res,
   Logger,
   UseInterceptors,
   UploadedFiles,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { Throttle } from '@nestjs/throttler';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import { ChatService } from './chat.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { SendMessageDto } from './dto/send-message.dto';
+import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 
 const uploadLogger = new Logger('FileUpload');
 
@@ -37,13 +40,15 @@ export class ChatController {
 
   @Post('conversations')
   createConversation(@Body() dto: CreateConversationDto) {
-    this.logger.log(`Creating conversation: title="${dto.title || 'New Chat'}", model="${dto.model || 'default'}"`);
+    this.logger.log(
+      `Creating conversation: title="${dto.title || 'New Chat'}", model="${dto.model || 'default'}"`,
+    );
     return this.chatService.createConversation(dto);
   }
 
   @Patch('conversations/:id')
   updateConversation(
-    @Param('id') id: string,
+    @Param('id', ParseObjectIdPipe) id: string,
     @Body() dto: UpdateConversationDto,
   ) {
     this.logger.log(`Updating conversation ${id}: ${JSON.stringify(dto)}`);
@@ -51,30 +56,35 @@ export class ChatController {
   }
 
   @Delete('conversations/:id')
-  deleteConversation(@Param('id') id: string) {
+  deleteConversation(@Param('id', ParseObjectIdPipe) id: string) {
     this.logger.log(`Deleting conversation ${id}`);
     return this.chatService.deleteConversation(id);
   }
 
   // Messages
   @Get('conversations/:id/messages')
-  getMessages(@Param('id') id: string) {
+  getMessages(@Param('id', ParseObjectIdPipe) id: string) {
     this.logger.debug(`GET /conversations/${id}/messages`);
     return this.chatService.getMessages(id);
   }
 
   @Post('conversations/:id/messages')
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
   sendMessage(
-    @Param('id') id: string,
+    @Param('id', ParseObjectIdPipe) id: string,
     @Body() dto: SendMessageDto,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
-    this.logger.log(`Starting SSE stream for conversation ${id}, model="${dto.model || 'default'}", attachments=${dto.attachments?.length || 0}`);
-    return this.chatService.sendMessageAndStream(id, dto, res);
+    this.logger.log(
+      `Starting SSE stream for conversation ${id}, model="${dto.model || 'default'}", attachments=${dto.attachments?.length || 0}`,
+    );
+    return this.chatService.sendMessageAndStream(id, dto, req, res);
   }
 
   // File upload
   @Post('upload')
+  @Throttle({ default: { ttl: 60000, limit: 20 } })
   @UseInterceptors(
     FilesInterceptor('files', 5, {
       storage: diskStorage({
@@ -98,7 +108,9 @@ export class ChatController {
         ];
         const allowed = allowedMimes.includes(file.mimetype);
         if (!allowed) {
-          uploadLogger.warn(`Rejected file "${file.originalname}" with mime type "${file.mimetype}"`);
+          uploadLogger.warn(
+            `Rejected file "${file.originalname}" with mime type "${file.mimetype}"`,
+          );
         }
         cb(null, allowed);
       },
@@ -106,7 +118,9 @@ export class ChatController {
     }),
   )
   uploadFiles(@UploadedFiles() files: Express.Multer.File[]) {
-    this.logger.log(`Uploaded ${files.length} file(s): ${files.map((f) => `${f.originalname} (${(f.size / 1024).toFixed(1)}KB)`).join(', ')}`);
+    this.logger.log(
+      `Uploaded ${files.length} file(s): ${files.map((f) => `${f.originalname} (${(f.size / 1024).toFixed(1)}KB)`).join(', ')}`,
+    );
     return files.map((file) => ({
       fileName: file.originalname,
       fileType: file.mimetype,

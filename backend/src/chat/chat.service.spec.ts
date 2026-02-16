@@ -114,21 +114,17 @@ describe('ChatService', () => {
 
   describe('getConversation', () => {
     it('should return a conversation by id', async () => {
-      const result = await service.getConversation(
-        '507f1f77bcf86cd799439011',
-      );
+      const result = await service.getConversation('507f1f77bcf86cd799439011');
       expect(result).toBeDefined();
       expect(result._id).toEqual(mockObjectId);
     });
 
     it('should throw NotFoundException when not found', async () => {
-      mockConversationsCollection.findOne = vi
-        .fn()
-        .mockResolvedValue(null);
+      mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
 
-      await expect(service.getConversation('507f1f77bcf86cd799439011')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.getConversation('507f1f77bcf86cd799439011'),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -172,12 +168,10 @@ describe('ChatService', () => {
 
     it('should delete messages before the conversation', async () => {
       const callOrder: string[] = [];
-      mockMessagesCollection.deleteMany = vi
-        .fn()
-        .mockImplementation(() => {
-          callOrder.push('deleteMessages');
-          return Promise.resolve({ deletedCount: 1 });
-        });
+      mockMessagesCollection.deleteMany = vi.fn().mockImplementation(() => {
+        callOrder.push('deleteMessages');
+        return Promise.resolve({ deletedCount: 1 });
+      });
       mockConversationsCollection.findOneAndDelete = vi
         .fn()
         .mockImplementation(() => {
@@ -190,9 +184,7 @@ describe('ChatService', () => {
     });
 
     it('should throw NotFoundException when not found', async () => {
-      mockConversationsCollection.findOne = vi
-        .fn()
-        .mockResolvedValue(null);
+      mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
 
       await expect(
         service.deleteConversation('507f1f77bcf86cd799439011'),
@@ -200,9 +192,7 @@ describe('ChatService', () => {
     });
 
     it('should not delete messages if conversation not found', async () => {
-      mockConversationsCollection.findOne = vi
-        .fn()
-        .mockResolvedValue(null);
+      mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
 
       await expect(
         service.deleteConversation('507f1f77bcf86cd799439011'),

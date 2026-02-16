@@ -103,12 +103,19 @@ describe('ChatController', () => {
   describe('sendMessage', () => {
     it('should call sendMessageAndStream', async () => {
       const dto = { content: 'Hello' };
+      const mockReq = {} as any;
       const mockRes = {} as any;
 
-      await controller.sendMessage('507f1f77bcf86cd799439011', dto, mockRes);
+      await controller.sendMessage(
+        '507f1f77bcf86cd799439011',
+        dto,
+        mockReq,
+        mockRes,
+      );
       expect(chatService.sendMessageAndStream).toHaveBeenCalledWith(
         '507f1f77bcf86cd799439011',
         dto,
+        mockReq,
         mockRes,
       );
     });

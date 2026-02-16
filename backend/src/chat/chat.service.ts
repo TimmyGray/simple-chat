@@ -9,7 +9,7 @@ import { ObjectId } from 'mongodb';
 import OpenAI from 'openai';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { DatabaseService } from '../database/database.service';
 import { ConversationDoc } from './interfaces/conversation.interface';
 import { MessageDoc } from './interfaces/message.interface';
@@ -126,9 +126,12 @@ export class ChatService {
     return messages;
   }
 
+  private static readonly STREAM_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+
   async sendMessageAndStream(
     conversationId: string,
     dto: SendMessageDto,
+    req: Request,
     res: Response,
   ): Promise<void> {
     const conversation = await this.getConversation(conversationId);
@@ -176,7 +179,20 @@ export class ChatService {
     res.setHeader('Connection', 'keep-alive');
     res.setHeader('X-Accel-Buffering', 'no');
 
+    // Detect client disconnect
+    let clientDisconnected = false;
+    req.on('close', () => {
+      clientDisconnected = true;
+    });
+
     let fullContent = '';
+    const streamTimeout = setTimeout(() => {
+      this.logger.warn(`Stream timeout for conversation ${conversationId}`);
+      if (!res.writableEnded) {
+        res.write(`data: ${JSON.stringify({ error: 'Stream timeout' })}\n\n`);
+        res.end();
+      }
+    }, ChatService.STREAM_TIMEOUT_MS);
 
     try {
       this.logger.log(
@@ -189,6 +205,14 @@ export class ChatService {
       });
 
       for await (const chunk of stream) {
+        if (clientDisconnected) {
+          this.logger.log(
+            `Client disconnected during stream for conversation ${conversationId}`,
+          );
+          stream.controller.abort();
+          break;
+        }
+
         const content = chunk.choices[0]?.delta?.content || '';
         if (content) {
           fullContent += content;
@@ -196,23 +220,27 @@ export class ChatService {
         }
       }
 
-      // Save assistant message
-      const assistantNow = new Date();
-      await this.databaseService.messages().insertOne({
-        conversationId: new ObjectId(conversationId),
-        role: 'assistant',
-        content: fullContent,
-        model,
-        attachments: [],
-        createdAt: assistantNow,
-        updatedAt: assistantNow,
-      });
+      // Save assistant message if we got any content
+      if (fullContent.length > 0) {
+        const assistantNow = new Date();
+        await this.databaseService.messages().insertOne({
+          conversationId: new ObjectId(conversationId),
+          role: 'assistant',
+          content: fullContent,
+          model,
+          attachments: [],
+          createdAt: assistantNow,
+          updatedAt: assistantNow,
+        });
+      }
 
       this.logger.log(
         `Stream complete for conversation ${conversationId}: ${fullContent.length} chars`,
       );
-      res.write(`data: [DONE]\n\n`);
-      res.end();
+      if (!res.writableEnded) {
+        res.write(`data: [DONE]\n\n`);
+        res.end();
+      }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -220,8 +248,12 @@ export class ChatService {
         `LLM stream failed for conversation ${conversationId}: ${errorMessage}`,
         error instanceof Error ? error.stack : undefined,
       );
-      res.write(`data: ${JSON.stringify({ error: errorMessage })}\n\n`);
-      res.end();
+      if (!res.writableEnded) {
+        res.write(`data: ${JSON.stringify({ error: errorMessage })}\n\n`);
+        res.end();
+      }
+    } finally {
+      clearTimeout(streamTimeout);
     }
   }
 
@@ -259,9 +291,11 @@ export class ChatService {
     fileName: string;
   }): Promise<string | null> {
     try {
-      const fullPath = path.resolve(attachment.filePath);
+      // Reconstruct path from basename only to prevent path traversal
+      const fileName = path.basename(attachment.filePath);
+      const fullPath = path.join(UPLOADS_DIR, fileName);
 
-      // Prevent path traversal: resolved path must be inside the uploads directory
+      // Defense-in-depth: resolved path must still be inside the uploads directory
       if (!fullPath.startsWith(UPLOADS_DIR + path.sep)) {
         this.logger.warn(
           `Path traversal attempt blocked: "${attachment.filePath}" → "${fullPath}"`,

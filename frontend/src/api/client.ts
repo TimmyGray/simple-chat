@@ -36,6 +36,8 @@ export async function getMessages(conversationId: string): Promise<Message[]> {
   return data;
 }
 
+const STREAM_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+
 export async function sendMessageStream(
   conversationId: string,
   content: string,
@@ -44,58 +46,81 @@ export async function sendMessageStream(
   onChunk?: (text: string) => void,
   onDone?: () => void,
   onError?: (error: string) => void,
+  abortSignal?: AbortSignal,
 ): Promise<void> {
-  const response = await fetch(
-    `${BASE_URL}/conversations/${conversationId}/messages`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content, model, attachments }),
-    },
-  );
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), STREAM_TIMEOUT_MS);
 
-  if (!response.ok || !response.body) {
-    onError?.(`HTTP error: ${response.status}`);
-    return;
+  // Allow external abort (e.g., stop generation button)
+  if (abortSignal) {
+    abortSignal.addEventListener('abort', () => controller.abort());
   }
 
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
+  let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
 
-  let buffer = '';
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
+  try {
+    const response = await fetch(
+      `${BASE_URL}/conversations/${conversationId}/messages`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content, model, attachments }),
+        signal: controller.signal,
+      },
+    );
 
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split('\n');
-    buffer = lines.pop() || ''; // Keep the last incomplete line in the buffer
+    if (!response.ok || !response.body) {
+      onError?.(`HTTP error: ${response.status}`);
+      return;
+    }
 
-    for (const line of lines) {
-      if (!line.startsWith('data: ')) continue;
-      const payload = line.slice(6);
+    reader = response.body.getReader();
+    const decoder = new TextDecoder();
 
-      if (payload === '[DONE]') {
-        onDone?.();
-        return;
-      }
+    let buffer = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
 
-      try {
-        const parsed = JSON.parse(payload);
-        if (parsed.error) {
-          onError?.(parsed.error);
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const payload = line.slice(6);
+
+        if (payload === '[DONE]') {
+          onDone?.();
           return;
         }
-        if (parsed.content) {
-          onChunk?.(parsed.content);
+
+        try {
+          const parsed = JSON.parse(payload);
+          if (parsed.error) {
+            onError?.(parsed.error);
+            return;
+          }
+          if (parsed.content) {
+            onChunk?.(parsed.content);
+          }
+        } catch {
+          // skip malformed lines
         }
-      } catch {
-        // skip malformed lines
       }
     }
-  }
 
-  onDone?.();
+    onDone?.();
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      onError?.(abortSignal?.aborted ? 'Generation stopped' : 'Stream timeout');
+    } else {
+      onError?.(err instanceof Error ? err.message : 'Stream failed');
+    }
+  } finally {
+    clearTimeout(timeout);
+    reader?.cancel().catch(() => {});
+  }
 }
 
 export async function uploadFiles(files: File[]): Promise<Attachment[]> {

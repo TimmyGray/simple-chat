@@ -1,23 +1,37 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import type { Message, Attachment } from '../types';
 import * as api from '../api/client';
+
+let msgCounter = 0;
+function tempId(prefix = 'temp') {
+  return `${prefix}-${Date.now()}-${++msgCounter}`;
+}
 
 export function useMessages() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [streaming, setStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const fetchMessages = useCallback(async (conversationId: string) => {
     setLoading(true);
+    setError(null);
     try {
       const data = await api.getMessages(conversationId);
       setMessages(data);
     } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to fetch messages';
+      setError(msg);
       console.error('Failed to fetch messages:', err);
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  const stopStreaming = useCallback(() => {
+    abortRef.current?.abort();
   }, []);
 
   const sendMessage = useCallback(
@@ -29,7 +43,7 @@ export function useMessages() {
     ) => {
       // Optimistically add user message
       const userMsg: Message = {
-        _id: `temp-${Date.now()}`,
+        _id: tempId('user'),
         conversationId,
         role: 'user',
         content,
@@ -37,59 +51,72 @@ export function useMessages() {
         createdAt: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, userMsg]);
-
+      setError(null);
       setStreaming(true);
       setStreamingContent('');
 
+      const abortController = new AbortController();
+      abortRef.current = abortController;
       let fullContent = '';
+      let completed = false;
 
-      await api.sendMessageStream(
-        conversationId,
-        content,
-        model,
-        attachments,
-        (chunk) => {
-          fullContent += chunk;
-          setStreamingContent(fullContent);
-        },
-        () => {
-          setStreaming(false);
-          setStreamingContent('');
-          // Add the full assistant message
-          const assistantMsg: Message = {
-            _id: `temp-assistant-${Date.now()}`,
-            conversationId,
-            role: 'assistant',
-            content: fullContent,
-            model,
-            attachments: [],
-            createdAt: new Date().toISOString(),
-          };
-          setMessages((prev) => [...prev, assistantMsg]);
-        },
-        (error) => {
-          setStreaming(false);
-          setStreamingContent('');
-          console.error('Streaming error:', error);
-          const errorMsg: Message = {
-            _id: `temp-error-${Date.now()}`,
-            conversationId,
-            role: 'assistant',
-            content: `Error: ${error}`,
-            attachments: [],
-            createdAt: new Date().toISOString(),
-          };
-          setMessages((prev) => [...prev, errorMsg]);
-        },
-      );
+      try {
+        await api.sendMessageStream(
+          conversationId,
+          content,
+          model,
+          attachments,
+          (chunk) => {
+            fullContent += chunk;
+            setStreamingContent(fullContent);
+          },
+          () => {
+            completed = true;
+            const assistantMsg: Message = {
+              _id: tempId('assistant'),
+              conversationId,
+              role: 'assistant',
+              content: fullContent,
+              model,
+              attachments: [],
+              createdAt: new Date().toISOString(),
+            };
+            setMessages((prev) => [...prev, assistantMsg]);
+          },
+          (streamError) => {
+            console.error('Streaming error:', streamError);
+            const errorMsg: Message = {
+              _id: tempId('error'),
+              conversationId,
+              role: 'assistant',
+              content: `Error: ${streamError}`,
+              attachments: [],
+              createdAt: new Date().toISOString(),
+            };
+            setMessages((prev) => [...prev, errorMsg]);
+          },
+          abortController.signal,
+        );
+      } catch (err) {
+        if (!completed) {
+          const msg = err instanceof Error ? err.message : 'Streaming failed';
+          setError(msg);
+        }
+      } finally {
+        setStreaming(false);
+        setStreamingContent('');
+        abortRef.current = null;
+      }
     },
     [],
   );
 
   const clear = useCallback(() => {
+    abortRef.current?.abort();
     setMessages([]);
     setStreamingContent('');
     setStreaming(false);
+    setError(null);
   }, []);
 
   return {
@@ -97,8 +124,10 @@ export function useMessages() {
     loading,
     streaming,
     streamingContent,
+    error,
     fetchMessages,
     sendMessage,
+    stopStreaming,
     clear,
   };
 }
