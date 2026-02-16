@@ -1,0 +1,50 @@
+import { useState, useEffect, useCallback } from 'react';
+import type { Conversation } from '../types';
+import * as api from '../api/client';
+
+export function useConversations() {
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetch = useCallback(async () => {
+    try {
+      const data = await api.getConversations();
+      setConversations(data);
+    } catch (err) {
+      console.error('Failed to fetch conversations:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
+
+  const create = useCallback(
+    async (model?: string) => {
+      const conversation = await api.createConversation({ model });
+      setConversations((prev) => [conversation, ...prev]);
+      return conversation;
+    },
+    [],
+  );
+
+  const update = useCallback(
+    async (id: string, body: { title?: string; model?: string }) => {
+      const updated = await api.updateConversation(id, body);
+      setConversations((prev) =>
+        prev.map((c) => (c._id === id ? updated : c)),
+      );
+      return updated;
+    },
+    [],
+  );
+
+  const remove = useCallback(async (id: string) => {
+    await api.deleteConversation(id);
+    setConversations((prev) => prev.filter((c) => c._id !== id));
+  }, []);
+
+  return { conversations, loading, refresh: fetch, create, update, remove };
+}
