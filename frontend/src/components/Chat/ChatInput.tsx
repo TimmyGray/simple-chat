@@ -124,7 +124,7 @@ export default function ChatInput({
           >
             {attachments.map((att, i) => (
               <Chip
-                key={i}
+                key={att.filePath}
                 label={att.fileName}
                 size="small"
                 onDelete={() => handleRemoveAttachment(i)}

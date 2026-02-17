@@ -68,15 +68,15 @@ export default function Layout({
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      {/* Mobile menu button */}
-      {isMobile && (
+      {/* Mobile menu button — hidden when drawer is open */}
+      {isMobile && !mobileOpen && (
         <IconButton
           onClick={() => setMobileOpen(true)}
           sx={{
             position: 'fixed',
             top: 12,
             left: 12,
-            zIndex: 1300,
+            zIndex: (theme) => theme.zIndex.modal + 1,
             backgroundColor: 'background.paper',
             border: '1px solid',
             borderColor: 'divider',

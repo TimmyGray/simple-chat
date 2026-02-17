@@ -66,6 +66,7 @@ export default function ChatArea({
         streamingContent={streamingContent}
       />
       <ChatInput
+        key={conversation._id}
         models={models}
         selectedModel={selectedModel}
         onModelChange={onModelChange}

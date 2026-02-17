@@ -2,11 +2,6 @@ import { useState, useCallback, useRef } from 'react';
 import type { Message, Attachment } from '../types';
 import * as api from '../api/client';
 
-let msgCounter = 0;
-function tempId(prefix = 'temp') {
-  return `${prefix}-${Date.now()}-${++msgCounter}`;
-}
-
 export function useMessages() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
@@ -43,7 +38,7 @@ export function useMessages() {
     ) => {
       // Optimistically add user message
       const userMsg: Message = {
-        _id: tempId('user'),
+        _id: crypto.randomUUID(),
         conversationId,
         role: 'user',
         content,
@@ -73,7 +68,7 @@ export function useMessages() {
           () => {
             completed = true;
             const assistantMsg: Message = {
-              _id: tempId('assistant'),
+              _id: crypto.randomUUID(),
               conversationId,
               role: 'assistant',
               content: fullContent,
@@ -86,7 +81,7 @@ export function useMessages() {
           (streamError) => {
             console.error('Streaming error:', streamError);
             const errorMsg: Message = {
-              _id: tempId('error'),
+              _id: crypto.randomUUID(),
               conversationId,
               role: 'assistant',
               content: `Error: ${streamError}`,
