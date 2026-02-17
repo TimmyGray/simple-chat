@@ -1,6 +1,6 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
@@ -20,16 +20,19 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
       load: [configuration],
       validationSchema: envValidationSchema,
     }),
-    LoggerModule.forRoot({
-      pinoHttp: {
-        level: process.env.LOG_LEVEL || 'info',
-        transport: process.env.NODE_ENV !== 'production'
-          ? { target: 'pino-pretty', options: { colorize: true } }
-          : undefined,
-        customProps: (req: any) => ({
-          correlationId: req.headers['x-correlation-id'],
-        }),
-      },
+    LoggerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        pinoHttp: {
+          level: config.get<string>('LOG_LEVEL', 'info'),
+          transport: config.get<string>('NODE_ENV') !== 'production'
+            ? { target: 'pino-pretty', options: { colorize: true } }
+            : undefined,
+          customProps: (req: any) => ({
+            correlationId: req.headers['x-correlation-id'],
+          }),
+        },
+      }),
     }),
     ThrottlerModule.forRoot({
       throttlers: [

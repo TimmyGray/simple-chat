@@ -19,9 +19,10 @@ export class MongoHealthIndicator extends HealthIndicator {
       await this.client.db().command({ ping: 1 });
       return this.getStatus(key, true);
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
       throw new HealthCheckError(
         'MongoDB check failed',
-        this.getStatus(key, false, { message: error.message }),
+        this.getStatus(key, false, { message }),
       );
     }
   }
