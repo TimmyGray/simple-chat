@@ -2,6 +2,7 @@ import { Box, Typography, Paper, Chip } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -68,9 +69,9 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
         {/* Attachments */}
         {message.attachments && message.attachments.length > 0 && (
           <Box sx={{ mb: 1, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-            {message.attachments.map((att, i) => (
+            {message.attachments.map((att) => (
               <Chip
-                key={i}
+                key={att.filePath}
                 label={att.fileName}
                 size="small"
                 variant="outlined"
@@ -99,6 +100,25 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
                 borderRadius: 0.5,
               },
               '& a': { color: 'primary.light' },
+              '& table': {
+                borderCollapse: 'collapse',
+                width: '100%',
+                mb: 1,
+                fontSize: '0.85rem',
+              },
+              '& th, & td': {
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                px: 1.5,
+                py: 0.75,
+                textAlign: 'left',
+              },
+              '& th': {
+                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                fontWeight: 600,
+              },
+              '& tr:nth-of-type(even)': {
+                backgroundColor: 'rgba(255, 255, 255, 0.03)',
+              },
               '& ul, & ol': { pl: 2, mb: 1 },
               '& blockquote': {
                 borderLeft: '3px solid',
@@ -110,6 +130,7 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
             }}
           >
             <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeSanitize]}
               components={{
                 code(props) {

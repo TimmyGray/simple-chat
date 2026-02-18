@@ -7,4 +7,7 @@ export default () => ({
     apiKey: process.env.OPENROUTER_API_KEY || '',
     baseUrl: process.env.LLM_URL_KEY || 'https://openrouter.ai/api/v1',
   },
+  uploads: {
+    ttlHours: parseInt(process.env.UPLOAD_TTL_HOURS || '24', 10),
+  },
 });

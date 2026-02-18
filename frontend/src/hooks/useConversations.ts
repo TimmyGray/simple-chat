@@ -27,27 +27,45 @@ export function useConversations() {
 
   const create = useCallback(
     async (model?: string) => {
-      const conversation = await api.createConversation({ model });
-      setConversations((prev) => [conversation, ...prev]);
-      return conversation;
+      try {
+        const conversation = await api.createConversation({ model });
+        setConversations((prev) => [conversation, ...prev]);
+        return conversation;
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Failed to create conversation';
+        setError(msg);
+        throw err;
+      }
     },
     [],
   );
 
   const update = useCallback(
     async (id: string, body: { title?: string; model?: string }) => {
-      const updated = await api.updateConversation(id, body);
-      setConversations((prev) =>
-        prev.map((c) => (c._id === id ? updated : c)),
-      );
-      return updated;
+      try {
+        const updated = await api.updateConversation(id, body);
+        setConversations((prev) =>
+          prev.map((c) => (c._id === id ? updated : c)),
+        );
+        return updated;
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Failed to update conversation';
+        setError(msg);
+        throw err;
+      }
     },
     [],
   );
 
   const remove = useCallback(async (id: string) => {
-    await api.deleteConversation(id);
-    setConversations((prev) => prev.filter((c) => c._id !== id));
+    try {
+      await api.deleteConversation(id);
+      setConversations((prev) => prev.filter((c) => c._id !== id));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to delete conversation';
+      setError(msg);
+      throw err;
+    }
   }, []);
 
   return { conversations, loading, error, refresh: fetch, create, update, remove };

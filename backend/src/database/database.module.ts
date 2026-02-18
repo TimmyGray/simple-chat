@@ -29,7 +29,7 @@ import { DATABASE_CONNECTION, MONGO_CLIENT } from './database.constants';
     },
     DatabaseService,
   ],
-  exports: [DATABASE_CONNECTION, DatabaseService],
+  exports: [DATABASE_CONNECTION, MONGO_CLIENT, DatabaseService],
 })
 export class DatabaseModule implements OnModuleDestroy {
   constructor(@Inject(MONGO_CLIENT) private readonly client: MongoClient) {}
