@@ -10,13 +10,12 @@ export function useAuth() {
     tRef.current = t;
   });
 
-  const hasToken = !!api.getStoredToken();
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(hasToken);
+  const [loading, setLoading] = useState(() => !!api.getStoredToken());
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!hasToken) return;
+    if (!loading) return;
 
     let cancelled = false;
     api
@@ -34,25 +33,29 @@ export function useAuth() {
     return () => {
       cancelled = true;
     };
-  }, [hasToken]);
+  }, [loading]);
 
   const login = useCallback(async (email: string, password: string) => {
     setError(null);
     try {
       const { accessToken } = await api.login(email, password);
       api.setStoredToken(accessToken);
-      const profile = await api.getProfile();
-      setUser(profile);
+      try {
+        const profile = await api.getProfile();
+        setUser(profile);
+      } catch {
+        api.clearStoredToken();
+        setError(tRef.current('auth.loginFailed'));
+      }
     } catch (err) {
       if (err instanceof Error && 'response' in err) {
         const axiosErr = err as { response?: { status?: number } };
         if (axiosErr.response?.status === 401) {
           setError(tRef.current('auth.invalidCredentials'));
-          throw err;
+          return;
         }
       }
       setError(tRef.current('auth.loginFailed'));
-      throw err;
     }
   }, []);
 
@@ -61,18 +64,22 @@ export function useAuth() {
     try {
       const { accessToken } = await api.register(email, password);
       api.setStoredToken(accessToken);
-      const profile = await api.getProfile();
-      setUser(profile);
+      try {
+        const profile = await api.getProfile();
+        setUser(profile);
+      } catch {
+        api.clearStoredToken();
+        setError(tRef.current('auth.registerFailed'));
+      }
     } catch (err) {
       if (err instanceof Error && 'response' in err) {
         const axiosErr = err as { response?: { status?: number } };
         if (axiosErr.response?.status === 409) {
           setError(tRef.current('auth.emailTaken'));
-          throw err;
+          return;
         }
       }
       setError(tRef.current('auth.registerFailed'));
-      throw err;
     }
   }, []);
 

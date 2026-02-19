@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Box,
@@ -33,14 +33,16 @@ export default function AuthPage({
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    setPassword('');
+  }, [mode]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password) return;
     setSubmitting(true);
     try {
       await onSubmit(email.trim().toLowerCase(), password);
-    } catch {
-      // error is handled via the error prop
     } finally {
       setSubmitting(false);
     }
@@ -81,7 +83,7 @@ export default function AuthPage({
           <ChatBubbleOutlineIcon sx={{ color: '#fff', fontSize: 28 }} />
         </Box>
         <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          Simple Chat
+          {t('sidebar.title')}
         </Typography>
       </Box>
 
@@ -125,7 +127,7 @@ export default function AuthPage({
             onChange={(e) => setPassword(e.target.value)}
             autoComplete={isLogin ? 'current-password' : 'new-password'}
             required
-            inputProps={{ minLength: isLogin ? undefined : 8 }}
+            slotProps={{ htmlInput: { minLength: isLogin ? undefined : 8 } }}
             helperText={!isLogin ? t('auth.passwordHint') : undefined}
             sx={{ mb: 3 }}
           />

@@ -32,7 +32,9 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 && getStoredToken()) {
+    const url = error.config?.url || '';
+    const isAuthEndpoint = url.includes('/auth/login') || url.includes('/auth/register');
+    if (error.response?.status === 401 && getStoredToken() && !isAuthEndpoint) {
       clearStoredToken();
       window.location.reload();
     }
@@ -128,6 +130,11 @@ export async function sendMessageStream(
     );
 
     if (!response.ok || !response.body) {
+      if (response.status === 401 && getStoredToken()) {
+        clearStoredToken();
+        window.location.reload();
+        return;
+      }
       onError?.(`HTTP error: ${response.status}`);
       return;
     }
