@@ -1,13 +1,15 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ThemeProvider, CssBaseline, Snackbar, Alert } from '@mui/material';
+import { ThemeProvider, CssBaseline, Snackbar, Alert, Box, CircularProgress } from '@mui/material';
 import theme from './theme';
 import ErrorBoundary from './components/ErrorBoundary';
+import { useAuth } from './hooks/useAuth';
 import { useConversations } from './hooks/useConversations';
 import { useModels } from './hooks/useModels';
 import Layout from './components/Layout';
+import AuthPage from './components/Auth/AuthPage';
 
-export default function App() {
+function ChatApp({ userEmail, onLogout }: { userEmail: string; onLogout: () => void }) {
   const { t } = useTranslation();
   const { conversations, loading: convsLoading, error: convsError, clearError: clearConvsError, refresh, create, remove } = useConversations();
   const { models, error: modelsError, clearError: clearModelsError } = useModels();
@@ -16,7 +18,6 @@ export default function App() {
   const [selectedModel, setSelectedModel] = useState('openrouter/free');
   const [localError, setLocalError] = useState<string | null>(null);
 
-  // Derive displayed error from hook errors or local errors
   const error = convsError || modelsError || localError;
 
   const clearError = useCallback(() => {
@@ -56,31 +57,82 @@ export default function App() {
   );
 
   return (
+    <>
+      <Layout
+        conversations={conversations}
+        conversationsLoading={convsLoading}
+        models={models}
+        selectedConversation={selectedConversation}
+        selectedModel={selectedModel}
+        userEmail={userEmail}
+        onSelectConversation={setSelectedId}
+        onNewChat={handleNewChat}
+        onDeleteConversation={handleDelete}
+        onModelChange={setSelectedModel}
+        onConversationUpdate={refresh}
+        onLogout={onLogout}
+      />
+      <Snackbar
+        open={!!error}
+        autoHideDuration={4000}
+        onClose={clearError}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="error" onClose={clearError}>
+          {error}
+        </Alert>
+      </Snackbar>
+    </>
+  );
+}
+
+export default function App() {
+  const { user, loading: authLoading, error: authError, clearError: clearAuthError, login, register, logout } = useAuth();
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+
+  const handleSwitchMode = useCallback(() => {
+    clearAuthError();
+    setAuthMode((prev) => (prev === 'login' ? 'register' : 'login'));
+  }, [clearAuthError]);
+
+  const handleSubmit = useCallback(
+    async (email: string, password: string) => {
+      if (authMode === 'login') {
+        await login(email, password);
+      } else {
+        await register(email, password);
+      }
+    },
+    [authMode, login, register],
+  );
+
+  return (
     <ErrorBoundary>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Layout
-          conversations={conversations}
-          conversationsLoading={convsLoading}
-          models={models}
-          selectedConversation={selectedConversation}
-          selectedModel={selectedModel}
-          onSelectConversation={setSelectedId}
-          onNewChat={handleNewChat}
-          onDeleteConversation={handleDelete}
-          onModelChange={setSelectedModel}
-          onConversationUpdate={refresh}
-        />
-        <Snackbar
-          open={!!error}
-          autoHideDuration={4000}
-          onClose={clearError}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        >
-          <Alert severity="error" onClose={clearError}>
-            {error}
-          </Alert>
-        </Snackbar>
+        {authLoading ? (
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100vh',
+              backgroundColor: 'background.default',
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        ) : user ? (
+          <ChatApp userEmail={user.email} onLogout={logout} />
+        ) : (
+          <AuthPage
+            mode={authMode}
+            error={authError}
+            onSubmit={handleSubmit}
+            onSwitchMode={handleSwitchMode}
+            onClearError={clearAuthError}
+          />
+        )}
       </ThemeProvider>
     </ErrorBoundary>
   );

@@ -1,4 +1,20 @@
 {
+  "auth": {
+    "loginTitle": "Welcome back",
+    "registerTitle": "Create account",
+    "login": "Sign in",
+    "register": "Sign up",
+    "logout": "Sign out",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "At least 8 characters",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "invalidCredentials": "Invalid email or password",
+    "emailTaken": "This email is already registered",
+    "loginFailed": "Sign in failed",
+    "registerFailed": "Sign up failed"
+  },
   "sidebar": {
     "title": "Simple Chat",
     "newChat": "New Chat",

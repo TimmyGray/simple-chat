@@ -19,11 +19,13 @@ interface LayoutProps {
   models: ModelInfo[];
   selectedConversation: Conversation | null;
   selectedModel: string;
+  userEmail?: string;
   onSelectConversation: (id: string) => void;
   onNewChat: () => void;
   onDeleteConversation: (id: string) => void;
   onModelChange: (model: string) => void;
   onConversationUpdate: () => void;
+  onLogout?: () => void;
 }
 
 export default function Layout({
@@ -32,11 +34,13 @@ export default function Layout({
   models,
   selectedConversation,
   selectedModel,
+  userEmail,
   onSelectConversation,
   onNewChat,
   onDeleteConversation,
   onModelChange,
   onConversationUpdate,
+  onLogout,
 }: LayoutProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -60,9 +64,11 @@ export default function Layout({
       conversations={conversations}
       loading={conversationsLoading}
       selectedId={selectedConversation?._id || null}
+      userEmail={userEmail}
       onSelect={handleSelectConversation}
       onNewChat={handleNewChat}
       onDelete={onDeleteConversation}
+      onLogout={onLogout}
     />
   );
 

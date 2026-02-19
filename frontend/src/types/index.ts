@@ -1,3 +1,12 @@
+export interface User {
+  _id: string;
+  email: string;
+}
+
+export interface AuthResponse {
+  accessToken: string;
+}
+
 export interface Conversation {
   _id: string;
   title: string;

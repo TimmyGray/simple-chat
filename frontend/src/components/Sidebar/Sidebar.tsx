@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, List, Typography, Divider, CircularProgress } from '@mui/material';
+import { Box, List, Typography, Divider, CircularProgress, IconButton, Tooltip } from '@mui/material';
+import LogoutIcon from '@mui/icons-material/Logout';
 import type { Conversation } from '../../types';
 import NewChatButton from './NewChatButton';
 import ConversationItem from './ConversationItem';
@@ -11,18 +12,22 @@ interface SidebarProps {
   conversations: Conversation[];
   loading: boolean;
   selectedId: string | null;
+  userEmail?: string;
   onSelect: (id: string) => void;
   onNewChat: () => void;
   onDelete: (id: string) => void;
+  onLogout?: () => void;
 }
 
 export default function Sidebar({
   conversations,
   loading,
   selectedId,
+  userEmail,
   onSelect,
   onNewChat,
   onDelete,
+  onLogout,
 }: SidebarProps) {
   const { t } = useTranslation();
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
@@ -74,6 +79,39 @@ export default function Sidebar({
 
       <Divider sx={{ my: 1 }} />
       <LanguageSwitcher />
+
+      {userEmail && onLogout && (
+        <>
+          <Divider sx={{ my: 1 }} />
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              px: 1,
+            }}
+          >
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                flex: 1,
+                mr: 1,
+              }}
+            >
+              {userEmail}
+            </Typography>
+            <Tooltip title={t('auth.logout')}>
+              <IconButton size="small" onClick={onLogout}>
+                <LogoutIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </>
+      )}
 
       <ConfirmDialog
         open={!!deleteTarget}

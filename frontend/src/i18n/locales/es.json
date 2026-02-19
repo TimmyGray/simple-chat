@@ -1,4 +1,20 @@
 {
+  "auth": {
+    "loginTitle": "Bienvenido de nuevo",
+    "registerTitle": "Crear cuenta",
+    "login": "Iniciar sesión",
+    "register": "Registrarse",
+    "logout": "Cerrar sesión",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "passwordHint": "Al menos 8 caracteres",
+    "noAccount": "¿No tienes cuenta?",
+    "hasAccount": "¿Ya tienes cuenta?",
+    "invalidCredentials": "Correo o contraseña incorrectos",
+    "emailTaken": "Este correo ya está registrado",
+    "loginFailed": "Error al iniciar sesión",
+    "registerFailed": "Error al registrarse"
+  },
   "sidebar": {
     "title": "Simple Chat",
     "newChat": "Nuevo chat",
