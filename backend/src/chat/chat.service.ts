@@ -43,9 +43,11 @@ export class ChatService {
 
   async createConversation(
     dto: CreateConversationDto,
+    userId: ObjectId,
   ): Promise<ConversationDoc> {
     const now = new Date();
     const doc = {
+      userId,
       title: dto.title || 'New Chat',
       model: dto.model || 'openrouter/free',
       createdAt: now,
@@ -57,22 +59,31 @@ export class ChatService {
     return saved;
   }
 
-  async getConversations(): Promise<ConversationDoc[]> {
+  async getConversations(userId: ObjectId): Promise<ConversationDoc[]> {
     const conversations = await this.databaseService
       .conversations()
-      .find()
+      .find({ userId })
       .sort({ updatedAt: -1 })
       .toArray();
     this.logger.debug(`Fetched ${conversations.length} conversations`);
     return conversations;
   }
 
-  async getConversation(id: string): Promise<ConversationDoc> {
+  async getConversation(
+    id: string,
+    userId: ObjectId,
+  ): Promise<ConversationDoc> {
     const conversation = await this.databaseService
       .conversations()
       .findOne({ _id: new ObjectId(id) });
     if (!conversation) {
       this.logger.warn(`Conversation not found: ${id}`);
+      throw new NotFoundException('Conversation not found');
+    }
+    if (!conversation.userId.equals(userId)) {
+      this.logger.warn(
+        `Unauthorized access attempt to conversation ${id} by user ${String(userId)}`,
+      );
       throw new NotFoundException('Conversation not found');
     }
     return conversation;
@@ -81,11 +92,12 @@ export class ChatService {
   async updateConversation(
     id: string,
     dto: UpdateConversationDto,
+    userId: ObjectId,
   ): Promise<ConversationDoc> {
     const conversation = await this.databaseService
       .conversations()
       .findOneAndUpdate(
-        { _id: new ObjectId(id) },
+        { _id: new ObjectId(id), userId },
         { $set: { ...dto, updatedAt: new Date() } },
         { returnDocument: 'after' },
       );
@@ -97,10 +109,10 @@ export class ChatService {
     return conversation;
   }
 
-  async deleteConversation(id: string): Promise<void> {
+  async deleteConversation(id: string, userId: ObjectId): Promise<void> {
     const conversation = await this.databaseService
       .conversations()
-      .findOne({ _id: new ObjectId(id) });
+      .findOne({ _id: new ObjectId(id), userId });
     if (!conversation) {
       this.logger.warn(`Conversation not found for deletion: ${id}`);
       throw new NotFoundException('Conversation not found');
@@ -110,11 +122,17 @@ export class ChatService {
       .deleteMany({ conversationId: new ObjectId(id) });
     await this.databaseService
       .conversations()
-      .findOneAndDelete({ _id: new ObjectId(id) });
+      .findOneAndDelete({ _id: new ObjectId(id), userId });
     this.logger.log(`Conversation deleted: ${id} (with messages)`);
   }
 
-  async getMessages(conversationId: string): Promise<MessageDoc[]> {
+  async getMessages(
+    conversationId: string,
+    userId: ObjectId,
+  ): Promise<MessageDoc[]> {
+    // Verify conversation ownership before returning messages
+    await this.getConversation(conversationId, userId);
+
     const messages = await this.databaseService
       .messages()
       .find({ conversationId: new ObjectId(conversationId) })
@@ -133,8 +151,9 @@ export class ChatService {
     dto: SendMessageDto,
     req: Request,
     res: Response,
+    userId: ObjectId,
   ): Promise<void> {
-    const conversation = await this.getConversation(conversationId);
+    const conversation = await this.getConversation(conversationId, userId);
     const model = dto.model || conversation.model;
 
     // Save user message
@@ -161,7 +180,7 @@ export class ChatService {
       await this.databaseService
         .conversations()
         .findOneAndUpdate(
-          { _id: new ObjectId(conversationId) },
+          { _id: new ObjectId(conversationId), userId },
           { $set: { title, updatedAt: new Date() } },
         );
       this.logger.debug(
@@ -170,7 +189,11 @@ export class ChatService {
     }
 
     // Build message history for LLM
-    const messages = await this.getMessages(conversationId);
+    const messages = await this.databaseService
+      .messages()
+      .find({ conversationId: new ObjectId(conversationId) })
+      .sort({ createdAt: 1 })
+      .toArray();
     const llmMessages = await this.buildLlmMessages(messages);
 
     // Set SSE headers
