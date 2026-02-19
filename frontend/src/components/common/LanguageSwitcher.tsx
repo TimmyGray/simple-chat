@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { ToggleButtonGroup, ToggleButton } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 
 const languages = [
   { code: 'en', label: 'EN' },
@@ -28,10 +29,10 @@ export default function LanguageSwitcher() {
           color: 'text.secondary',
           borderColor: 'rgba(255, 255, 255, 0.08)',
           '&.Mui-selected': {
-            backgroundColor: 'rgba(124, 77, 255, 0.15)',
+            backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.15),
             color: 'primary.light',
             '&:hover': {
-              backgroundColor: 'rgba(124, 77, 255, 0.25)',
+              backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.25),
             },
           },
         },

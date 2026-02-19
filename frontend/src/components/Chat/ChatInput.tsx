@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, TextField, IconButton, Tooltip, Paper, Chip } from '@mui/material';
+import { Box, TextField, IconButton, Tooltip, Paper, Chip, Typography } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import SendIcon from '@mui/icons-material/Send';
 import type { ModelInfo, Attachment } from '../../types';
 import ModelSelector from './ModelSelector';
@@ -27,6 +28,7 @@ export default function ChatInput({
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [uploading, setUploading] = useState(false);
   const [focused, setFocused] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const handleSend = useCallback(() => {
     const text = input.trim();
@@ -46,11 +48,12 @@ export default function ChatInput({
 
   const handleAttach = async (files: File[]) => {
     setUploading(true);
+    setUploadError(null);
     try {
       const uploaded = await api.uploadFiles(files);
       setAttachments((prev) => [...prev, ...uploaded]);
-    } catch (err) {
-      console.error('Upload failed:', err);
+    } catch {
+      setUploadError(t('errors.filesNotAttached'));
     } finally {
       setUploading(false);
     }
@@ -72,9 +75,10 @@ export default function ChatInput({
           borderColor: focused ? 'primary.main' : 'divider',
           backgroundColor: 'rgba(255, 255, 255, 0.03)',
           transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-          boxShadow: focused
-            ? '0 0 0 2px rgba(124, 77, 255, 0.15)'
-            : 'none',
+          boxShadow: (theme) =>
+            focused
+              ? `0 0 0 2px ${alpha(theme.palette.primary.main, 0.15)}`
+              : 'none',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
@@ -134,6 +138,13 @@ export default function ChatInput({
               />
             ))}
           </Box>
+        )}
+
+        {/* Upload error */}
+        {uploadError && (
+          <Typography variant="caption" color="error" sx={{ px: 2, pb: 0.5 }}>
+            {uploadError}
+          </Typography>
         )}
 
         {/* Toolbar row */}

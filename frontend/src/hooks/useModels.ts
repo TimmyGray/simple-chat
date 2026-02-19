@@ -16,7 +16,6 @@ export function useModels() {
       .catch((err) => {
         const msg = err instanceof Error ? err.message : t('errors.fetchModels');
         setError(msg);
-        console.error('Failed to fetch models:', err);
       })
       .finally(() => setLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
