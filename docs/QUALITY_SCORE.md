@@ -49,10 +49,10 @@
 
 ## Tech Debt
 - Critical: 0 (JWT authentication completed)
-- High: 5
-- Medium: ~23
-- Low: ~13
-- Total tracked: 63 (see `docs/exec-plans/tech-debt-tracker.md`)
+- High: 5 (unchanged)
+- Medium: ~24 (+1 new: B-M10 split chat.service.ts)
+- Low: ~12 (-1: F-L3 completed in sweep)
+- Total tracked: 64 (see `docs/exec-plans/tech-debt-tracker.md`)
 
 ## Targets
 - Test count: 100+ (currently 91)
