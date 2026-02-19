@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, List, Typography, Divider, CircularProgress } from '@mui/material';
 import type { Conversation } from '../../types';
 import NewChatButton from './NewChatButton';
 import ConversationItem from './ConversationItem';
 import ConfirmDialog from '../common/ConfirmDialog';
+import LanguageSwitcher from '../common/LanguageSwitcher';
 
 interface SidebarProps {
   conversations: Conversation[];
@@ -22,6 +24,7 @@ export default function Sidebar({
   onNewChat,
   onDelete,
 }: SidebarProps) {
+  const { t } = useTranslation();
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   return (
@@ -34,7 +37,7 @@ export default function Sidebar({
       }}
     >
       <Typography variant="h6" sx={{ mb: 2, px: 1 }}>
-        Simple Chat
+        {t('sidebar.title')}
       </Typography>
 
       <NewChatButton onClick={onNewChat} />
@@ -52,7 +55,7 @@ export default function Sidebar({
             color="text.secondary"
             sx={{ textAlign: 'center', pt: 4 }}
           >
-            No conversations yet
+            {t('sidebar.noConversations')}
           </Typography>
         ) : (
           <List dense disablePadding>
@@ -69,10 +72,13 @@ export default function Sidebar({
         )}
       </Box>
 
+      <Divider sx={{ my: 1 }} />
+      <LanguageSwitcher />
+
       <ConfirmDialog
         open={!!deleteTarget}
-        title="Delete conversation"
-        message="This will permanently delete this conversation and all its messages."
+        title={t('dialog.deleteTitle')}
+        message={t('dialog.deleteMessage')}
         onConfirm={() => {
           if (deleteTarget) {
             onDelete(deleteTarget);

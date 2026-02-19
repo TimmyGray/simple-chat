@@ -1,0 +1,42 @@
+{
+  "sidebar": {
+    "title": "Simple Chat",
+    "newChat": "Новый чат",
+    "noConversations": "Нет диалогов"
+  },
+  "chat": {
+    "placeholder": "Введите сообщение...",
+    "filesAttached": "[Файлы прикреплены]",
+    "sendTooltip": "Отправить (Enter)",
+    "noConversation": "Диалог не выбран",
+    "noConversationHint": "Начните новый чат или выберите существующий",
+    "attachFiles": "Прикрепить файлы"
+  },
+  "dialog": {
+    "deleteTitle": "Удалить диалог",
+    "deleteMessage": "Это навсегда удалит этот диалог и все его сообщения."
+  },
+  "common": {
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "tryAgain": "Попробовать снова",
+    "reloadPage": "Перезагрузить страницу"
+  },
+  "models": {
+    "free": "Бесплатно"
+  },
+  "errors": {
+    "createConversation": "Не удалось создать диалог",
+    "deleteConversation": "Не удалось удалить диалог",
+    "fetchConversations": "Не удалось загрузить диалоги",
+    "updateConversation": "Не удалось обновить диалог",
+    "fetchMessages": "Не удалось загрузить сообщения",
+    "streamingFailed": "Ошибка потоковой передачи",
+    "somethingWrong": "Что-то пошло не так",
+    "unexpected": "Произошла непредвиденная ошибка.",
+    "maxFileCount": "Можно прикрепить не более {{count}} файлов за раз.",
+    "fileTooLarge": "\"{{name}}\" превышает лимит в 10 МБ.",
+    "unsupportedType": "\"{{name}}\" имеет неподдерживаемый тип файла ({{type}}).",
+    "filesNotAttached": "Некоторые файлы не были прикреплены:"
+  }
+}

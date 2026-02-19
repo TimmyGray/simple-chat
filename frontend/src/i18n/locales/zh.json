@@ -1,0 +1,42 @@
+{
+  "sidebar": {
+    "title": "Simple Chat",
+    "newChat": "新建聊天",
+    "noConversations": "暂无对话"
+  },
+  "chat": {
+    "placeholder": "输入消息...",
+    "filesAttached": "[已附加文件]",
+    "sendTooltip": "发送 (Enter)",
+    "noConversation": "未选择对话",
+    "noConversationHint": "开始新聊天或选择已有对话",
+    "attachFiles": "附加文件"
+  },
+  "dialog": {
+    "deleteTitle": "删除对话",
+    "deleteMessage": "这将永久删除此对话及其所有消息。"
+  },
+  "common": {
+    "cancel": "取消",
+    "delete": "删除",
+    "tryAgain": "重试",
+    "reloadPage": "重新加载页面"
+  },
+  "models": {
+    "free": "免费"
+  },
+  "errors": {
+    "createConversation": "创建对话失败",
+    "deleteConversation": "删除对话失败",
+    "fetchConversations": "获取对话列表失败",
+    "updateConversation": "更新对话失败",
+    "fetchMessages": "获取消息失败",
+    "streamingFailed": "流式传输失败",
+    "somethingWrong": "出了点问题",
+    "unexpected": "发生了意外错误。",
+    "maxFileCount": "一次最多只能附加 {{count}} 个文件。",
+    "fileTooLarge": "\"{{name}}\" 超过了 10MB 大小限制。",
+    "unsupportedType": "\"{{name}}\" 的文件类型不受支持 ({{type}})。",
+    "filesNotAttached": "部分文件未能附加："
+  }
+}

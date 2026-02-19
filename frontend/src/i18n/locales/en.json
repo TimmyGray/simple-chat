@@ -1,0 +1,42 @@
+{
+  "sidebar": {
+    "title": "Simple Chat",
+    "newChat": "New Chat",
+    "noConversations": "No conversations yet"
+  },
+  "chat": {
+    "placeholder": "Type your message...",
+    "filesAttached": "[Files attached]",
+    "sendTooltip": "Send (Enter)",
+    "noConversation": "No conversation selected",
+    "noConversationHint": "Start a new chat or select an existing one",
+    "attachFiles": "Attach files"
+  },
+  "dialog": {
+    "deleteTitle": "Delete conversation",
+    "deleteMessage": "This will permanently delete this conversation and all its messages."
+  },
+  "common": {
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "tryAgain": "Try Again",
+    "reloadPage": "Reload Page"
+  },
+  "models": {
+    "free": "Free"
+  },
+  "errors": {
+    "createConversation": "Failed to create conversation",
+    "deleteConversation": "Failed to delete conversation",
+    "fetchConversations": "Failed to fetch conversations",
+    "updateConversation": "Failed to update conversation",
+    "fetchMessages": "Failed to fetch messages",
+    "streamingFailed": "Streaming failed",
+    "somethingWrong": "Something went wrong",
+    "unexpected": "An unexpected error occurred.",
+    "maxFileCount": "You can attach up to {{count}} files at a time.",
+    "fileTooLarge": "\"{{name}}\" exceeds the 10MB size limit.",
+    "unsupportedType": "\"{{name}}\" has an unsupported file type ({{type}}).",
+    "filesNotAttached": "Some files were not attached:"
+  }
+}

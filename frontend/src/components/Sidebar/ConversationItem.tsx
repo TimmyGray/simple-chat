@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   ListItemButton,
   ListItemText,
@@ -21,6 +22,7 @@ export default function ConversationItem({
   onClick,
   onDelete,
 }: ConversationItemProps) {
+  const { i18n } = useTranslation();
   return (
     <ListItemButton
       selected={selected}
@@ -46,7 +48,7 @@ export default function ConversationItem({
         }
         secondary={
           <Typography variant="caption" color="text.secondary" noWrap>
-            {new Date(conversation.updatedAt).toLocaleDateString()}
+            {new Date(conversation.updatedAt).toLocaleDateString(i18n.language)}
           </Typography>
         }
       />

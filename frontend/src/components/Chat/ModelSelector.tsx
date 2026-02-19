@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { FormControl, Select, MenuItem, Chip } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
 import type { ModelInfo } from '../../types';
@@ -15,6 +16,7 @@ export default function ModelSelector({
   onChange,
   size = 'small',
 }: ModelSelectorProps) {
+  const { t } = useTranslation();
   const handleChange = (e: SelectChangeEvent) => onChange(e.target.value);
 
   return (
@@ -47,7 +49,7 @@ export default function ModelSelector({
             {model.name}
             {model.free && (
               <Chip
-                label="Free"
+                label={t('models.free')}
                 size="small"
                 color="success"
                 sx={{ ml: 1, height: 18, fontSize: '0.65rem' }}

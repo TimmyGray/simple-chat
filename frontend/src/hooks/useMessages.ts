@@ -1,8 +1,10 @@
 import { useState, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Message, Attachment } from '../types';
 import * as api from '../api/client';
 
 export function useMessages() {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [streaming, setStreaming] = useState(false);
@@ -17,13 +19,13 @@ export function useMessages() {
       const data = await api.getMessages(conversationId);
       setMessages(data);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Failed to fetch messages';
+      const msg = err instanceof Error ? err.message : t('errors.fetchMessages');
       setError(msg);
       console.error('Failed to fetch messages:', err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const stopStreaming = useCallback(() => {
     abortRef.current?.abort();
@@ -94,7 +96,7 @@ export function useMessages() {
         );
       } catch (err) {
         if (!completed) {
-          const msg = err instanceof Error ? err.message : 'Streaming failed';
+          const msg = err instanceof Error ? err.message : t('errors.streamingFailed');
           setError(msg);
         }
       } finally {
@@ -103,7 +105,7 @@ export function useMessages() {
         abortRef.current = null;
       }
     },
-    [],
+    [t],
   );
 
   const clear = useCallback(() => {

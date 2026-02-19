@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
+import i18n from '../i18n';
 
 interface Props {
   children: React.ReactNode;
@@ -44,16 +45,16 @@ export default class ErrorBoundary extends React.Component<Props, State> {
           }}
         >
           <Typography variant="h5" color="error">
-            Something went wrong
+            {i18n.t('errors.somethingWrong')}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
-            {this.state.error?.message || 'An unexpected error occurred.'}
+            {this.state.error?.message || i18n.t('errors.unexpected')}
           </Typography>
           <Button variant="contained" onClick={this.handleReset}>
-            Try Again
+            {i18n.t('common.tryAgain')}
           </Button>
           <Button variant="text" onClick={() => window.location.reload()}>
-            Reload Page
+            {i18n.t('common.reloadPage')}
           </Button>
         </Box>
       );

@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Box, TextField, IconButton, Tooltip, Paper, Chip } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import type { ModelInfo, Attachment } from '../../types';
@@ -21,6 +22,7 @@ export default function ChatInput({
   onSend,
   disabled,
 }: ChatInputProps) {
+  const { t } = useTranslation();
   const [input, setInput] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -30,10 +32,10 @@ export default function ChatInput({
     const text = input.trim();
     if (!text && attachments.length === 0) return;
 
-    onSend(text || '[Files attached]', attachments);
+    onSend(text || t('chat.filesAttached'), attachments);
     setInput('');
     setAttachments([]);
-  }, [input, attachments, onSend]);
+  }, [input, attachments, onSend, t]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -84,7 +86,7 @@ export default function ChatInput({
           multiline
           minRows={3}
           maxRows={8}
-          placeholder="Type your message..."
+          placeholder={t('chat.placeholder')}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -160,7 +162,7 @@ export default function ChatInput({
           </Box>
 
           {/* Right: send button */}
-          <Tooltip title="Send (Enter)">
+          <Tooltip title={t('chat.sendTooltip')}>
             <span>
               <IconButton
                 onClick={handleSend}
