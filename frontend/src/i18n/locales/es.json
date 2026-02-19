@@ -1,0 +1,43 @@
+{
+  "sidebar": {
+    "title": "Simple Chat",
+    "newChat": "Nuevo chat",
+    "noConversations": "No hay conversaciones"
+  },
+  "chat": {
+    "placeholder": "Escribe tu mensaje...",
+    "filesAttached": "[Archivos adjuntos]",
+    "sendTooltip": "Enviar (Enter)",
+    "noConversation": "Ninguna conversación seleccionada",
+    "noConversationHint": "Inicia un nuevo chat o selecciona uno existente",
+    "attachFiles": "Adjuntar archivos"
+  },
+  "dialog": {
+    "deleteTitle": "Eliminar conversación",
+    "deleteMessage": "Esto eliminará permanentemente esta conversación y todos sus mensajes."
+  },
+  "common": {
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "tryAgain": "Intentar de nuevo",
+    "reloadPage": "Recargar página"
+  },
+  "models": {
+    "free": "Gratis"
+  },
+  "errors": {
+    "createConversation": "Error al crear la conversación",
+    "deleteConversation": "Error al eliminar la conversación",
+    "fetchConversations": "Error al obtener las conversaciones",
+    "updateConversation": "Error al actualizar la conversación",
+    "fetchMessages": "Error al obtener los mensajes",
+    "streamingFailed": "Error en la transmisión",
+    "somethingWrong": "Algo salió mal",
+    "unexpected": "Ocurrió un error inesperado.",
+    "maxFileCount": "Puedes adjuntar hasta {{count}} archivos a la vez.",
+    "fileTooLarge": "\"{{name}}\" excede el límite de 10 MB.",
+    "unsupportedType": "\"{{name}}\" tiene un tipo de archivo no compatible ({{type}}).",
+    "fetchModels": "Error al obtener los modelos",
+    "filesNotAttached": "Algunos archivos no se adjuntaron:"
+  }
+}

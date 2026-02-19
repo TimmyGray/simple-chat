@@ -1,8 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Conversation } from '../types';
 import * as api from '../api/client';
 
 export function useConversations() {
+  const { t } = useTranslation();
+  const tRef = useRef(t);
+  tRef.current = t;
+
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -13,7 +18,7 @@ export function useConversations() {
       const data = await api.getConversations();
       setConversations(data);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Failed to fetch conversations';
+      const msg = err instanceof Error ? err.message : tRef.current('errors.fetchConversations');
       setError(msg);
       console.error('Failed to fetch conversations:', err);
     } finally {
@@ -32,7 +37,7 @@ export function useConversations() {
         setConversations((prev) => [conversation, ...prev]);
         return conversation;
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Failed to create conversation';
+        const msg = err instanceof Error ? err.message : tRef.current('errors.createConversation');
         setError(msg);
         throw err;
       }
@@ -49,7 +54,7 @@ export function useConversations() {
         );
         return updated;
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Failed to update conversation';
+        const msg = err instanceof Error ? err.message : tRef.current('errors.updateConversation');
         setError(msg);
         throw err;
       }
@@ -62,11 +67,13 @@ export function useConversations() {
       await api.deleteConversation(id);
       setConversations((prev) => prev.filter((c) => c._id !== id));
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Failed to delete conversation';
+      const msg = err instanceof Error ? err.message : tRef.current('errors.deleteConversation');
       setError(msg);
       throw err;
     }
   }, []);
 
-  return { conversations, loading, error, refresh: fetch, create, update, remove };
+  const clearError = useCallback(() => setError(null), []);
+
+  return { conversations, loading, error, clearError, refresh: fetch, create, update, remove };
 }

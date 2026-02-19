@@ -1,7 +1,10 @@
 import { Box, Typography } from '@mui/material';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import { useTranslation } from 'react-i18next';
 
 export default function EmptyState() {
+  const { t } = useTranslation();
+
   return (
     <Box
       sx={{
@@ -15,9 +18,9 @@ export default function EmptyState() {
       }}
     >
       <ChatBubbleOutlineIcon sx={{ fontSize: 64 }} />
-      <Typography variant="h6">No conversation selected</Typography>
+      <Typography variant="h6">{t('chat.noConversation')}</Typography>
       <Typography variant="body2" color="text.secondary">
-        Start a new chat or select an existing one
+        {t('chat.noConversationHint')}
       </Typography>
     </Box>
   );

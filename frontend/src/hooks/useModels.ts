@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ModelInfo } from '../types';
 import * as api from '../api/client';
 
 export function useModels() {
+  const { t } = useTranslation();
   const [models, setModels] = useState<ModelInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -12,12 +14,15 @@ export function useModels() {
       .getModels()
       .then(setModels)
       .catch((err) => {
-        const msg = err instanceof Error ? err.message : 'Failed to fetch models';
+        const msg = err instanceof Error ? err.message : t('errors.fetchModels');
         setError(msg);
         console.error('Failed to fetch models:', err);
       })
       .finally(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { models, loading, error };
+  const clearError = useCallback(() => setError(null), []);
+
+  return { models, loading, error, clearError };
 }

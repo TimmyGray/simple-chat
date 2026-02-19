@@ -328,7 +328,9 @@ export class ChatService {
         attachment.fileName.endsWith('.pdf')
       ) {
         // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const pdfParse = require('pdf-parse');
+        const pdfParse = require('pdf-parse') as (
+          buf: Buffer,
+        ) => Promise<{ text: string }>;
         const buffer = fs.readFileSync(fullPath);
         const data = await pdfParse(buffer);
         return data.text;

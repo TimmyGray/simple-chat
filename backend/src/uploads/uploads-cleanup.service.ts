@@ -16,7 +16,7 @@ export class UploadsCleanupService {
   }
 
   @Cron(CronExpression.EVERY_HOUR)
-  async handleCleanup() {
+  handleCleanup() {
     this.logger.log('Starting upload cleanup...');
     let deleted = 0;
 
@@ -45,7 +45,8 @@ export class UploadsCleanupService {
               deleted++;
             } catch (unlinkErr) {
               // File may have been deleted between stat and unlink (TOCTOU)
-              if ((unlinkErr as NodeJS.ErrnoException).code !== 'ENOENT') throw unlinkErr;
+              if ((unlinkErr as NodeJS.ErrnoException).code !== 'ENOENT')
+                throw unlinkErr;
             }
           }
         } catch (err) {

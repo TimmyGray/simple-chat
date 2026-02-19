@@ -24,8 +24,11 @@ async function bootstrap() {
   await app.listen(port);
   logger.log(`Backend running on http://localhost:${port}`);
 }
-bootstrap().catch((err) => {
+bootstrap().catch((err: unknown) => {
   const logger = new Logger('Bootstrap');
-  logger.fatal('Failed to start application', err.stack);
+  logger.fatal(
+    'Failed to start application',
+    err instanceof Error ? err.stack : String(err),
+  );
   process.exit(1);
 });

@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { IconButton, Tooltip } from '@mui/material';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 
@@ -24,6 +25,7 @@ export default function FileAttachment({
   onAttach,
   disabled,
 }: FileAttachmentProps) {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,7 +38,7 @@ export default function FileAttachment({
 
     // Validate file count
     if (selected.length > MAX_FILE_COUNT) {
-      window.alert(`You can attach up to ${MAX_FILE_COUNT} files at a time.`);
+      window.alert(t('errors.maxFileCount', { count: MAX_FILE_COUNT }));
       if (inputRef.current) inputRef.current.value = '';
       return;
     }
@@ -47,14 +49,14 @@ export default function FileAttachment({
     for (const file of selected) {
       // Validate file size
       if (file.size > MAX_FILE_SIZE) {
-        errors.push(`"${file.name}" exceeds the 10MB size limit.`);
+        errors.push(t('errors.fileTooLarge', { name: file.name }));
         continue;
       }
 
       // Validate MIME type
       if (!ALLOWED_TYPES.includes(file.type)) {
         errors.push(
-          `"${file.name}" has an unsupported file type (${file.type || 'unknown'}).`,
+          t('errors.unsupportedType', { name: file.name, type: file.type || 'unknown' }),
         );
         continue;
       }
@@ -63,7 +65,7 @@ export default function FileAttachment({
     }
 
     if (errors.length > 0) {
-      window.alert(`Some files were not attached:\n\n${errors.join('\n')}`);
+      window.alert(`${t('errors.filesNotAttached')}\n\n${errors.join('\n')}`);
     }
 
     if (validFiles.length > 0) {
@@ -84,7 +86,7 @@ export default function FileAttachment({
         accept=".pdf,.txt,.md,.csv,.png,.jpg,.jpeg,.gif,.webp"
         onChange={handleFileChange}
       />
-      <Tooltip title="Attach files">
+      <Tooltip title={t('chat.attachFiles')}>
         <IconButton
           size="small"
           onClick={() => inputRef.current?.click()}

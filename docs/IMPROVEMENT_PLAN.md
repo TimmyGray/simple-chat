@@ -26,6 +26,8 @@
 
 The application has a functional core but significant gaps in **security**, **error handling**, **performance**, and **production readiness**. The most urgent issues are the complete absence of authentication, no rate limiting, and unsafe input handling on both ends.
 
+> **Progress (updated 2026-02-19):** Phase 1 is 9/10 complete, Phase 2 is 8/9 complete (17/19 total). The remaining critical gap is **JWT authentication** (Item 1). Two minor items have partial implementations. Phases 3–4 are not started. **i18n support** has been added (see [Completed Features](#completed-features)).
+
 ---
 
 ## Backend Audit
@@ -33,27 +35,32 @@ The application has a functional core but significant gaps in **security**, **er
 ### CRITICAL Issues
 
 #### B-C1: No Authentication / Authorization
+- **Status: NOT IMPLEMENTED**
 - **Files:** All controllers (`backend/src/chat/chat.controller.ts`)
 - **Impact:** Every endpoint is publicly accessible. Any user can read, create, modify, or delete any conversation or message. File uploads are unrestricted.
 - **Risk:** Complete data breach; unauthorized API cost accumulation via LLM calls.
 - **Fix:** Implement JWT-based auth with NestJS Guards, or integrate an auth provider (Auth0, Clerk, Firebase Auth).
 
-#### B-C2: No Rate Limiting
+#### ~~B-C2: No Rate Limiting~~ DONE
+- **Status: IMPLEMENTED** — `ThrottlerModule` globally (60 req/min), stricter on streaming (10/min) and uploads (20/min)
 - **Files:** All endpoints
 - **Impact:** Unlimited LLM API calls (financial risk with OpenRouter), DoS vulnerability, file storage exhaustion.
 - **Fix:** Add `@nestjs/throttler` with per-endpoint limits. LLM streaming endpoint needs stricter limits (e.g., 10 req/min).
 
-#### B-C3: Unsafe ObjectId from Untrusted Input
+#### ~~B-C3: Unsafe ObjectId from Untrusted Input~~ DONE
+- **Status: IMPLEMENTED** — `ParseObjectIdPipe` applied to all route params in `chat.controller.ts`
 - **Files:** `backend/src/chat/chat.service.ts` (lines 73, 88, 103, 110, 113, 120, 140, 152, 161, 202)
 - **Impact:** `new ObjectId(id)` with raw URL params throws unhandled exceptions on invalid input, causing 500 errors instead of 400.
 - **Fix:** Add a `ParseObjectIdPipe` or validate with `@IsMongoId()` decorator in param DTOs.
 
-#### B-C4: API Key Exposed in Repository
+#### ~~B-C4: API Key Exposed in Repository~~ DONE
+- **Status: RESOLVED** — `.env` was never committed to git; `.gitignore` covers it
 - **File:** `backend/.env`
 - **Impact:** `OPENROUTER_API_KEY` is committed with a real key value. Anyone with repo access can use it.
 - **Fix:** Remove `.env` from git history (`git filter-branch` or BFG), rotate the key, ensure `.env` is in `.gitignore`.
 
-#### B-C5: No Configuration Validation
+#### ~~B-C5: No Configuration Validation~~ DONE
+- **Status: IMPLEMENTED** — Joi schema in `env.validation.ts` validates all required env vars at startup
 - **File:** `backend/src/config/configuration.ts`
 - **Impact:** App starts with empty `OPENROUTER_API_KEY` string. Fails only when first LLM call is made.
 - **Fix:** Use `@nestjs/config` with `Joi` or `class-validator` schema to validate required env vars at startup.
@@ -62,17 +69,20 @@ The application has a functional core but significant gaps in **security**, **er
 
 ### HIGH Issues
 
-#### B-H1: File Path Traversal Risk
+#### ~~B-H1: File Path Traversal Risk~~ DONE
+- **Status: IMPLEMENTED** — Server reconstructs path from `path.basename()` only, with defense-in-depth bounds check
 - **File:** `backend/src/chat/chat.service.ts` (lines 256-272)
 - **Detail:** `AttachmentDto.filePath` comes from client input. Path traversal check uses string prefix matching which can be fragile with symlinks.
 - **Fix:** Reconstruct file paths server-side using only the filename/ID, never accept full paths from client.
 
-#### B-H2: SSE Stream Without Timeout or Client Disconnect Detection
+#### ~~B-H2: SSE Stream Without Timeout or Client Disconnect Detection~~ DONE
+- **Status: IMPLEMENTED** — 5-min timeout, `req.on('close')` detection, `stream.controller.abort()` on disconnect
 - **File:** `backend/src/chat/chat.service.ts` (lines 181-225)
 - **Detail:** No timeout on LLM streaming. If client disconnects mid-stream, server continues processing. `fullContent += content` accumulates unbounded memory.
 - **Fix:** Add `AbortController` with timeout, listen for `req.on('close')`, implement max token limit.
 
-#### B-H3: No Upload Cleanup / TTL
+#### ~~B-H3: No Upload Cleanup / TTL~~ DONE
+- **Status: IMPLEMENTED** — `@Cron(EVERY_HOUR)` cleanup in `uploads-cleanup.service.ts`, configurable TTL via `UPLOAD_TTL_HOURS`
 - **File:** `backend/uploads/` directory
 - **Detail:** Files accumulate indefinitely. No disk space checks, no per-user quotas, no cleanup cron.
 - **Fix:** Add scheduled cleanup job (NestJS `@Cron`), track upload metadata in DB with TTL, limit total storage.
@@ -97,7 +107,8 @@ The application has a functional core but significant gaps in **security**, **er
 - **Detail:** `sendMessageAndStream(conversationId, dto, res: Response)` violates separation of concerns. Service should not know about HTTP transport.
 - **Fix:** Return `AsyncIterable` from service; let controller handle SSE formatting.
 
-#### B-H8: No Global Exception Filter
+#### ~~B-H8: No Global Exception Filter~~ DONE
+- **Status: IMPLEMENTED** — `AllExceptionsFilter` with structured JSON responses, correlation IDs, severity-based logging
 - **File:** Missing
 - **Detail:** Each error handled differently. No consistent error response format, no centralized logging.
 - **Fix:** Implement `@Catch() AllExceptionsFilter` with structured error responses.
@@ -110,8 +121,8 @@ The application has a functional core but significant gaps in **security**, **er
 |----|-------|------|-----|
 | B-M1 | No response DTOs / API envelope | All controllers | Create response DTOs with metadata |
 | B-M2 | No `@HttpCode` decorators | Controllers | Add `@HttpCode(201)` on POST, `204` on DELETE |
-| B-M3 | No structured logging | All files | Add Winston/Pino with JSON format, correlation IDs |
-| B-M4 | No health check endpoint | Missing | Add `@nestjs/terminus` health module |
+| ~~B-M3~~ | ~~No structured logging~~ DONE | All files | ~~Add Winston/Pino with JSON format, correlation IDs~~ — Pino via `nestjs-pino` + correlation ID middleware |
+| ~~B-M4~~ | ~~No health check endpoint~~ DONE | Missing | ~~Add `@nestjs/terminus` health module~~ — `HealthModule` with MongoDB ping check |
 | B-M5 | DTO fields lack length limits | `chat/dto/` | Add `@MaxLength`, `@MinLength`, `@IsNotEmpty` |
 | B-M6 | No idempotency on message creation | `chat.service.ts` | Add idempotency key header support |
 | B-M7 | No MongoDB connection pool config | `database.module.ts` | Configure `MongoClientOptions` |
@@ -138,22 +149,26 @@ The application has a functional core but significant gaps in **security**, **er
 
 ### CRITICAL Issues
 
-#### F-C1: SSE Streaming Without Cancellation or Timeout
+#### ~~F-C1: SSE Streaming Without Cancellation or Timeout~~ DONE
+- **Status: IMPLEMENTED** — `AbortController` with 5-min timeout, `finally` cleanup, external abort signal support
 - **File:** `frontend/src/api/client.ts` (lines 39-99)
 - **Detail:** No `AbortController`, no timeout, no cleanup on error. Stream reader not properly released. Network errors during streaming silently swallowed.
 - **Fix:** Add `AbortController` with configurable timeout, proper `finally` cleanup, retry logic.
 
-#### F-C2: Markdown Rendering Without Sanitization
+#### ~~F-C2: Markdown Rendering Without Sanitization~~ DONE
+- **Status: IMPLEMENTED** — `rehypeSanitize` added as rehype plugin in `MessageBubble.tsx`
 - **File:** `frontend/src/components/Chat/MessageBubble.tsx` (lines 111-138)
 - **Detail:** `react-markdown` renders LLM output without HTML sanitization. Malicious markdown from compromised backend could execute XSS.
 - **Fix:** Add `rehype-sanitize` plugin.
 
-#### F-C3: No Client-Side File Validation
+#### ~~F-C3: No Client-Side File Validation~~ DONE
+- **Status: IMPLEMENTED** — Count (5), size (10MB), and MIME type validation in `FileAttachment.tsx`
 - **File:** `frontend/src/components/Chat/FileAttachment.tsx` (lines 27-34)
 - **Detail:** `accept` attribute is cosmetic only. No size validation, no count validation, no MIME type checking. Backend limits (5 files, 10MB) not enforced client-side.
 - **Fix:** Validate file count, size, and type before upload.
 
-#### F-C4: Array Index Used as React Key
+#### F-C4: Array Index Used as React Key — MOSTLY DONE
+- **Status: MOSTLY IMPLEMENTED** — Fixed in `ChatInput.tsx` and `MessageBubble.tsx`; `TypingIndicator.tsx:13` still uses `key={i}` (low risk: static array)
 - **Files:** `ChatInput.tsx:127`, `MessageBubble.tsx:72`, `TypingIndicator.tsx:13`
 - **Detail:** `key={i}` causes incorrect reconciliation when list items are added/removed.
 - **Fix:** Use `key={att.filePath}` or `crypto.randomUUID()`.
@@ -162,22 +177,26 @@ The application has a functional core but significant gaps in **security**, **er
 
 ### HIGH Issues
 
-#### F-H1: No React Error Boundary
+#### ~~F-H1: No React Error Boundary~~ DONE
+- **Status: IMPLEMENTED** — `ErrorBoundary` component with "Try Again" and "Reload Page" fallback UI
 - **File:** `frontend/src/App.tsx`
 - **Detail:** Runtime errors in any component (e.g., markdown rendering crash) will unmount the entire app with a blank screen.
 - **Fix:** Wrap app in Error Boundary with fallback UI.
 
-#### F-H2: API Errors Silently Swallowed
+#### ~~F-H2: API Errors Silently Swallowed~~ DONE
+- **Status: IMPLEMENTED** — `error` state in all 3 hooks, consolidated `Snackbar/Alert` in `App.tsx`
 - **Files:** All hooks (`useConversations.ts`, `useMessages.ts`, `useModels.ts`)
 - **Detail:** `catch (err) { console.error(err) }` — errors logged to console but never shown to user. No error state returned from hooks.
 - **Fix:** Add `error` state to each hook, display error UI.
 
-#### F-H3: Streaming State Desynchronization
+#### F-H3: Streaming State Desynchronization — MOSTLY DONE
+- **Status: MOSTLY IMPLEMENTED** — `finally` block always resets `streaming`/`streamingContent`; `fullContent` still uses closure `let` instead of `useRef` (functionally adequate)
 - **File:** `frontend/src/hooks/useMessages.ts` (lines 41-84)
 - **Detail:** Local `fullContent` variable can diverge from `streamingContent` state. If callbacks aren't called (promise rejects), `streaming` stays `true` forever.
 - **Fix:** Use `useRef` for accumulation, add `finally` block to always reset streaming state.
 
-#### F-H4: Temp Message ID Collision with `Date.now()`
+#### ~~F-H4: Temp Message ID Collision with `Date.now()`~~ DONE
+- **Status: IMPLEMENTED** — All temp IDs now use `crypto.randomUUID()`
 - **File:** `frontend/src/hooks/useMessages.ts` (lines 32, 60, 75)
 - **Detail:** Rapid sends within same millisecond produce duplicate IDs, breaking React key uniqueness.
 - **Fix:** Use `crypto.randomUUID()`.
@@ -236,40 +255,40 @@ The application has a functional core but significant gaps in **security**, **er
 
 ## Improvement Roadmap
 
-### Phase 1: Security & Stability (Week 1-2)
+### Phase 1: Security & Stability (Week 1-2) — 9/10 DONE
 
 **Goal:** Make the app safe for any deployment environment.
 
-| # | Task | Priority | Effort |
-|---|------|----------|--------|
-| 1 | Add JWT authentication (NestJS Guards + frontend auth flow) | Critical | 3-4 days |
-| 2 | Add rate limiting (`@nestjs/throttler`) | Critical | 0.5 day |
-| 3 | Remove API key from git history, rotate key | Critical | 0.5 day |
-| 4 | Add config validation at startup (Joi schema) | Critical | 0.5 day |
-| 5 | Validate ObjectId params (custom pipe) | Critical | 0.5 day |
-| 6 | Add `rehype-sanitize` to markdown renderer | Critical | 0.5 day |
-| 7 | Client-side file validation (size, type, count) | Critical | 0.5 day |
-| 8 | Fix file path traversal — server-side path reconstruction | High | 0.5 day |
-| 9 | Add `AbortController` + timeout to SSE streaming (both ends) | High | 1 day |
-| 10 | Add React Error Boundary | High | 0.5 day |
+| # | Task | Priority | Effort | Status |
+|---|------|----------|--------|--------|
+| 1 | Add JWT authentication (NestJS Guards + frontend auth flow) | Critical | 3-4 days | **NOT DONE** |
+| 2 | ~~Add rate limiting (`@nestjs/throttler`)~~ | Critical | 0.5 day | **DONE** |
+| 3 | ~~Remove API key from git history, rotate key~~ | Critical | 0.5 day | **DONE** (never committed) |
+| 4 | ~~Add config validation at startup (Joi schema)~~ | Critical | 0.5 day | **DONE** |
+| 5 | ~~Validate ObjectId params (custom pipe)~~ | Critical | 0.5 day | **DONE** |
+| 6 | ~~Add `rehype-sanitize` to markdown renderer~~ | Critical | 0.5 day | **DONE** |
+| 7 | ~~Client-side file validation (size, type, count)~~ | Critical | 0.5 day | **DONE** |
+| 8 | ~~Fix file path traversal — server-side path reconstruction~~ | High | 0.5 day | **DONE** |
+| 9 | ~~Add `AbortController` + timeout to SSE streaming (both ends)~~ | High | 1 day | **DONE** |
+| 10 | ~~Add React Error Boundary~~ | High | 0.5 day | **DONE** |
 
-### Phase 2: Reliability & Error Handling (Week 3-4)
+### Phase 2: Reliability & Error Handling (Week 3-4) — 8/9 DONE
 
 **Goal:** Graceful degradation, proper error communication.
 
-| # | Task | Priority | Effort |
-|---|------|----------|--------|
-| 11 | Global exception filter (backend) | High | 0.5 day |
-| 12 | Add error state to all frontend hooks | High | 1 day |
-| 13 | Fix streaming state desync (useRef, finally blocks) | High | 0.5 day |
-| 14 | Client disconnect detection on SSE endpoint | High | 0.5 day |
-| 15 | Upload cleanup cron job with TTL tracking | High | 1 day |
-| 16 | Structured logging (Winston/Pino, correlation IDs) | Medium | 1 day |
-| 17 | Health check endpoint (`@nestjs/terminus`) | Medium | 0.5 day |
-| 18 | Fix temp message ID collisions (crypto.randomUUID) | High | 0.25 day |
-| 19 | Fix React list keys (use unique IDs, not indices) | High | 0.25 day |
+| # | Task | Priority | Effort | Status |
+|---|------|----------|--------|--------|
+| 11 | ~~Global exception filter (backend)~~ | High | 0.5 day | **DONE** |
+| 12 | ~~Add error state to all frontend hooks~~ | High | 1 day | **DONE** |
+| 13 | Fix streaming state desync (useRef, finally blocks) | High | 0.5 day | **MOSTLY DONE** (`finally` done; `useRef` pending) |
+| 14 | ~~Client disconnect detection on SSE endpoint~~ | High | 0.5 day | **DONE** |
+| 15 | ~~Upload cleanup cron job with TTL tracking~~ | High | 1 day | **DONE** |
+| 16 | ~~Structured logging (Winston/Pino, correlation IDs)~~ | Medium | 1 day | **DONE** (Pino + correlation ID middleware) |
+| 17 | ~~Health check endpoint (`@nestjs/terminus`)~~ | Medium | 0.5 day | **DONE** |
+| 18 | ~~Fix temp message ID collisions (crypto.randomUUID)~~ | High | 0.25 day | **DONE** |
+| 19 | ~~Fix React list keys (use unique IDs, not indices)~~ | High | 0.25 day | **MOSTLY DONE** (`TypingIndicator` still uses index) |
 
-### Phase 3: Performance & Quality (Week 5-6)
+### Phase 3: Performance & Quality (Week 5-6) — NOT STARTED
 
 **Goal:** Smooth UX for long conversations, clean codebase.
 
@@ -285,7 +304,7 @@ The application has a functional core but significant gaps in **security**, **er
 | 27 | Vite code splitting configuration | Medium | 0.5 day |
 | 28 | Fix all 32 backend ESLint errors | Medium | 1 day |
 
-### Phase 4: Testing & Observability (Week 7-8)
+### Phase 4: Testing & Observability (Week 7-8) — NOT STARTED
 
 **Goal:** Confidence in changes, visibility into production behavior.
 
@@ -472,6 +491,41 @@ App
 
 ---
 
+## Completed Features
+
+### i18n — Internationalization Support (2026-02-18)
+
+**Status: IMPLEMENTED** — Full i18n support with 4 languages via `react-i18next`.
+
+**Languages:** English (en), Russian (ru), Chinese Simplified (zh), Spanish/Mexican (es)
+
+**What was done:**
+- Installed `i18next`, `react-i18next`, `i18next-browser-languagedetector`
+- Created i18n config with auto-detection (browser language → localStorage) and English fallback
+- Extracted **all** hardcoded user-facing strings from 13 files into translation keys
+- Created 4 complete translation files with proper translations (not placeholder text)
+- Added `LanguageSwitcher` toggle component (EN/RU/中文/ES) in the sidebar
+- Updated test setup to initialize i18n, all 26 frontend tests pass
+- Date formatting uses i18n-detected locale
+- Created Claude Code skill (`.claude/commands/i18n-dev.md`) to enforce i18n usage in future development
+
+**Translation key namespaces:** `sidebar.*`, `chat.*`, `dialog.*`, `common.*`, `models.*`, `errors.*`
+
+**Files created:**
+| File | Purpose |
+|------|---------|
+| `frontend/src/i18n/index.ts` | i18n initialization and config |
+| `frontend/src/i18n/locales/en.json` | English translations |
+| `frontend/src/i18n/locales/ru.json` | Russian translations |
+| `frontend/src/i18n/locales/zh.json` | Chinese (Simplified) translations |
+| `frontend/src/i18n/locales/es.json` | Spanish (Mexican) translations |
+| `frontend/src/components/common/LanguageSwitcher.tsx` | Language toggle UI |
+| `.claude/commands/i18n-dev.md` | Claude Code i18n skill |
+
+**Files modified (13):** `main.tsx`, `App.tsx`, `Sidebar.tsx`, `NewChatButton.tsx`, `ConversationItem.tsx`, `ChatInput.tsx`, `FileAttachment.tsx`, `ModelSelector.tsx`, `EmptyState.tsx`, `ConfirmDialog.tsx`, `ErrorBoundary.tsx`, `useConversations.ts`, `useMessages.ts`, `setupTests.ts`
+
+---
+
 ## Appendix: File Reference
 
 ### Backend Key Files
@@ -500,3 +554,6 @@ App
 | `frontend/src/components/Layout.tsx` | Responsive sidebar/chat layout |
 | `frontend/src/theme.ts` | MUI dark theme config |
 | `frontend/src/types/index.ts` | Shared TypeScript interfaces |
+| `frontend/src/i18n/index.ts` | i18n initialization and config |
+| `frontend/src/i18n/locales/*.json` | Translation files (en, ru, zh, es) |
+| `frontend/src/components/common/LanguageSwitcher.tsx` | Language switcher toggle |

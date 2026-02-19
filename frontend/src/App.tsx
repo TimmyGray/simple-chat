@@ -1,4 +1,5 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ThemeProvider, CssBaseline, Snackbar, Alert } from '@mui/material';
 import theme from './theme';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -7,18 +8,22 @@ import { useModels } from './hooks/useModels';
 import Layout from './components/Layout';
 
 export default function App() {
-  const { conversations, loading: convsLoading, error: convsError, refresh, create, remove } = useConversations();
-  const { models, error: modelsError } = useModels();
+  const { t } = useTranslation();
+  const { conversations, loading: convsLoading, error: convsError, clearError: clearConvsError, refresh, create, remove } = useConversations();
+  const { models, error: modelsError, clearError: clearModelsError } = useModels();
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState('openrouter/free');
-  const [error, setError] = useState<string | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
 
-  // Surface hook errors to the Snackbar
-  useEffect(() => {
-    const hookError = convsError || modelsError;
-    if (hookError) setError(hookError);
-  }, [convsError, modelsError]);
+  // Derive displayed error from hook errors or local errors
+  const error = convsError || modelsError || localError;
+
+  const clearError = useCallback(() => {
+    setLocalError(null);
+    if (convsError) clearConvsError();
+    if (modelsError) clearModelsError();
+  }, [convsError, modelsError, clearConvsError, clearModelsError]);
 
   const selectedConversation = useMemo(
     () => conversations.find((c) => c._id === selectedId) || null,
@@ -30,10 +35,10 @@ export default function App() {
       const conv = await create(selectedModel);
       setSelectedId(conv._id);
     } catch (err) {
-      setError('Failed to create conversation');
+      setLocalError(t('errors.createConversation'));
       console.error(err);
     }
-  }, [create, selectedModel]);
+  }, [create, selectedModel, t]);
 
   const handleDelete = useCallback(
     async (id: string) => {
@@ -43,11 +48,11 @@ export default function App() {
           setSelectedId(null);
         }
       } catch (err) {
-        setError('Failed to delete conversation');
+        setLocalError(t('errors.deleteConversation'));
         console.error(err);
       }
     },
-    [remove, selectedId],
+    [remove, selectedId, t],
   );
 
   return (
@@ -69,10 +74,10 @@ export default function App() {
         <Snackbar
           open={!!error}
           autoHideDuration={4000}
-          onClose={() => setError(null)}
+          onClose={clearError}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         >
-          <Alert severity="error" onClose={() => setError(null)}>
+          <Alert severity="error" onClose={clearError}>
             {error}
           </Alert>
         </Snackbar>

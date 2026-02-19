@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Button } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 
@@ -6,6 +7,7 @@ interface NewChatButtonProps {
 }
 
 export default function NewChatButton({ onClick }: NewChatButtonProps) {
+  const { t } = useTranslation();
   return (
     <Button
       fullWidth
@@ -21,7 +23,7 @@ export default function NewChatButton({ onClick }: NewChatButtonProps) {
         },
       }}
     >
-      New Chat
+      {t('sidebar.newChat')}
     </Button>
   );
 }
