@@ -25,9 +25,10 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
       useFactory: (config: ConfigService) => ({
         pinoHttp: {
           level: config.get<string>('LOG_LEVEL', 'info'),
-          transport: config.get<string>('NODE_ENV') !== 'production'
-            ? { target: 'pino-pretty', options: { colorize: true } }
-            : undefined,
+          transport:
+            config.get<string>('NODE_ENV') !== 'production'
+              ? { target: 'pino-pretty', options: { colorize: true } }
+              : undefined,
           customProps: (req: any) => ({
             correlationId: req.headers['x-correlation-id'],
           }),

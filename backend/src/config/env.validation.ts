@@ -12,6 +12,10 @@ export const envValidationSchema = Joi.object({
   LLM_URL_KEY: Joi.string().uri().optional(),
   CORS_ORIGIN: Joi.string().optional(),
   UPLOAD_TTL_HOURS: Joi.number().integer().min(1).default(24),
-  LOG_LEVEL: Joi.string().valid('fatal', 'error', 'warn', 'info', 'debug', 'trace').default('info'),
-  NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
+  LOG_LEVEL: Joi.string()
+    .valid('fatal', 'error', 'warn', 'info', 'debug', 'trace')
+    .default('info'),
+  NODE_ENV: Joi.string()
+    .valid('development', 'production', 'test')
+    .default('development'),
 }).unknown(true);

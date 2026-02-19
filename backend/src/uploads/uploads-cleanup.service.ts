@@ -45,7 +45,8 @@ export class UploadsCleanupService {
               deleted++;
             } catch (unlinkErr) {
               // File may have been deleted between stat and unlink (TOCTOU)
-              if ((unlinkErr as NodeJS.ErrnoException).code !== 'ENOENT') throw unlinkErr;
+              if ((unlinkErr as NodeJS.ErrnoException).code !== 'ENOENT')
+                throw unlinkErr;
             }
           }
         } catch (err) {

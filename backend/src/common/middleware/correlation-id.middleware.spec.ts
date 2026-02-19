@@ -19,7 +19,10 @@ describe('CorrelationIdMiddleware', () => {
     expect(req.headers['x-correlation-id']).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
     );
-    expect(res.setHeader).toHaveBeenCalledWith('x-correlation-id', req.headers['x-correlation-id']);
+    expect(res.setHeader).toHaveBeenCalledWith(
+      'x-correlation-id',
+      req.headers['x-correlation-id'],
+    );
     expect(next).toHaveBeenCalled();
   });
 
@@ -35,11 +38,15 @@ describe('CorrelationIdMiddleware', () => {
   });
 
   it('should reject an invalid correlation ID and generate a new UUID', () => {
-    const { req, res, next } = createMocks({ 'x-correlation-id': 'malicious\nheader-injection' });
+    const { req, res, next } = createMocks({
+      'x-correlation-id': 'malicious\nheader-injection',
+    });
 
     middleware.use(req, res, next);
 
-    expect(req.headers['x-correlation-id']).not.toBe('malicious\nheader-injection');
+    expect(req.headers['x-correlation-id']).not.toBe(
+      'malicious\nheader-injection',
+    );
     expect(req.headers['x-correlation-id']).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
     );
