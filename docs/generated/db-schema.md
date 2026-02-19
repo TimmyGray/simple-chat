@@ -65,8 +65,15 @@
 
 **Source:** `backend/src/auth/interfaces/user.interface.ts`
 
+## Schema Validation
+
+MongoDB JSON Schema validators are applied to all collections at startup via `collMod` commands in `DatabaseService.onModuleInit()`.
+
+- **Validation level:** `moderate` — validates inserts and updates to documents that already satisfy the schema (safe for existing data)
+- **Validation action:** `error` — rejects documents that fail validation
+- **Additional properties:** disallowed on all collections (strict schema)
+- **Schema source:** `backend/src/database/database.schemas.ts`
+
 ## Notes
-- No schema validation enforced at MongoDB level (uses native driver, not Mongoose)
-- TypeScript interfaces provide compile-time safety only
 - Database module: `backend/src/database/database.module.ts`
 - Service: `backend/src/database/database.service.ts`
