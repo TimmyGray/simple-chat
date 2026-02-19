@@ -59,9 +59,9 @@ Each task has:
 | F-M10 | Prevent full page re-render on model change | frontend | 0.5d | todo | Memoize or use Context |
 | F-M11 | Strengthen TypeScript interfaces (branded types) | frontend | 0.5d | todo | Weak type definitions |
 | F-M12 | Add type guards for caught errors | frontend | 0.25d | todo | Implicit `unknown` error handling |
-| F-M13 | Use theme palette tokens instead of hardcoded gradients | frontend | 0.25d | todo | Hardcoded colors in MessageBubble |
+| F-M13 | Use theme palette tokens instead of hardcoded gradients | frontend | 0.25d | todo | Hex colors fixed (retro #1), rgba/gradients remain |
 | F-M14 | Add CORS error handling interceptor | frontend | 0.25d | todo | No special CORS error handling |
-| F-M15 | Add stricter ESLint rules (no-console, no-floating-promises) | frontend | 0.25d | todo | Missing rules |
+| F-M15 | Add stricter ESLint rules (no-floating-promises) | frontend | 0.25d | todo | no-console promoted in retro #1; no-floating-promises needs type-checked config |
 | F-M16 | Create frontend .env.example | frontend | 0.1d | todo | VITE_API_URL undocumented |
 | F-M17 | Configure Vite code splitting (manualChunks) | frontend | 0.5d | todo | No chunking strategy |
 | F-M18 | Add hook tests (useMessages streaming) | frontend | 1d | todo | Only component tests exist |

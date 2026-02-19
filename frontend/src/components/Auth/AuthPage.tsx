@@ -80,7 +80,7 @@ export default function AuthPage({
             mb: 2,
           }}
         >
-          <ChatBubbleOutlineIcon sx={{ color: '#fff', fontSize: 28 }} />
+          <ChatBubbleOutlineIcon sx={{ color: 'common.white', fontSize: 28 }} />
         </Box>
         <Typography variant="h6" sx={{ fontWeight: 600 }}>
           {t('sidebar.title')}
@@ -145,7 +145,7 @@ export default function AuthPage({
             }}
           >
             {submitting ? (
-              <CircularProgress size={22} sx={{ color: '#fff' }} />
+              <CircularProgress size={22} sx={{ color: 'common.white' }} />
             ) : (
               submitLabel
             )}
