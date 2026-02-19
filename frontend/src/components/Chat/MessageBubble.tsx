@@ -41,9 +41,9 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
         }}
       >
         {isUser ? (
-          <PersonIcon sx={{ fontSize: 18, color: '#fff' }} />
+          <PersonIcon sx={{ fontSize: 18, color: 'common.white' }} />
         ) : (
-          <SmartToyIcon sx={{ fontSize: 18, color: '#000' }} />
+          <SmartToyIcon sx={{ fontSize: 18, color: 'common.black' }} />
         )}
       </Box>
 

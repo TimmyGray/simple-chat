@@ -20,7 +20,7 @@ export default defineConfig([
       globals: globals.browser,
     },
     rules: {
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'no-console': 'error',
       'no-restricted-syntax': [
         'error',
         {
@@ -38,6 +38,35 @@ export default defineConfig([
         {
           selector: 'JSXOpeningElement[name.name="textarea"]',
           message: 'Use MUI <TextField multiline> instead of raw <textarea>. Import { TextField } from "@mui/material".',
+        },
+        {
+          selector: 'Literal[value=/^#[0-9a-fA-F]{3,8}$/]',
+          message: 'Hardcoded hex color detected. Use MUI theme tokens instead (e.g., theme.palette.primary.main). Define custom colors in frontend/src/theme.ts. See docs/references/mui-theme-reference.md.',
+        },
+      ],
+    },
+  },
+  {
+    // theme.ts is where hex colors SHOULD be defined — exempt it from the hex color rule
+    files: ['src/theme.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'JSXOpeningElement[name.name="button"]',
+          message: 'Use MUI <Button> instead of raw <button>.',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="input"]',
+          message: 'Use MUI <TextField> or <Input> instead of raw <input>.',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="select"]',
+          message: 'Use MUI <Select> instead of raw <select>.',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="textarea"]',
+          message: 'Use MUI <TextField multiline> instead of raw <textarea>.',
         },
       ],
     },

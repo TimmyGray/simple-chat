@@ -24,8 +24,18 @@ const DOMAIN_MODULES = ['auth', 'chat', 'health', 'models', 'uploads'] as const;
 /** Modules that any domain module may import from (shared infrastructure) */
 const SHARED_MODULES = ['common', 'config', 'database', 'types'];
 
-/** Maximum lines per file (excluding test files) */
-const MAX_FILE_LINES = 400;
+/** Maximum lines per file (excluding test files). Must match docs/CONVENTIONS.md. */
+const MAX_FILE_LINES = 300;
+
+/**
+ * Temporary exceptions for files that exceed the line limit.
+ * Each exception MUST reference a tech-debt-tracker task ID.
+ * Remove the exception when the task is completed.
+ */
+const FILE_SIZE_EXCEPTIONS: Record<string, string> = {
+  'chat/chat.service.ts':
+    'B-M10: Split chat.service.ts (extract streaming + file-extraction helpers)',
+};
 
 function getAllTsFiles(dir: string): string[] {
   const files: string[] = [];
@@ -170,7 +180,7 @@ describe('Architecture: File Size Limits', () => {
       const lineCount = content.split('\n').length;
       const relFile = relative(SRC_DIR, file);
 
-      if (lineCount > MAX_FILE_LINES) {
+      if (lineCount > MAX_FILE_LINES && !FILE_SIZE_EXCEPTIONS[relFile]) {
         violations.push(
           `${relFile} has ${lineCount} lines (max ${MAX_FILE_LINES}). ` +
             `REMEDIATION: Split this file into smaller, focused modules. ` +
