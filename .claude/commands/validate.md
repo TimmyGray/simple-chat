@@ -6,14 +6,16 @@ Run all validation checks and report results.
 
 Run each check and record pass/fail:
 
-1. **Backend Lint**: `cd backend && npm run lint`
-2. **Frontend Lint**: `cd frontend && npm run lint`
-3. **Backend Typecheck**: `cd backend && npm run typecheck`
-4. **Frontend Typecheck**: `cd frontend && npm run typecheck`
-5. **Backend Tests**: `cd backend && npm test`
-6. **Frontend Tests**: `cd frontend && npm test`
+1. **Backend Lint**: `npm run lint:backend`
+2. **Frontend Lint**: `npm run lint:frontend`
+3. **Backend Typecheck**: `npm run typecheck:backend`
+4. **Frontend Typecheck**: `npm run typecheck:frontend`
+5. **Backend Tests**: `npm run test:backend`
+6. **Frontend Tests**: `npm run test:frontend`
 7. **Backend Build**: `cd backend && npm run build`
 8. **Frontend Build**: `cd frontend && npm run build`
+
+Note: Backend lint includes `--fix` (auto-corrects fixable issues). This is intentional — validation both checks and fixes formatting.
 
 ## Output
 

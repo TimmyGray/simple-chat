@@ -34,11 +34,11 @@ For each approved improvement:
 - Update ESLint config if new rules needed
 
 ### 5. Update Learning Memory
-Write key learnings to Claude Code memory files:
-- `memory/patterns.md` — successful patterns to repeat
-- `memory/pitfalls.md` — mistakes to avoid
+Write key learnings to Claude Code auto-memory files:
+- `patterns.md` — successful patterns to repeat
+- `pitfalls.md` — mistakes to avoid
 
-Use the Write or Edit tool to update these files in `/Users/fulldive/.claude/projects/-Users-fulldive-apps-simple-chat/memory/`.
+These files live in the Claude Code auto-memory directory for this project. Use the auto-memory path shown in your system prompt (it varies per developer machine).
 
 ### 6. Report
 Present:

@@ -1,3 +1,9 @@
+# Initial Audit — Historical Snapshot
+
+> **Archived on 2026-02-19.** This is a frozen snapshot of the original improvement plan at the time the harness engineering infrastructure was introduced. The live task backlog is now in `docs/exec-plans/tech-debt-tracker.md`. Do NOT update this file.
+
+---
+
 # Simple Chat - Comprehensive Improvement Plan
 
 > Full-stack audit and improvement roadmap for the Simple Chat application.

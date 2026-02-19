@@ -62,7 +62,7 @@ $ARGUMENTS — Optional task ID from `docs/exec-plans/tech-debt-tracker.md`. If 
 
 ## Important Rules
 - Never skip validation. Fix errors before creating the PR.
-- Stage files explicitly — never use `git add .`
+- Stage files explicitly — never use `git add .` (include generated docs from `docs/generated/` if updated)
 - If a task seems too large (touches > 15 files), break it into subtasks first
 - If tests fail and you can't fix them after 3 attempts, stop and report the issue
 - Always check that i18n strings are complete in all 4 locale files (en, ru, zh, es)
