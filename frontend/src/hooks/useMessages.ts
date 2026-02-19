@@ -24,7 +24,6 @@ export function useMessages() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : tRef.current('errors.fetchMessages');
       setError(msg);
-      console.error('Failed to fetch messages:', err);
     } finally {
       setLoading(false);
     }
@@ -84,7 +83,6 @@ export function useMessages() {
             setMessages((prev) => [...prev, assistantMsg]);
           },
           (streamError) => {
-            console.error('Streaming error:', streamError);
             const errorMsg: Message = {
               _id: crypto.randomUUID(),
               conversationId,

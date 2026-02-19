@@ -45,6 +45,7 @@ Each task has:
 | B-M6 | Add idempotency key support for message creation | backend | 0.5d | todo | Duplicate sends possible |
 | B-M7 | Configure MongoDB connection pool options | backend | 0.25d | todo | Using default pool settings |
 | B-M8 | Fix ESLint errors in test files (32 errors) | backend | 1d | todo | `any` types in test mocks |
+| B-M10 | Split chat.service.ts (365 lines, exceeds 300-line limit) | backend | 1d | todo | Extract streaming + file-extraction helpers |
 | B-M9 | Add coverage tool, target 80%+ | backend | 0.5d | done | @vitest/coverage-v8 configured, thresholds: 60%/50% |
 | F-M1 | Add list virtualization (react-window) | frontend | 1d | todo | Long conversations cause jank |
 | F-M2 | Throttle scroll-to-bottom during streaming | frontend | 0.25d | todo | Scroll fires on every chunk |
@@ -80,7 +81,7 @@ Each task has:
 | B-L7 | Document CORS configuration | backend | 0.1d | todo | Allowed origins undocumented |
 | F-L1 | Extract magic numbers to constants/theme | frontend | 0.25d | todo | Hardcoded values in styles |
 | F-L2 | Split large component files (180+ lines) | frontend | 0.5d | todo | Some files too large |
-| F-L3 | Standardize error logging with utility | frontend | 0.25d | todo | Inconsistent console.error |
+| F-L3 | Standardize error logging with utility | frontend | 0.25d | done | console.error removed in sweep |
 | F-L4 | Add return type annotations to hooks | frontend | 0.25d | todo | Missing explicit types |
 | F-L5 | Optimize tablet layout (md-lg breakpoints) | frontend | 0.5d | todo | Not tested on tablets |
 | F-L6 | Configure and document production source maps | frontend | 0.25d | todo | No source map config |
@@ -128,3 +129,4 @@ Each task has:
 | B-M5 | Add length limits to DTO fields (@MaxLength/@MinLength) | 2026-02-19 |
 | B-M9 | Add coverage tool (@vitest/coverage-v8) | 2026-02-19 |
 | FEAT-1 | User Authentication & Multi-Tenancy | 2026-02-19 |
+| F-L3 | Remove frontend console.error (sweep) | 2026-02-19 |

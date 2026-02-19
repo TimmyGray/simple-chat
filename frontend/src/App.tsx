@@ -35,9 +35,8 @@ function ChatApp({ userEmail, onLogout }: { userEmail: string; onLogout: () => v
     try {
       const conv = await create(selectedModel);
       setSelectedId(conv._id);
-    } catch (err) {
+    } catch {
       setLocalError(t('errors.createConversation'));
-      console.error(err);
     }
   }, [create, selectedModel, t]);
 
@@ -48,9 +47,8 @@ function ChatApp({ userEmail, onLogout }: { userEmail: string; onLogout: () => v
         if (selectedId === id) {
           setSelectedId(null);
         }
-      } catch (err) {
+      } catch {
         setLocalError(t('errors.deleteConversation'));
-        console.error(err);
       }
     },
     [remove, selectedId, t],

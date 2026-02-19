@@ -21,8 +21,9 @@ export default class ErrorBoundary extends React.Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('ErrorBoundary caught:', error, errorInfo);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  componentDidCatch(_error: Error, _errorInfo: React.ErrorInfo) {
+    // Error already captured in state via getDerivedStateFromError
   }
 
   handleReset = () => {

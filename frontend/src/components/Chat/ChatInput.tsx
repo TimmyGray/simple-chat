@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, TextField, IconButton, Tooltip, Paper, Chip } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import SendIcon from '@mui/icons-material/Send';
 import type { ModelInfo, Attachment } from '../../types';
 import ModelSelector from './ModelSelector';
@@ -49,8 +50,8 @@ export default function ChatInput({
     try {
       const uploaded = await api.uploadFiles(files);
       setAttachments((prev) => [...prev, ...uploaded]);
-    } catch (err) {
-      console.error('Upload failed:', err);
+    } catch {
+      // Upload errors are visible via missing attachments
     } finally {
       setUploading(false);
     }
@@ -72,9 +73,10 @@ export default function ChatInput({
           borderColor: focused ? 'primary.main' : 'divider',
           backgroundColor: 'rgba(255, 255, 255, 0.03)',
           transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-          boxShadow: focused
-            ? '0 0 0 2px rgba(124, 77, 255, 0.15)'
-            : 'none',
+          boxShadow: (theme) =>
+            focused
+              ? `0 0 0 2px ${alpha(theme.palette.primary.main, 0.15)}`
+              : 'none',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',

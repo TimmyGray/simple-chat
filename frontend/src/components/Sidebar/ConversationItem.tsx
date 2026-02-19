@@ -6,6 +6,7 @@ import {
   Typography,
   Box,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import type { Conversation } from '../../types';
 
@@ -31,9 +32,9 @@ export default function ConversationItem({
         borderRadius: 2,
         mb: 0.5,
         '&.Mui-selected': {
-          backgroundColor: 'rgba(124, 77, 255, 0.12)',
+          backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.12),
           '&:hover': {
-            backgroundColor: 'rgba(124, 77, 255, 0.18)',
+            backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.18),
           },
         },
         '& .delete-btn': { opacity: 0 },

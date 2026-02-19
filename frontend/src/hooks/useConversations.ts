@@ -20,7 +20,6 @@ export function useConversations() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : tRef.current('errors.fetchConversations');
       setError(msg);
-      console.error('Failed to fetch conversations:', err);
     } finally {
       setLoading(false);
     }
