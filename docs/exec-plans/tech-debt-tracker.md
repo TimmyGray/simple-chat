@@ -21,7 +21,7 @@ Each task has:
 | B-C1 | Add JWT authentication (NestJS Guards + frontend auth flow) | fullstack | 3-4d | in-progress | Blocking production deployment. Split into phases below. |
 | B-C1a | Backend auth module: register, login, JWT, guard, users collection | backend | 1d | done | Phase 1. PR: feat/backend-auth-module |
 | B-C1b | Apply JWT guards to existing endpoints + userId scoping | backend | 1d | done | Phase 2. PR #6 merged. |
-| B-C1c | Frontend auth flow: login/register UI, token management, i18n | frontend | 1-2d | todo | Phase 3. Auth pages, interceptors, protected routes. |
+| B-C1c | Frontend auth flow: login/register UI, token management, i18n | frontend | 1-2d | done | Phase 3. PR #7 merged. |
 
 ## High
 
@@ -123,3 +123,4 @@ Each task has:
 | F-H4 | Temp message ID collision fix | 2026-02-16 |
 | I18N | i18n support (4 languages) | 2026-02-18 |
 | INFRA | CI/CD pipeline + pre-commit hooks | 2026-02-19 |
+| B-C1c | Frontend auth flow (login/register UI, token management, i18n) | 2026-02-19 |

@@ -186,25 +186,31 @@ All `:id` parameters are validated by `ParseObjectIdPipe` (returns 400 for inval
 ### Component Tree
 
 ```
-App
+App (useAuth hook)
 ├── ErrorBoundary
 │   └── ThemeProvider (MUI dark theme)
 │       ├── CssBaseline
-│       ├── Layout
-│       │   ├── Sidebar
-│       │   │   ├── LanguageSwitcher
-│       │   │   ├── NewChatButton
-│       │   │   └── ConversationItem[] (list with delete)
-│       │   └── ChatArea
-│       │       ├── ModelSelector (dropdown)
-│       │       ├── MessageList
-│       │       │   ├── MessageBubble[] (markdown rendering)
-│       │       │   └── TypingIndicator (during streaming)
-│       │       ├── EmptyState (no conversation selected)
-│       │       └── ChatInput
-│       │           └── FileAttachment (upload UI)
-│       └── ConfirmDialog (shared delete confirmation)
-└── Snackbar + Alert (error display, auto-dismiss 4s)
+│       ├── AuthPage (login/register, shown when unauthenticated)
+│       │   ├── LanguageSwitcher
+│       │   └── Login/Register form
+│       ├── ChatApp (shown when authenticated)
+│       │   ├── Layout
+│       │   │   ├── Sidebar
+│       │   │   │   ├── LanguageSwitcher
+│       │   │   │   ├── NewChatButton
+│       │   │   │   ├── ConversationItem[] (list with delete)
+│       │   │   │   └── User email + Logout button
+│       │   │   └── ChatArea
+│       │   │       ├── ModelSelector (dropdown)
+│       │   │       ├── MessageList
+│       │   │       │   ├── MessageBubble[] (markdown rendering)
+│       │   │       │   └── TypingIndicator (during streaming)
+│       │   │       ├── EmptyState (no conversation selected)
+│       │   │       └── ChatInput
+│       │   │           └── FileAttachment (upload UI)
+│       │   └── ConfirmDialog (shared delete confirmation)
+│       │   └── Snackbar + Alert (error display, auto-dismiss 4s)
+│       └── Loading spinner (during auth session restore)
 ```
 
 ### State Management
@@ -213,6 +219,7 @@ Custom hooks with no external state library:
 
 | Hook               | Responsibilities                                                    |
 |--------------------|---------------------------------------------------------------------|
+| `useAuth`          | JWT token management (localStorage), login, register, logout, session restore on mount. |
 | `useConversations` | Fetch, create, update, delete conversations. Error state. Auto-fetch on mount. |
 | `useMessages`      | Fetch messages, send with SSE streaming, optimistic user message insertion, stop streaming. Manages `streaming`, `streamingContent`, abort controller. |
 | `useModels`        | Fetch available models on mount. Error state.                       |
