@@ -10,6 +10,7 @@ import OpenAI from 'openai';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Request, Response } from 'express';
+import { PDFParse } from 'pdf-parse';
 import { DatabaseService } from '../database/database.service';
 import { ConversationDoc } from './interfaces/conversation.interface';
 import { MessageDoc } from './interfaces/message.interface';
@@ -344,13 +345,11 @@ export class ChatService {
         attachment.fileType === 'application/pdf' ||
         attachment.fileName.endsWith('.pdf')
       ) {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const pdfParse = require('pdf-parse') as (
-          buf: Buffer,
-        ) => Promise<{ text: string }>;
         const buffer = fs.readFileSync(fullPath);
-        const data = await pdfParse(buffer);
-        return data.text;
+        const parser = new PDFParse({ data: buffer });
+        const result = await parser.getText();
+        await parser.destroy();
+        return result.text;
       }
 
       return `[Binary file: ${attachment.fileName}]`;
