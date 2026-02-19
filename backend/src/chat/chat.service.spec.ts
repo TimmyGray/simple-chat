@@ -142,6 +142,8 @@ describe('ChatService', () => {
     });
 
     it('should throw NotFoundException when user does not own the conversation', async () => {
+      mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
+
       await expect(
         service.getConversation('507f1f77bcf86cd799439011', otherUserId),
       ).rejects.toThrow(NotFoundException);
@@ -190,7 +192,12 @@ describe('ChatService', () => {
         userId: mockUserId,
       });
       expect(mockMessagesCollection.deleteMany).toHaveBeenCalled();
-      expect(mockConversationsCollection.findOneAndDelete).toHaveBeenCalled();
+      expect(mockConversationsCollection.findOneAndDelete).toHaveBeenCalledWith(
+        {
+          _id: new ObjectId('507f1f77bcf86cd799439011'),
+          userId: mockUserId,
+        },
+      );
     });
 
     it('should delete messages before the conversation', async () => {
@@ -239,6 +246,8 @@ describe('ChatService', () => {
     });
 
     it('should throw NotFoundException if conversation not owned by user', async () => {
+      mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
+
       await expect(
         service.getMessages('507f1f77bcf86cd799439011', otherUserId),
       ).rejects.toThrow(NotFoundException);

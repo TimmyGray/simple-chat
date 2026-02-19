@@ -75,15 +75,9 @@ export class ChatService {
   ): Promise<ConversationDoc> {
     const conversation = await this.databaseService
       .conversations()
-      .findOne({ _id: new ObjectId(id) });
+      .findOne({ _id: new ObjectId(id), userId });
     if (!conversation) {
       this.logger.warn(`Conversation not found: ${id}`);
-      throw new NotFoundException('Conversation not found');
-    }
-    if (!conversation.userId.equals(userId)) {
-      this.logger.warn(
-        `Unauthorized access attempt to conversation ${id} by user ${String(userId)}`,
-      );
       throw new NotFoundException('Conversation not found');
     }
     return conversation;

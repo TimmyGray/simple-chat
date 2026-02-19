@@ -18,7 +18,6 @@ import { Throttle } from '@nestjs/throttler';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import type { Request, Response } from 'express';
-import { ObjectId } from 'mongodb';
 import { ChatService } from './chat.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
@@ -26,13 +25,9 @@ import { SendMessageDto } from './dto/send-message.dto';
 import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { AuthUser } from '../auth/interfaces/auth-user.interface';
 
 const uploadLogger = new Logger('FileUpload');
-
-interface AuthUser {
-  _id: ObjectId;
-  email: string;
-}
 
 @Controller('api')
 @UseGuards(JwtAuthGuard)
