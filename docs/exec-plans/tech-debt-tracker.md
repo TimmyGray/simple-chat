@@ -18,7 +18,7 @@ Each task has:
 
 | ID | Task | Area | Effort | Status | Notes |
 |----|------|------|--------|--------|-------|
-| B-C1 | Add JWT authentication (NestJS Guards + frontend auth flow) | fullstack | 3-4d | in-progress | Blocking production deployment. Split into phases below. |
+| B-C1 | Add JWT authentication (NestJS Guards + frontend auth flow) | fullstack | 3-4d | done | All 3 phases complete. |
 | B-C1a | Backend auth module: register, login, JWT, guard, users collection | backend | 1d | done | Phase 1. PR: feat/backend-auth-module |
 | B-C1b | Apply JWT guards to existing endpoints + userId scoping | backend | 1d | done | Phase 2. PR #6 merged. |
 | B-C1c | Frontend auth flow: login/register UI, token management, i18n | frontend | 1-2d | done | Phase 3. PR #7 merged. |
@@ -41,11 +41,11 @@ Each task has:
 |----|------|------|--------|--------|-------|
 | B-M1 | Add response DTOs and API envelope | backend | 1d | todo | No consistent response format |
 | B-M2 | Add @HttpCode decorators to controllers | backend | 0.25d | todo | POST returns 200 instead of 201 |
-| B-M5 | Add length limits to DTO fields | backend | 0.25d | todo | Missing @MaxLength, @MinLength |
+| B-M5 | Add length limits to DTO fields | backend | 0.25d | done | @MaxLength/@MinLength already in auth DTOs |
 | B-M6 | Add idempotency key support for message creation | backend | 0.5d | todo | Duplicate sends possible |
 | B-M7 | Configure MongoDB connection pool options | backend | 0.25d | todo | Using default pool settings |
 | B-M8 | Fix ESLint errors in test files (32 errors) | backend | 1d | todo | `any` types in test mocks |
-| B-M9 | Add coverage tool, target 80%+ | backend | 0.5d | todo | No @vitest/coverage-v8 |
+| B-M9 | Add coverage tool, target 80%+ | backend | 0.5d | done | @vitest/coverage-v8 configured, thresholds: 60%/50% |
 | F-M1 | Add list virtualization (react-window) | frontend | 1d | todo | Long conversations cause jank |
 | F-M2 | Throttle scroll-to-bottom during streaming | frontend | 0.25d | todo | Scroll fires on every chunk |
 | F-M3 | Replace 9-prop drill with React Context | frontend | 1d | todo | Layout has too many props |
@@ -89,7 +89,7 @@ Each task has:
 
 | ID | Task | Area | Effort | Status | Notes |
 |----|------|------|--------|--------|-------|
-| FEAT-1 | User Authentication & Multi-Tenancy | fullstack | 5d | todo | JWT + user-scoped conversations |
+| FEAT-1 | User Authentication & Multi-Tenancy | fullstack | 5d | done | JWT auth + userId-scoped data via B-C1 |
 | FEAT-2 | Conversation Search (Cmd+K) | fullstack | 2d | todo | MongoDB text index + search UI |
 | FEAT-3 | Message Editing & Regeneration | fullstack | 3d | todo | Edit sent messages, regenerate responses |
 | FEAT-4 | Conversation Export (Markdown/PDF/JSON) | fullstack | 2d | todo | Data portability |
@@ -124,3 +124,7 @@ Each task has:
 | I18N | i18n support (4 languages) | 2026-02-18 |
 | INFRA | CI/CD pipeline + pre-commit hooks | 2026-02-19 |
 | B-C1c | Frontend auth flow (login/register UI, token management, i18n) | 2026-02-19 |
+| B-C1 | JWT authentication (all phases complete) | 2026-02-19 |
+| B-M5 | Add length limits to DTO fields (@MaxLength/@MinLength) | 2026-02-19 |
+| B-M9 | Add coverage tool (@vitest/coverage-v8) | 2026-02-19 |
+| FEAT-1 | User Authentication & Multi-Tenancy | 2026-02-19 |
