@@ -12,6 +12,7 @@ export class DatabaseService implements OnModuleInit {
   async onModuleInit() {
     await this.messages().createIndex({ conversationId: 1, createdAt: 1 });
     await this.messages().createIndex({ conversationId: 1 });
+    await this.conversations().createIndex({ userId: 1, updatedAt: -1 });
     await this.users().createIndex({ email: 1 }, { unique: true });
   }
 

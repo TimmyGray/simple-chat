@@ -13,9 +13,12 @@ describe('ChatService', () => {
 
   const mockObjectId = new ObjectId('507f1f77bcf86cd799439011');
   const mockMessageId = new ObjectId('507f1f77bcf86cd799439012');
+  const mockUserId = new ObjectId('607f1f77bcf86cd799439099');
+  const otherUserId = new ObjectId('607f1f77bcf86cd799439100');
 
   const mockConversation = {
     _id: mockObjectId,
+    userId: mockUserId,
     title: 'Test Chat',
     model: 'openrouter/free',
     createdAt: new Date(),
@@ -87,17 +90,23 @@ describe('ChatService', () => {
   });
 
   describe('createConversation', () => {
-    it('should create a conversation with default values', async () => {
-      const result = await service.createConversation({});
+    it('should create a conversation with userId and default values', async () => {
+      const result = await service.createConversation({}, mockUserId);
       expect(result).toBeDefined();
       expect(result.title).toBe('New Chat');
+      expect(result.userId).toEqual(mockUserId);
+      const insertArg = mockConversationsCollection.insertOne.mock.calls[0][0];
+      expect(insertArg.userId).toEqual(mockUserId);
     });
 
     it('should create a conversation with custom title', async () => {
-      const result = await service.createConversation({
-        title: 'My Chat',
-        model: 'meta-llama/llama-3.3-70b-instruct:free',
-      });
+      const result = await service.createConversation(
+        {
+          title: 'My Chat',
+          model: 'meta-llama/llama-3.3-70b-instruct:free',
+        },
+        mockUserId,
+      );
       expect(result).toBeDefined();
       expect(result.title).toBe('My Chat');
       expect(result.model).toBe('meta-llama/llama-3.3-70b-instruct:free');
@@ -105,16 +114,21 @@ describe('ChatService', () => {
   });
 
   describe('getConversations', () => {
-    it('should return list of conversations sorted by updatedAt', async () => {
-      const result = await service.getConversations();
+    it('should return conversations filtered by userId', async () => {
+      const result = await service.getConversations(mockUserId);
       expect(result).toHaveLength(1);
-      expect(mockConversationsCollection.find).toHaveBeenCalled();
+      expect(mockConversationsCollection.find).toHaveBeenCalledWith({
+        userId: mockUserId,
+      });
     });
   });
 
   describe('getConversation', () => {
-    it('should return a conversation by id', async () => {
-      const result = await service.getConversation('507f1f77bcf86cd799439011');
+    it('should return a conversation owned by the user', async () => {
+      const result = await service.getConversation(
+        '507f1f77bcf86cd799439011',
+        mockUserId,
+      );
       expect(result).toBeDefined();
       expect(result._id).toEqual(mockObjectId);
     });
@@ -123,16 +137,25 @@ describe('ChatService', () => {
       mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
 
       await expect(
-        service.getConversation('507f1f77bcf86cd799439011'),
+        service.getConversation('507f1f77bcf86cd799439011', mockUserId),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw NotFoundException when user does not own the conversation', async () => {
+      mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
+
+      await expect(
+        service.getConversation('507f1f77bcf86cd799439011', otherUserId),
       ).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('updateConversation', () => {
-    it('should update a conversation', async () => {
+    it('should update a conversation owned by the user', async () => {
       const result = await service.updateConversation(
         '507f1f77bcf86cd799439011',
         { title: 'Updated Title' },
+        mockUserId,
       );
       expect(result).toBeDefined();
       expect(mockConversationsCollection.findOneAndUpdate).toHaveBeenCalled();
@@ -140,30 +163,41 @@ describe('ChatService', () => {
         mockConversationsCollection.findOneAndUpdate.mock.calls[0];
       expect(callArgs[0]).toEqual({
         _id: new ObjectId('507f1f77bcf86cd799439011'),
+        userId: mockUserId,
       });
       expect(callArgs[1].$set.title).toBe('Updated Title');
       expect(callArgs[2]).toEqual({ returnDocument: 'after' });
     });
 
-    it('should throw NotFoundException when not found', async () => {
+    it('should throw NotFoundException when not found or not owned', async () => {
       mockConversationsCollection.findOneAndUpdate = vi
         .fn()
         .mockResolvedValue(null);
 
       await expect(
-        service.updateConversation('507f1f77bcf86cd799439011', {
-          title: 'x',
-        }),
+        service.updateConversation(
+          '507f1f77bcf86cd799439011',
+          { title: 'x' },
+          mockUserId,
+        ),
       ).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('deleteConversation', () => {
-    it('should delete a conversation and its messages', async () => {
-      await service.deleteConversation('507f1f77bcf86cd799439011');
-      expect(mockConversationsCollection.findOne).toHaveBeenCalled();
+    it('should delete a conversation owned by the user and its messages', async () => {
+      await service.deleteConversation('507f1f77bcf86cd799439011', mockUserId);
+      expect(mockConversationsCollection.findOne).toHaveBeenCalledWith({
+        _id: new ObjectId('507f1f77bcf86cd799439011'),
+        userId: mockUserId,
+      });
       expect(mockMessagesCollection.deleteMany).toHaveBeenCalled();
-      expect(mockConversationsCollection.findOneAndDelete).toHaveBeenCalled();
+      expect(mockConversationsCollection.findOneAndDelete).toHaveBeenCalledWith(
+        {
+          _id: new ObjectId('507f1f77bcf86cd799439011'),
+          userId: mockUserId,
+        },
+      );
     });
 
     it('should delete messages before the conversation', async () => {
@@ -179,15 +213,15 @@ describe('ChatService', () => {
           return Promise.resolve(mockConversation);
         });
 
-      await service.deleteConversation('507f1f77bcf86cd799439011');
+      await service.deleteConversation('507f1f77bcf86cd799439011', mockUserId);
       expect(callOrder).toEqual(['deleteMessages', 'deleteConversation']);
     });
 
-    it('should throw NotFoundException when not found', async () => {
+    it('should throw NotFoundException when not found or not owned', async () => {
       mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
 
       await expect(
-        service.deleteConversation('507f1f77bcf86cd799439011'),
+        service.deleteConversation('507f1f77bcf86cd799439011', mockUserId),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -195,17 +229,28 @@ describe('ChatService', () => {
       mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
 
       await expect(
-        service.deleteConversation('507f1f77bcf86cd799439011'),
+        service.deleteConversation('507f1f77bcf86cd799439011', mockUserId),
       ).rejects.toThrow(NotFoundException);
       expect(mockMessagesCollection.deleteMany).not.toHaveBeenCalled();
     });
   });
 
   describe('getMessages', () => {
-    it('should return messages for a conversation', async () => {
-      const result = await service.getMessages('507f1f77bcf86cd799439011');
+    it('should return messages for a conversation owned by user', async () => {
+      const result = await service.getMessages(
+        '507f1f77bcf86cd799439011',
+        mockUserId,
+      );
       expect(result).toHaveLength(1);
       expect(mockMessagesCollection.find).toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException if conversation not owned by user', async () => {
+      mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
+
+      await expect(
+        service.getMessages('507f1f77bcf86cd799439011', otherUserId),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });

@@ -9,10 +9,14 @@
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | _id | ObjectId | auto | Primary key |
+| userId | ObjectId | yes | Reference to users._id (owner) |
 | title | string | yes | Conversation title (auto-generated from first message, max 50 chars + "...") |
 | model | string | yes | LLM model identifier (default: "openrouter/free") |
 | createdAt | Date | yes | Creation timestamp |
 | updatedAt | Date | yes | Last update timestamp |
+
+**Indexes:**
+- `{ userId: 1, updatedAt: -1 }` — list user's conversations sorted by recent activity
 
 **Source:** `backend/src/chat/interfaces/conversation.interface.ts`
 

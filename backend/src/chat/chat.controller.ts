@@ -9,6 +9,7 @@ import {
   Req,
   Res,
   Logger,
+  UseGuards,
   UseInterceptors,
   UploadedFiles,
 } from '@nestjs/common';
@@ -22,10 +23,14 @@ import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { AuthUser } from '../auth/interfaces/auth-user.interface';
 
 const uploadLogger = new Logger('FileUpload');
 
 @Controller('api')
+@UseGuards(JwtAuthGuard)
 export class ChatController {
   private readonly logger = new Logger(ChatController.name);
 
@@ -33,44 +38,55 @@ export class ChatController {
 
   // Conversations
   @Get('conversations')
-  getConversations() {
+  getConversations(@CurrentUser() user: AuthUser) {
     this.logger.debug('GET /conversations');
-    return this.chatService.getConversations();
+    return this.chatService.getConversations(user._id);
   }
 
   @Post('conversations')
-  createConversation(@Body() dto: CreateConversationDto) {
+  createConversation(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: CreateConversationDto,
+  ) {
     this.logger.log(
       `Creating conversation: title="${dto.title || 'New Chat'}", model="${dto.model || 'default'}"`,
     );
-    return this.chatService.createConversation(dto);
+    return this.chatService.createConversation(dto, user._id);
   }
 
   @Patch('conversations/:id')
   updateConversation(
+    @CurrentUser() user: AuthUser,
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() dto: UpdateConversationDto,
   ) {
     this.logger.log(`Updating conversation ${id}: ${JSON.stringify(dto)}`);
-    return this.chatService.updateConversation(id, dto);
+    return this.chatService.updateConversation(id, dto, user._id);
   }
 
   @Delete('conversations/:id')
-  deleteConversation(@Param('id', ParseObjectIdPipe) id: string) {
+  deleteConversation(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseObjectIdPipe) id: string,
+  ) {
     this.logger.log(`Deleting conversation ${id}`);
-    return this.chatService.deleteConversation(id);
+    return this.chatService.deleteConversation(id, user._id);
   }
 
   // Messages
   @Get('conversations/:id/messages')
-  getMessages(@Param('id', ParseObjectIdPipe) id: string) {
+  getMessages(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseObjectIdPipe) id: string,
+  ) {
     this.logger.debug(`GET /conversations/${id}/messages`);
-    return this.chatService.getMessages(id);
+    return this.chatService.getMessages(id, user._id);
   }
 
   @Post('conversations/:id/messages')
   @Throttle({ default: { ttl: 60000, limit: 10 } })
   sendMessage(
+    @CurrentUser() user: AuthUser,
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() dto: SendMessageDto,
     @Req() req: Request,
@@ -79,7 +95,7 @@ export class ChatController {
     this.logger.log(
       `Starting SSE stream for conversation ${id}, model="${dto.model || 'default'}", attachments=${dto.attachments?.length || 0}`,
     );
-    return this.chatService.sendMessageAndStream(id, dto, req, res);
+    return this.chatService.sendMessageAndStream(id, dto, req, res, user._id);
   }
 
   // File upload
