@@ -12,6 +12,7 @@ import { ChatModule } from './chat/chat.module';
 import { ModelsModule } from './models/models.module';
 import { HealthModule } from './health/health.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { AuthModule } from './auth/auth.module';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 
 @Module({
@@ -51,6 +52,7 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
     ModelsModule,
     HealthModule,
     UploadsModule,
+    AuthModule,
   ],
   providers: [
     {

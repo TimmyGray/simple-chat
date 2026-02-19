@@ -61,7 +61,27 @@ For each issue found, report:
 - Severity (critical, warning, suggestion)
 - Description and fix recommendation
 
-End with a verdict: **APPROVE** or **REQUEST_CHANGES**
+### 4. Verdict
 
-If APPROVE: note any non-blocking suggestions
-If REQUEST_CHANGES: list the blocking issues that must be fixed
+End with a machine-readable verdict on its own line:
+
+- If no blocking issues: `VERDICT: APPROVE`
+- If blocking issues exist: `VERDICT: REQUEST_CHANGES`
+
+If APPROVE: note any non-blocking suggestions above the verdict line.
+If REQUEST_CHANGES: list all blocking issues above the verdict line.
+
+**Important:** The verdict line must be exactly `VERDICT: APPROVE` or `VERDICT: REQUEST_CHANGES` — this format is parsed by the autonomous pipeline (`/develop-feature`) to determine next steps.
+
+## Fix Loop (Autonomous Pipeline)
+
+When this review is run as part of the `/develop-feature` autonomous pipeline:
+
+1. The calling agent reads the `VERDICT:` line to decide whether to proceed or fix
+2. If `VERDICT: REQUEST_CHANGES`, the caller will:
+   - Fix all blocking issues listed in the report
+   - Commit and push fixes
+   - Re-run CI checks
+   - Re-run this review
+3. Max 2 review-fix cycles — after that, remaining issues are reported to the user
+4. Non-blocking suggestions (severity: suggestion) do not trigger a fix loop

@@ -18,7 +18,10 @@ Each task has:
 
 | ID | Task | Area | Effort | Status | Notes |
 |----|------|------|--------|--------|-------|
-| B-C1 | Add JWT authentication (NestJS Guards + frontend auth flow) | fullstack | 3-4d | todo | Blocking production deployment. All endpoints currently public. |
+| B-C1 | Add JWT authentication (NestJS Guards + frontend auth flow) | fullstack | 3-4d | in-progress | Blocking production deployment. Split into phases below. |
+| B-C1a | Backend auth module: register, login, JWT, guard, users collection | backend | 1d | done | Phase 1. PR: feat/backend-auth-module |
+| B-C1b | Apply JWT guards to existing endpoints + userId scoping | backend | 1d | todo | Phase 2. Protect conversations/messages/upload endpoints. |
+| B-C1c | Frontend auth flow: login/register UI, token management, i18n | frontend | 1-2d | todo | Phase 3. Auth pages, interceptors, protected routes. |
 
 ## High
 

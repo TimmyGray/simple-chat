@@ -10,4 +10,11 @@ export default () => ({
   uploads: {
     ttlHours: parseInt(process.env.UPLOAD_TTL_HOURS || '24', 10),
   },
+  jwt: {
+    secret: process.env.JWT_SECRET,
+    expirationSeconds: parseInt(
+      process.env.JWT_EXPIRATION_SECONDS || '900',
+      10,
+    ),
+  },
 });

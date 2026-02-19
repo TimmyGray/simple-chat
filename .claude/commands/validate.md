@@ -17,6 +17,21 @@ Run each check and record pass/fail:
 
 Note: Backend lint includes `--fix` (auto-corrects fixable issues). This is intentional — validation both checks and fixes formatting.
 
+## Staged Completeness Check
+
+When run before a commit (i.e., there are staged or unstaged changes), perform a staged-file completeness check:
+
+1. Run `git status --short`
+2. For each `??` (untracked) file:
+   - Check if any staged `.ts`, `.tsx`, `.js`, or `.jsx` file imports it (search for the filename or relative path in staged files)
+   - If found, report as `UNSTAGED DEPENDENCY: <file>` — this file **must** be staged before committing or CI will fail
+3. For each ` M` (unstaged modified) file:
+   - Check if this file was modified as part of the current work (e.g., imported by staged files)
+   - If found, report as `UNSTAGED MODIFICATION: <file>`
+4. If no issues found, report `Staged Completeness: PASS`
+
+This check prevents the most common CI failure: files that exist on disk (so local `tsc` passes) but aren't committed (so CI `tsc` fails with "Cannot find module").
+
 ## Output
 
 Present results as a summary table:
@@ -31,5 +46,6 @@ Present results as a summary table:
 | Frontend Tests | PASS/FAIL | X passed, Y failed |
 | Backend Build | PASS/FAIL | |
 | Frontend Build | PASS/FAIL | |
+| Staged Completeness | PASS/WARN | unstaged dependency count or "clean" |
 
 If any check fails, provide the first few lines of error output for quick diagnosis.
