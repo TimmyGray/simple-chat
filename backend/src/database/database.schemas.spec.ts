@@ -69,6 +69,10 @@ describe('Database Schemas', () => {
         'fileSize',
       ]);
     });
+
+    it('should disallow additional properties', () => {
+      expect(messagesSchema.$jsonSchema.additionalProperties).toBe(false);
+    });
   });
 
   describe('usersSchema', () => {

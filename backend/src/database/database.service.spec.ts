@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { MongoServerError } from 'mongodb';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { DatabaseService } from './database.service';
 import { DATABASE_CONNECTION } from './database.constants';
@@ -7,6 +8,12 @@ import {
   messagesSchema,
   usersSchema,
 } from './database.schemas';
+
+function makeMongoError(message: string, code: number): MongoServerError {
+  const error = new MongoServerError({ message });
+  error.code = code;
+  return error;
+}
 
 describe('DatabaseService', () => {
   let service: DatabaseService;
@@ -81,8 +88,8 @@ describe('DatabaseService', () => {
       });
     });
 
-    it('should create collection with validator if collMod fails', async () => {
-      mockDb.command.mockRejectedValue(new Error('ns not found'));
+    it('should create collection when NamespaceNotFound (code 26)', async () => {
+      mockDb.command.mockRejectedValue(makeMongoError('ns not found', 26));
 
       await service.onModuleInit();
 
@@ -101,6 +108,13 @@ describe('DatabaseService', () => {
         validationLevel: 'moderate',
         validationAction: 'error',
       });
+    });
+
+    it('should re-throw non-NamespaceNotFound errors from collMod', async () => {
+      mockDb.command.mockRejectedValue(makeMongoError('not authorized', 13));
+
+      await expect(service.onModuleInit()).rejects.toThrow('not authorized');
+      expect(mockDb.createCollection).not.toHaveBeenCalled();
     });
   });
 

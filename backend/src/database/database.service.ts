@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { Collection, Db, Document } from 'mongodb';
+import { Collection, Db, Document, MongoServerError } from 'mongodb';
 import { DATABASE_CONNECTION } from './database.constants';
 import { ConversationDoc, MessageDoc, UserDoc } from '../types/documents';
 import {
@@ -52,16 +52,20 @@ export class DatabaseService implements OnModuleInit {
       this.logger.log(
         `Schema validation applied to "${collectionName}" collection`,
       );
-    } catch {
-      // Collection may not exist yet — create it with the validator
-      await this.db.createCollection(collectionName, {
-        validator,
-        validationLevel: 'moderate',
-        validationAction: 'error',
-      });
-      this.logger.log(
-        `Created "${collectionName}" collection with schema validation`,
-      );
+    } catch (error: unknown) {
+      // MongoDB error code 26 = NamespaceNotFound (collection doesn't exist)
+      if (error instanceof MongoServerError && error.code === 26) {
+        await this.db.createCollection(collectionName, {
+          validator,
+          validationLevel: 'moderate',
+          validationAction: 'error',
+        });
+        this.logger.log(
+          `Created "${collectionName}" collection with schema validation`,
+        );
+        return;
+      }
+      throw error;
     }
   }
 
