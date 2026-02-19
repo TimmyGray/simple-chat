@@ -347,9 +347,12 @@ export class ChatService {
       ) {
         const buffer = fs.readFileSync(fullPath);
         const parser = new PDFParse({ data: buffer });
-        const result = await parser.getText();
-        await parser.destroy();
-        return result.text;
+        try {
+          const result = await parser.getText();
+          return result.text;
+        } finally {
+          await parser.destroy();
+        }
       }
 
       return `[Binary file: ${attachment.fileName}]`;
