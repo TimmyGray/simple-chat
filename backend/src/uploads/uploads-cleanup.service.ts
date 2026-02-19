@@ -16,7 +16,7 @@ export class UploadsCleanupService {
   }
 
   @Cron(CronExpression.EVERY_HOUR)
-  async handleCleanup() {
+  handleCleanup() {
     this.logger.log('Starting upload cleanup...');
     let deleted = 0;
 

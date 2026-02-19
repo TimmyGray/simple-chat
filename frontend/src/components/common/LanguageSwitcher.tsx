@@ -4,7 +4,7 @@ import { ToggleButtonGroup, ToggleButton } from '@mui/material';
 const languages = [
   { code: 'en', label: 'EN' },
   { code: 'ru', label: 'RU' },
-  { code: 'zh', label: '中文' },
+  { code: 'zh-CN', label: '中文' },
   { code: 'es', label: 'ES' },
 ];
 

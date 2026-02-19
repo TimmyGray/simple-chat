@@ -9,8 +9,8 @@ import Layout from './components/Layout';
 
 export default function App() {
   const { t } = useTranslation();
-  const { conversations, loading: convsLoading, error: convsError, refresh, create, remove } = useConversations();
-  const { models, error: modelsError } = useModels();
+  const { conversations, loading: convsLoading, error: convsError, clearError: clearConvsError, refresh, create, remove } = useConversations();
+  const { models, error: modelsError, clearError: clearModelsError } = useModels();
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState('openrouter/free');
@@ -18,6 +18,12 @@ export default function App() {
 
   // Derive displayed error from hook errors or local errors
   const error = convsError || modelsError || localError;
+
+  const clearError = useCallback(() => {
+    setLocalError(null);
+    if (convsError) clearConvsError();
+    if (modelsError) clearModelsError();
+  }, [convsError, modelsError, clearConvsError, clearModelsError]);
 
   const selectedConversation = useMemo(
     () => conversations.find((c) => c._id === selectedId) || null,
@@ -68,10 +74,10 @@ export default function App() {
         <Snackbar
           open={!!error}
           autoHideDuration={4000}
-          onClose={() => setLocalError(null)}
+          onClose={clearError}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         >
-          <Alert severity="error" onClose={() => setLocalError(null)}>
+          <Alert severity="error" onClose={clearError}>
             {error}
           </Alert>
         </Snackbar>

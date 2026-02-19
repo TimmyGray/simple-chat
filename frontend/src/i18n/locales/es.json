@@ -37,6 +37,7 @@
     "maxFileCount": "Puedes adjuntar hasta {{count}} archivos a la vez.",
     "fileTooLarge": "\"{{name}}\" excede el límite de 10 MB.",
     "unsupportedType": "\"{{name}}\" tiene un tipo de archivo no compatible ({{type}}).",
+    "fetchModels": "Error al obtener los modelos",
     "filesNotAttached": "Algunos archivos no se adjuntaron:"
   }
 }

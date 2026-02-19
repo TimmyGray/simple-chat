@@ -37,6 +37,7 @@
     "maxFileCount": "You can attach up to {{count}} files at a time.",
     "fileTooLarge": "\"{{name}}\" exceeds the 10MB size limit.",
     "unsupportedType": "\"{{name}}\" has an unsupported file type ({{type}}).",
+    "fetchModels": "Failed to fetch models",
     "filesNotAttached": "Some files were not attached:"
   }
 }

@@ -5,6 +5,9 @@ import * as api from '../api/client';
 
 export function useMessages() {
   const { t } = useTranslation();
+  const tRef = useRef(t);
+  tRef.current = t;
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [streaming, setStreaming] = useState(false);
@@ -19,13 +22,13 @@ export function useMessages() {
       const data = await api.getMessages(conversationId);
       setMessages(data);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : t('errors.fetchMessages');
+      const msg = err instanceof Error ? err.message : tRef.current('errors.fetchMessages');
       setError(msg);
       console.error('Failed to fetch messages:', err);
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, []);
 
   const stopStreaming = useCallback(() => {
     abortRef.current?.abort();
@@ -96,7 +99,7 @@ export function useMessages() {
         );
       } catch (err) {
         if (!completed) {
-          const msg = err instanceof Error ? err.message : t('errors.streamingFailed');
+          const msg = err instanceof Error ? err.message : tRef.current('errors.streamingFailed');
           setError(msg);
         }
       } finally {
@@ -105,7 +108,7 @@ export function useMessages() {
         abortRef.current = null;
       }
     },
-    [t],
+    [],
   );
 
   const clear = useCallback(() => {

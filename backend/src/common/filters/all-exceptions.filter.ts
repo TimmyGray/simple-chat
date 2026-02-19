@@ -29,16 +29,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     const correlationId = request.headers['x-correlation-id'] as string;
 
+    const resolvedMessage =
+      typeof message === 'string'
+        ? message
+        : ((message as Record<string, unknown>).message ?? message);
+
     const errorResponse = {
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
       method: request.method,
       correlationId,
-      message:
-        typeof message === 'string'
-          ? message
-          : (message as any).message || message,
+      message: resolvedMessage,
     };
 
     if (status >= 500) {

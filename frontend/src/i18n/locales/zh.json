@@ -37,6 +37,7 @@
     "maxFileCount": "一次最多只能附加 {{count}} 个文件。",
     "fileTooLarge": "\"{{name}}\" 超过了 10MB 大小限制。",
     "unsupportedType": "\"{{name}}\" 的文件类型不受支持 ({{type}})。",
+    "fetchModels": "获取模型失败",
     "filesNotAttached": "部分文件未能附加："
   }
 }

@@ -1,10 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Conversation } from '../types';
 import * as api from '../api/client';
 
 export function useConversations() {
   const { t } = useTranslation();
+  const tRef = useRef(t);
+  tRef.current = t;
+
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,13 +18,13 @@ export function useConversations() {
       const data = await api.getConversations();
       setConversations(data);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : t('errors.fetchConversations');
+      const msg = err instanceof Error ? err.message : tRef.current('errors.fetchConversations');
       setError(msg);
       console.error('Failed to fetch conversations:', err);
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, []);
 
   useEffect(() => {
     fetch();
@@ -34,12 +37,12 @@ export function useConversations() {
         setConversations((prev) => [conversation, ...prev]);
         return conversation;
       } catch (err) {
-        const msg = err instanceof Error ? err.message : t('errors.createConversation');
+        const msg = err instanceof Error ? err.message : tRef.current('errors.createConversation');
         setError(msg);
         throw err;
       }
     },
-    [t],
+    [],
   );
 
   const update = useCallback(
@@ -51,12 +54,12 @@ export function useConversations() {
         );
         return updated;
       } catch (err) {
-        const msg = err instanceof Error ? err.message : t('errors.updateConversation');
+        const msg = err instanceof Error ? err.message : tRef.current('errors.updateConversation');
         setError(msg);
         throw err;
       }
     },
-    [t],
+    [],
   );
 
   const remove = useCallback(async (id: string) => {
@@ -64,11 +67,13 @@ export function useConversations() {
       await api.deleteConversation(id);
       setConversations((prev) => prev.filter((c) => c._id !== id));
     } catch (err) {
-      const msg = err instanceof Error ? err.message : t('errors.deleteConversation');
+      const msg = err instanceof Error ? err.message : tRef.current('errors.deleteConversation');
       setError(msg);
       throw err;
     }
-  }, [t]);
+  }, []);
 
-  return { conversations, loading, error, refresh: fetch, create, update, remove };
+  const clearError = useCallback(() => setError(null), []);
+
+  return { conversations, loading, error, clearError, refresh: fetch, create, update, remove };
 }

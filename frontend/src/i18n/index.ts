@@ -14,7 +14,7 @@ i18n
     resources: {
       en: { translation: en },
       ru: { translation: ru },
-      zh: { translation: zh },
+      'zh-CN': { translation: zh },
       es: { translation: es },
     },
     fallbackLng: 'en',
