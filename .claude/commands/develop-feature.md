@@ -20,10 +20,18 @@ $ARGUMENTS — Optional task ID from `docs/exec-plans/tech-debt-tracker.md`. If 
    - Security work → read `docs/SECURITY.md`
    - Full-stack → read all of the above
 3. Read `docs/design-docs/core-beliefs.md` for engineering principles
+4. Read `docs/CONVENTIONS.md` for code standards
 
 ### Phase 3: Branch & Plan
 1. Create a feature branch: `git checkout -b feat/<kebab-case-task-name>`
-2. For high-effort tasks (estimated > 1 day), create an exec plan in `docs/exec-plans/active/<feature>.md`
+2. **Execution Plan (required for tasks > 1 day effort):**
+   - Create `docs/exec-plans/active/<feature>.md` with:
+     - Task description and acceptance criteria
+     - Implementation phases with estimated effort
+     - Files to create/modify
+     - Decision log (empty initially — fill in as you make choices)
+     - Risks and open questions
+   - For smaller tasks, create a lightweight plan in the commit message
 3. Plan the implementation: list files to create/modify, tests to write
 
 ### Phase 4: Implementation
@@ -31,6 +39,9 @@ $ARGUMENTS — Optional task ID from `docs/exec-plans/tech-debt-tracker.md`. If 
 2. Write tests for new functionality
 3. Ensure i18n compliance: all user-facing strings use `t()` from react-i18next
 4. Follow patterns from `docs/references/` if applicable
+5. **Update execution plan** after each significant decision:
+   - Log architectural choices: "Chose X over Y because Z"
+   - Update phase completion status
 
 ### Phase 5: Validation + Staged-File Completeness
 1. Run validation checks — fix failures, max 3 retries per check:
@@ -48,22 +59,41 @@ $ARGUMENTS — Optional task ID from `docs/exec-plans/tech-debt-tracker.md`. If 
    - After staging any new files, re-run `npm run typecheck` and `npm run build` to confirm clean state
 3. This step prevents CI failures caused by files that exist on disk but aren't committed
 
-### Phase 6: Playwright Smoke Test
+### Phase 6: Playwright Deep Validation
 1. Start dev servers in background:
    - `npm run dev:backend` (background)
    - `npm run dev:frontend` (background)
 2. Wait for servers to be ready:
    - Poll `http://localhost:3001/api/health` until it responds (max 30s)
    - Poll `http://localhost:5173` until it responds (max 30s)
-3. Run browser smoke test:
+
+3. **Observability: Capture backend logs**
+   - Before testing, note the backend process output (Pino logs)
+   - After testing, check logs for: ERROR level entries, unhandled exceptions, slow operations
+
+4. **Deep browser validation** (not just "page loads"):
    - Use `browser_navigate` → `http://localhost:5173`
-   - Use `browser_snapshot` to capture accessibility tree
-   - Execute a feature-specific smoke test scenario derived from the task description
-   - Use `browser_console_messages(level: "error")` to check for JS errors
-   - Use `browser_network_requests` to verify API routes return expected status codes
+   - Use `browser_snapshot` to capture full accessibility tree
+   - **Navigate the specific user flow** affected by this feature:
+     - For auth changes → test login/register flow
+     - For chat changes → test conversation creation, message sending
+     - For UI changes → verify new components appear in the accessibility tree
+   - Use `browser_console_messages(level: "error")` — **zero JS errors required**
+   - Use `browser_console_messages(level: "warning")` — review warnings for relevance
+   - Use `browser_network_requests` — verify:
+     - API routes return expected status codes (no 4xx/5xx)
+     - No failed network requests
+     - SSE connections establish correctly (for streaming features)
    - Use `browser_take_screenshot` to capture evidence for the PR
-4. Kill dev servers: `pkill -f "nest start" || true` and `pkill -f "vite" || true`
-5. If smoke test reveals critical issues (JS errors, broken UI, failed API calls):
+   - **For bug fixes**: reproduce the bug scenario FIRST, then verify it's fixed after changes
+
+5. **Check backend logs for errors**:
+   - Read the backend process output
+   - Flag any ERROR or WARN level log entries that occurred during the test
+   - If backend errors found, treat as a validation failure
+
+6. Kill dev servers: `pkill -f "nest start" || true` and `pkill -f "vite" || true`
+7. If smoke test reveals critical issues (JS errors, broken UI, failed API calls, backend errors):
    - Fix the code
    - Return to Phase 5 (max 3 retry cycles across Phases 5-6)
 
@@ -76,6 +106,7 @@ $ARGUMENTS — Optional task ID from `docs/exec-plans/tech-debt-tracker.md`. If 
 6. Push: `git push -u origin feat/<branch-name>`
 7. Create PR via `gh pr create` using the project's PR template format
    - Include Playwright smoke test screenshot in the PR body if captured
+   - Include link to execution plan if one was created
 
 ### Phase 8: CI Monitor & Fix Loop
 1. Run `gh pr checks --watch --interval 30` to wait for CI to complete
@@ -122,3 +153,5 @@ $ARGUMENTS — Optional task ID from `docs/exec-plans/tech-debt-tracker.md`. If 
 - Always kill dev servers (Phase 6) before proceeding — leftover processes cause port conflicts
 - The staged-file completeness check (Phase 5) is critical — it prevents the #1 cause of CI failures
 - Max retry limits are hard limits: do not exceed them. Report blockers instead.
+- Execution plans are living documents: update them as you make decisions during implementation
+- When the agent struggles, treat it as a signal: identify what capability is missing and feed it back into the repo
