@@ -1,11 +1,65 @@
 import axios from 'axios';
-import type { Conversation, Message, ModelInfo, Attachment } from '../types';
+import type { Conversation, Message, ModelInfo, Attachment, AuthResponse, User } from '../types';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
+const TOKEN_KEY = 'auth_token';
+
+export function getStoredToken(): string | null {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function setStoredToken(token: string): void {
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+export function clearStoredToken(): void {
+  localStorage.removeItem(TOKEN_KEY);
+}
 
 const api = axios.create({
   baseURL: BASE_URL,
 });
+
+api.interceptors.request.use((config) => {
+  const token = getStoredToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const url = error.config?.url || '';
+    const isAuthEndpoint = url.includes('/auth/login') || url.includes('/auth/register');
+    if (error.response?.status === 401 && getStoredToken() && !isAuthEndpoint) {
+      clearStoredToken();
+      window.location.reload();
+    }
+    return Promise.reject(error);
+  },
+);
+
+// Auth
+
+export async function login(email: string, password: string): Promise<AuthResponse> {
+  const { data } = await api.post('/auth/login', { email, password });
+  return data;
+}
+
+export async function register(email: string, password: string): Promise<AuthResponse> {
+  const { data } = await api.post('/auth/register', { email, password });
+  return data;
+}
+
+export async function getProfile(): Promise<User> {
+  const { data } = await api.get('/auth/profile');
+  return data;
+}
+
+// Conversations
 
 export async function getConversations(): Promise<Conversation[]> {
   const { data } = await api.get('/conversations');
@@ -59,17 +113,28 @@ export async function sendMessageStream(
   let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
 
   try {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const token = getStoredToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(
       `${BASE_URL}/conversations/${conversationId}/messages`,
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ content, model, attachments }),
         signal: controller.signal,
       },
     );
 
     if (!response.ok || !response.body) {
+      if (response.status === 401 && getStoredToken()) {
+        clearStoredToken();
+        window.location.reload();
+        return;
+      }
       onError?.(`HTTP error: ${response.status}`);
       return;
     }

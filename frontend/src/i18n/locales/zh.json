@@ -1,4 +1,20 @@
 {
+  "auth": {
+    "loginTitle": "欢迎回来",
+    "registerTitle": "创建账户",
+    "login": "登录",
+    "register": "注册",
+    "logout": "退出",
+    "email": "电子邮件",
+    "password": "密码",
+    "passwordHint": "至少8个字符",
+    "noAccount": "没有账户？",
+    "hasAccount": "已有账户？",
+    "invalidCredentials": "邮箱或密码错误",
+    "emailTaken": "此邮箱已被注册",
+    "loginFailed": "登录失败",
+    "registerFailed": "注册失败"
+  },
   "sidebar": {
     "title": "Simple Chat",
     "newChat": "新建聊天",
