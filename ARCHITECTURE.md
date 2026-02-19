@@ -154,17 +154,20 @@ Created programmatically in `DatabaseService.onModuleInit()`:
 
 All routes are prefixed with `/api`.
 
-| Method   | Path                                | Throttle     | Description                              |
-|----------|-------------------------------------|--------------|------------------------------------------|
-| `GET`    | `/conversations`                    | 60/min       | List all conversations (sorted by updatedAt desc) |
-| `POST`   | `/conversations`                    | 60/min       | Create a new conversation                |
-| `PATCH`  | `/conversations/:id`                | 60/min       | Update conversation (title, model)       |
-| `DELETE` | `/conversations/:id`                | 60/min       | Delete conversation and all its messages  |
-| `GET`    | `/conversations/:id/messages`       | 60/min       | List messages for a conversation (sorted by createdAt asc) |
-| `POST`   | `/conversations/:id/messages`       | **10/min**   | Send message + stream LLM response (SSE) |
-| `POST`   | `/upload`                           | **20/min**   | Upload files (multipart, max 5 files, 10MB each) |
-| `GET`    | `/models`                           | 60/min       | List available LLM models                |
-| `GET`    | `/api/health`                       | none         | Health check (skips throttler)           |
+| Method   | Path                                | Throttle     | Auth     | Description                              |
+|----------|-------------------------------------|--------------|----------|------------------------------------------|
+| `POST`   | `/auth/register`                    | **5/min**    | No       | Register a new user                      |
+| `POST`   | `/auth/login`                       | **10/min**   | No       | Login and receive JWT token              |
+| `GET`    | `/auth/profile`                     | 60/min       | JWT      | Get current user profile                 |
+| `GET`    | `/conversations`                    | 60/min       | JWT      | List all conversations (sorted by updatedAt desc) |
+| `POST`   | `/conversations`                    | 60/min       | JWT      | Create a new conversation                |
+| `PATCH`  | `/conversations/:id`                | 60/min       | JWT      | Update conversation (title, model)       |
+| `DELETE` | `/conversations/:id`                | 60/min       | JWT      | Delete conversation and all its messages  |
+| `GET`    | `/conversations/:id/messages`       | 60/min       | JWT      | List messages for a conversation (sorted by createdAt asc) |
+| `POST`   | `/conversations/:id/messages`       | **10/min**   | JWT      | Send message + stream LLM response (SSE) |
+| `POST`   | `/upload`                           | **20/min**   | JWT      | Upload files (multipart, max 5 files, 10MB each) |
+| `GET`    | `/models`                           | 60/min       | No       | List available LLM models                |
+| `GET`    | `/health`                           | none         | No       | Health check (skips throttler)           |
 
 All `:id` parameters are validated by `ParseObjectIdPipe` (returns 400 for invalid ObjectId format).
 
@@ -268,6 +271,7 @@ Language detection order: `localStorage` then `navigator`. Fallback: English. Th
 | Variable             | Required | Default                                    | Description                        |
 |----------------------|----------|--------------------------------------------|------------------------------------|
 | `OPENROUTER_API_KEY` | Yes      | --                                         | API key for OpenRouter LLM calls   |
+| `JWT_SECRET`         | Yes      | --                                         | Secret key for JWT token signing   |
 | `MONGODB_URI`        | No       | `mongodb://localhost:27017/simple-chat`     | MongoDB connection string          |
 | `PORT`               | No       | `3001`                                     | Backend HTTP port                  |
 | `LLM_URL_KEY`        | No       | `https://openrouter.ai/api/v1`             | Override LLM base URL              |
@@ -318,7 +322,7 @@ Language detection order: `localStorage` then `navigator`. Fallback: English. Th
 ### Tooling
 | Category       | Technology                                          |
 |----------------|-----------------------------------------------------|
-| Monorepo       | npm workspaces (implicit), concurrently             |
+| Monorepo       | concurrently (no npm workspaces, separate package-locks) |
 | Linting        | ESLint 9 + typescript-eslint                        |
 | Formatting     | Prettier                                            |
 | Git Hooks      | Husky + lint-staged                                 |

@@ -6,9 +6,9 @@
 
 | Area | Test Files | Tests | Pass Rate |
 |------|-----------|-------|-----------|
-| Backend | 6 | ~12 | 100% |
-| Frontend | 6 | ~26 | 100% |
-| **Total** | **12** | **~38** | **100%** |
+| Backend | 9 | 58 | 100% |
+| Frontend | 7 | 33 | 100% |
+| **Total** | **16** | **91** | **100%** |
 
 ## Lint Status
 
@@ -32,8 +32,8 @@
 | Frontend | Passing |
 
 ## Coverage
-- Backend: Not configured (target: 80%)
-- Frontend: Not configured (target: 80%)
+- Backend: Configured (@vitest/coverage-v8, threshold: 60%)
+- Frontend: Configured (@vitest/coverage-v8, threshold: 50%)
 
 ## Dependencies
 
@@ -48,15 +48,15 @@
 - Frontend: TBD
 
 ## Tech Debt
-- Critical: 1 (JWT authentication)
+- Critical: 0 (JWT authentication completed)
 - High: 5
-- Medium: ~25
+- Medium: ~23
 - Low: ~13
-- Total tracked: 65 (see `docs/exec-plans/tech-debt-tracker.md`)
+- Total tracked: 63 (see `docs/exec-plans/tech-debt-tracker.md`)
 
 ## Targets
-- Test count: 100+ (currently ~38)
-- Coverage: 80%+ (currently unmeasured)
+- Test count: 100+ (currently 91)
+- Coverage: 80%+ (currently 60%/50% thresholds)
 - Lint errors: 0 (achieved)
 - Type errors: 0 (achieved)
-- Critical tech debt: 0 (currently 1)
+- Critical tech debt: 0 (achieved)
