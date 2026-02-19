@@ -27,7 +27,7 @@ Each task has:
 
 | ID | Task | Area | Effort | Status | Notes |
 |----|------|------|--------|--------|-------|
-| B-H4 | Add MongoDB JSON schema validation on collections | backend | 1d | todo | Native driver has no runtime schema enforcement |
+| B-H4 | Add MongoDB JSON schema validation on collections | backend | 1d | done | PR #11 merged. Validators on all 3 collections. |
 | B-H5 | Move `require('pdf-parse')` to module-level import | backend | 0.25d | todo | Dynamic require inside method, no type safety |
 | B-H6 | Make frontend origin configurable in LLM headers | backend | 0.25d | todo | Hardcoded `http://localhost:5173` in OpenAI headers |
 | B-H7 | Refactor SSE: return AsyncIterable from service, not Response | backend | 1d | todo | Service layer should not know about HTTP transport |
@@ -130,3 +130,4 @@ Each task has:
 | B-M9 | Add coverage tool (@vitest/coverage-v8) | 2026-02-19 |
 | FEAT-1 | User Authentication & Multi-Tenancy | 2026-02-19 |
 | F-L3 | Remove frontend console.error (sweep) | 2026-02-19 |
+| B-H4 | MongoDB JSON schema validation on collections (PR #11) | 2026-02-19 |
