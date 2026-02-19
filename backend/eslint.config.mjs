@@ -26,14 +26,38 @@ export default tseslint.config(
   },
   {
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-floating-promises': 'warn',
       "prettier/prettier": ["error", { endOfLine: "auto" }],
+      'no-console': ['error', {
+        allow: ['warn', 'error'],
+      }],
+      'no-restricted-imports': ['error', {
+        patterns: [
+          {
+            group: ['../chat/*'],
+            message: 'Cross-module import detected. Do not import from chat/ internals. Use NestJS dependency injection: import ChatModule in your module.ts and inject ChatService via constructor.',
+          },
+          {
+            group: ['../uploads/*'],
+            message: 'Cross-module import detected. Do not import from uploads/ internals. Use NestJS dependency injection: import UploadsModule in your module.ts and inject the service via constructor.',
+          },
+          {
+            group: ['../health/*'],
+            message: 'Cross-module import detected. Do not import from health/ internals. Use NestJS dependency injection: import HealthModule in your module.ts and inject the service via constructor.',
+          },
+          {
+            group: ['../models/*'],
+            message: 'Cross-module import detected. Do not import from models/ internals. Use NestJS dependency injection: import ModelsModule in your module.ts and inject ModelsService via constructor.',
+          },
+        ],
+      }],
     },
   },
   {
     files: ['**/*.spec.ts'],
     rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',

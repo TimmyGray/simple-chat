@@ -49,3 +49,27 @@ These principles guide all development decisions. Check against them during code
 - If a check can be automated (lint, typecheck, test), it should be in CI
 - Pre-commit hooks catch issues before they reach the PR
 - Commands automate the entire development workflow
+
+## 10. Agent Legibility First
+- Code is optimized for agent comprehension, not just human aesthetics
+- If the agent can't access it in-context, it effectively doesn't exist
+- Push all context into the repository — Slack discussions, design decisions, tacit knowledge
+- Favor "boring" technologies: composable, stable APIs, well-represented in training data
+
+## 11. Encode Taste into Tooling
+- If the same issue appears in 3+ reviews, promote it to an ESLint rule or structural test
+- Custom lint error messages ARE agent prompts — include remediation instructions
+- Human taste is captured once, then enforced continuously on every line of code
+- When documentation falls short, promote the rule into code
+
+## 12. Continuous Garbage Collection
+- Technical debt is a high-interest loan — pay it down in small increments
+- Run `/sweep` every 2-3 features to scan for deviations
+- Run `/doc-garden` after audits to keep documentation fresh
+- Background cleanup is cheaper than painful bursts of refactoring
+
+## 13. Progressive Disclosure for Context
+- CLAUDE.md is the table of contents (~60 lines), not the encyclopedia
+- Agents start with a small, stable entry point and are taught where to look next
+- Repository knowledge is the system of record — structured `docs/` directory
+- Context is a scarce resource: too much guidance becomes non-guidance

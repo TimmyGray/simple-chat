@@ -1,9 +1,7 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { Collection, Db } from 'mongodb';
 import { DATABASE_CONNECTION } from './database.constants';
-import { ConversationDoc } from '../chat/interfaces/conversation.interface';
-import { MessageDoc } from '../chat/interfaces/message.interface';
-import { UserDoc } from '../auth/interfaces/user.interface';
+import { ConversationDoc, MessageDoc, UserDoc } from '../types/documents';
 
 @Injectable()
 export class DatabaseService implements OnModuleInit {

@@ -78,6 +78,7 @@ export default function FileAttachment({
 
   return (
     <>
+      {/* eslint-disable-next-line no-restricted-syntax -- hidden file input has no MUI equivalent */}
       <input
         ref={inputRef}
         type="file"
