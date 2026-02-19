@@ -15,6 +15,11 @@ export const envValidationSchema = Joi.object({
   LOG_LEVEL: Joi.string()
     .valid('fatal', 'error', 'warn', 'info', 'debug', 'trace')
     .default('info'),
+  JWT_SECRET: Joi.string().required().not('').messages({
+    'any.required': 'JWT_SECRET is required',
+    'string.empty': 'JWT_SECRET must not be empty',
+  }),
+  JWT_EXPIRATION_SECONDS: Joi.number().integer().min(60).default(900),
   NODE_ENV: Joi.string()
     .valid('development', 'production', 'test')
     .default('development'),

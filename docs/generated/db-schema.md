@@ -46,6 +46,21 @@
 
 **Source:** `backend/src/chat/interfaces/message.interface.ts`
 
+### Collection: users
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| _id | ObjectId | auto | Primary key |
+| email | string | yes | User email (unique) |
+| password | string | yes | bcrypt-hashed password |
+| createdAt | Date | yes | Creation timestamp |
+| updatedAt | Date | yes | Last update timestamp |
+
+**Indexes:**
+- `{ email: 1 }` (unique) — fast lookup by email, enforces uniqueness
+
+**Source:** `backend/src/auth/interfaces/user.interface.ts`
+
 ## Notes
 - No schema validation enforced at MongoDB level (uses native driver, not Mongoose)
 - TypeScript interfaces provide compile-time safety only
