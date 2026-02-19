@@ -3,7 +3,7 @@
 ## Current Security Model
 
 ### Authentication
-**No authentication is implemented yet.** All API endpoints are publicly accessible. This is the most critical security gap in the application.
+**JWT authentication is implemented on the backend.** All conversation, message, and upload endpoints require a valid JWT token via `Authorization: Bearer <token>`. The auth module provides register/login endpoints that issue JWT tokens. Conversations are scoped by `userId` — users can only access their own data. Frontend auth UI (login/register pages, token management) is pending (B-C1c).
 
 ### Rate Limiting
 - **ThrottlerModule** applied globally via NestJS
@@ -46,7 +46,7 @@
 
 | # | Threat | Severity | Status | Mitigation |
 |---|--------|----------|--------|------------|
-| 1 | Unauthorized API access (no auth) | **Critical** | Open | Planned: JWT authentication with NestJS Guards |
+| 1 | Unauthorized API access (no auth) | **Critical** | Mitigated | Backend JWT guards + userId scoping. Frontend auth UI pending. |
 | 2 | LLM prompt injection | Medium | Open | Planned: input sanitization layer |
 | 3 | File upload abuse | Mitigated | Closed | Size limits, MIME whitelist, TTL cleanup cron |
 | 4 | SSE resource exhaustion | Mitigated | Closed | 5-min stream timeout, client disconnect detection |

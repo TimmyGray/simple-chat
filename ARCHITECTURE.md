@@ -54,9 +54,14 @@ AppModule
 │   ├── MONGO_CLIENT provider → MongoClient
 │   ├── DATABASE_CONNECTION provider → Db
 │   └── DatabaseService (collection accessors + index creation)
-├── ChatModule
-│   ├── ChatController (REST + SSE endpoints)
-│   └── ChatService (conversations CRUD, message streaming, file extraction)
+├── AuthModule
+│   ├── AuthController (register, login, profile)
+│   ├── AuthService (JWT issuance, bcrypt password hashing)
+│   ├── JwtStrategy (token validation, user lookup)
+│   └── JwtAuthGuard (route protection)
+├── ChatModule (imports AuthModule)
+│   ├── ChatController (REST + SSE endpoints, JWT-protected)
+│   └── ChatService (conversations CRUD, message streaming, userId-scoped)
 ├── ModelsModule
 │   ├── ModelsController (GET /api/models)
 │   └── ModelsService (hardcoded model catalog)
@@ -117,6 +122,7 @@ The project uses the **MongoDB native driver** (not Mongoose). `DatabaseModule` 
 | Field       | Type     | Description                      |
 |-------------|----------|----------------------------------|
 | `_id`       | ObjectId | Primary key                      |
+| `userId`    | ObjectId | Owner (reference to users._id)   |
 | `title`     | string   | Display name (auto-set from first message) |
 | `model`     | string   | Default LLM model ID             |
 | `createdAt` | Date     | Creation timestamp               |
@@ -141,6 +147,8 @@ The project uses the **MongoDB native driver** (not Mongoose). `DatabaseModule` 
 Created programmatically in `DatabaseService.onModuleInit()`:
 - `messages(conversationId: 1, createdAt: 1)` -- optimizes message history queries sorted by time.
 - `messages(conversationId: 1)` -- optimizes message count and delete operations.
+- `conversations(userId: 1, updatedAt: -1)` -- optimizes user-scoped conversation listing.
+- `users(email: 1)` unique -- fast lookup by email, enforces uniqueness.
 
 ### API Endpoints
 
