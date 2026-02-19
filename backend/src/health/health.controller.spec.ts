@@ -38,7 +38,7 @@ describe('HealthController', () => {
   it('should return health status', async () => {
     const result = await controller.check();
     expect(result.status).toBe('ok');
-    expect(result.info.mongodb.status).toBe('up');
+    expect(result.info!.mongodb.status).toBe('up');
   });
 
   it('should call mongo health indicator', async () => {

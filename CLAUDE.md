@@ -1,10 +1,25 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code when working in this repository.
 
-## Project Overview
+## Quick Reference
 
-A full-stack chat application with an LLM-powered backend (via OpenRouter API) and a React frontend. Users can create conversations, send messages with file attachments, and receive streamed AI responses.
+| What | Where |
+|------|-------|
+| System architecture | `ARCHITECTURE.md` |
+| Security model & checklist | `docs/SECURITY.md` |
+| Frontend patterns | `docs/FRONTEND.md` |
+| UI/UX design system | `docs/DESIGN.md` |
+| Error handling & monitoring | `docs/RELIABILITY.md` |
+| Product vision & priorities | `docs/PRODUCT_SENSE.md` |
+| High-level roadmap | `docs/PLANS.md` |
+| Quality metrics | `docs/QUALITY_SCORE.md` |
+| Engineering principles | `docs/design-docs/core-beliefs.md` |
+| Task backlog | `docs/exec-plans/tech-debt-tracker.md` |
+| NestJS patterns | `docs/references/nestjs-patterns.md` |
+| MUI theme reference | `docs/references/mui-theme-reference.md` |
+| OpenRouter API | `docs/references/openrouter-api.md` |
+| DB schema | `docs/generated/db-schema.md` |
 
 ## Commands
 
@@ -15,67 +30,72 @@ npm run dev:backend      # Backend only (NestJS watch mode, port 3001)
 npm run dev:frontend     # Frontend only (Vite dev server, port 5173)
 ```
 
-### Testing
+### Validation
 ```bash
-npm test                           # Run all tests (backend + frontend)
-npm run test:backend               # Backend tests (vitest)
-npm run test:frontend              # Frontend tests (vitest + jsdom)
-cd backend && npx vitest run src/chat/chat.service.spec.ts  # Single backend test
-cd frontend && npx vitest run src/__tests__/ChatInput.test.tsx  # Single frontend test
+npm run lint             # ESLint backend + frontend
+npm run typecheck        # TypeScript check backend + frontend
+npm test                 # Run all tests (backend + frontend)
+npm run build            # Build both
+npm run validate         # All of the above in sequence
 ```
 
-### Build & Lint
+### Single-target
 ```bash
-npm run build                      # Build both
-cd backend && npm run lint         # ESLint backend
-cd frontend && npm run lint        # ESLint frontend
-cd backend && npm run format       # Prettier backend
+npm run test:backend               # Backend tests only
+npm run test:frontend              # Frontend tests only
+cd backend && npx vitest run src/chat/chat.service.spec.ts  # Single test
+cd frontend && npx vitest run src/__tests__/ChatInput.test.tsx  # Single test
 ```
 
-## Architecture
+## Claude Code Commands
 
-### Monorepo Structure
-- **Root `package.json`** — orchestrates both apps via `concurrently`
-- **`backend/`** — NestJS (TypeScript, SWC compiler)
-- **`frontend/`** — React 19 + Vite + MUI 7
+| Command | Purpose | When to Use |
+|---------|---------|-------------|
+| `/develop-feature` | Autonomous feature development | Pick next task, implement, test, PR |
+| `/develop-feature <ID>` | Develop specific task | Implement a specific task by ID |
+| `/validate` | Run full validation suite | Before creating a PR |
+| `/review-pr` | Self-review current branch | After implementation, before merge |
+| `/review-pr <PR#>` | Review a specific PR | Code review |
+| `/audit-service` | Codebase audit + metrics update | Every 3-5 features |
+| `/retrospective` | Workflow self-improvement | Every 5-10 features |
+| `/i18n-dev` | i18n development guidelines | When adding user-facing strings |
 
-### Backend (NestJS)
+## Conventions
 
-Two modules under `backend/src/`:
+### Code
+- **Backend tests:** `*.spec.ts` next to source files, Vitest + NestJS Testing
+- **Frontend tests:** `src/__tests__/*.test.tsx`, Vitest + jsdom + RTL
+- **i18n:** All user-facing strings use `t()` from react-i18next. 4 locales: en, ru, zh, es
+- **Validation:** DTOs with class-validator (backend), client-side validation (frontend)
+- **Styling:** MUI 7 components + theme tokens, no raw HTML or hardcoded colors
 
-- **ChatModule** (`chat/`) — core functionality: conversations CRUD, message sending with SSE streaming, file attachment handling
-- **ModelsModule** (`models/`) — serves a hardcoded list of available LLM models
+### Git
+- Branch naming: `feat/<kebab-case>`, `fix/<kebab-case>`, `chore/<kebab-case>`
+- Commit messages: descriptive, focused on "why"
+- Stage files explicitly — never use `git add .` or `git add -A`
+- PRs follow `.github/pull_request_template.md` format
 
-Key patterns:
-- LLM calls use the **OpenAI SDK** pointed at OpenRouter's base URL (`openrouter.apiKey`, `openrouter.baseUrl` from config)
-- Message streaming uses **Server-Sent Events (SSE)** — the controller passes the Express `Response` object directly to the service, which writes `data:` chunks and ends with `data: [DONE]`
-- File uploads go to `./uploads/` via Multer (max 5 files, 10MB each). Text/PDF content is extracted and appended to user messages for the LLM context
-- MongoDB via Mongoose with two collections: `Conversation` (title, model) and `Message` (conversationId, role, content, attachments)
-- Validation uses `class-validator` DTOs with a global `ValidationPipe({ whitelist: true, transform: true })`
-- Tests use **Vitest** with SWC (`unplugin-swc`), test files are `*.spec.ts`
+### Environment
+- Backend: `backend/.env` (see `backend/.env.example`) — `OPENROUTER_API_KEY` required
+- Frontend: `VITE_API_URL` (default `http://localhost:3001/api`)
 
-### Frontend (React + Vite)
+## Self-Improvement Loop
 
-- **State management**: custom hooks (`useConversations`, `useMessages`, `useModels`) — no external state library
-- **API layer**: `src/api/client.ts` — axios for REST, native `fetch` with `ReadableStream` for SSE streaming
-- **Components**: `Layout` (responsive sidebar/chat split), `Sidebar/` (conversation list), `Chat/` (message area, input, model selector, file attachments)
-- **UI framework**: MUI 7 with custom dark theme (`src/theme.ts`)
-- **Markdown rendering**: `react-markdown` + `react-syntax-highlighter` in MessageBubble
-- Tests use **Vitest + jsdom + React Testing Library**, test files are in `src/__tests__/`
+The autonomous development workflow improves itself over time:
 
-### Environment Variables
+```
+tech-debt-tracker.md → /develop-feature → /validate → /review-pr → PR
+                              ↑                                       |
+                              |                                       ↓
+                    /audit-service ← ← ← ← ← ← ← ← ← ← ←  merged PR
+                    (update metrics,                              |
+                     find new issues)                             ↓
+                              ↑                           /retrospective
+                              |                           (improve workflow)
+                              ← ← ← ← ← ← ← ← ← ← ← ← ← ← ←
+```
 
-Configured in `backend/.env` (see `backend/.env.example`):
-- `OPENROUTER_API_KEY` — required for LLM calls
-- `LLM_URL_KEY` — base URL override (defaults to OpenRouter)
-- `MONGODB_URI` — defaults to `mongodb://localhost:27017/simple-chat`
-- `PORT` — backend port (default 3001)
-- Frontend: `VITE_API_URL` — backend API base URL (default `http://localhost:3001/api`)
-
-## API Endpoints
-
-All under `/api`:
-- `GET/POST /conversations`, `PATCH/DELETE /conversations/:id`
-- `GET /conversations/:id/messages`, `POST /conversations/:id/messages` (SSE stream)
-- `POST /upload` (multipart form, field name: `files`)
-- `GET /models`
+**Cadence:**
+- `/develop-feature` — on demand (human triggers)
+- `/audit-service` — every 3-5 features completed
+- `/retrospective` — every 5-10 features, or when quality metrics trend down

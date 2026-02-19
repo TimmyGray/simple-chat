@@ -1,3 +1,4 @@
+import { IncomingMessage } from 'http';
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -29,10 +30,8 @@ import { CorrelationIdMiddleware } from './common/middleware/correlation-id.midd
             config.get<string>('NODE_ENV') !== 'production'
               ? { target: 'pino-pretty', options: { colorize: true } }
               : undefined,
-          customProps: (req: Record<string, unknown>) => ({
-            correlationId: (req as { headers: Record<string, string> }).headers[
-              'x-correlation-id'
-            ],
+          customProps: (req: IncomingMessage) => ({
+            correlationId: req.headers['x-correlation-id'],
           }),
         },
       }),
