@@ -148,30 +148,34 @@ $ARGUMENTS — Optional task ID from `docs/exec-plans/tech-debt-tracker.md`. If 
 
 After bookkeeping, check if any maintenance tasks are due and launch them automatically.
 
+> This phase assumes sequential execution — do not run multiple `/develop-feature` instances concurrently.
+
 1. Read `docs/exec-plans/maintenance-cadence.json`
-   - If the file does not exist, create it with all counters at 0 and today's date for all `last_runs`
-2. Increment all three counters by 1:
+   - If the file does not exist, create it with: `schema_version: 1`, all counters at 0, thresholds `{sweep: 3, audit: 5, retrospective: 10}`, empty `pending_runs: []`, today's date for all `last_runs`, and `last_updated` set to today
+2. **Recovery check**: if `pending_runs` is non-empty, these are maintenance tasks that were due but never launched (previous session crashed). Re-launch them now (skip to step 10) and clear `pending_runs` after launching
+3. Increment all three counters by 1:
    - `counters.features_since_last_sweep += 1`
    - `counters.features_since_last_audit += 1`
    - `counters.features_since_last_retrospective += 1`
-3. Update `last_updated` to today's date
-4. Determine which maintenance tasks are due:
+4. Update `last_updated` to today's date
+5. Determine which maintenance tasks are due:
    - **Sweep due** if `features_since_last_sweep >= thresholds.sweep_every_n_features`
    - **Audit due** if `features_since_last_audit >= thresholds.audit_every_n_features`
-   - **Doc-garden due** if audit is due (doc-garden always runs after audit, not independently)
+   - **Doc-garden due** if audit is due (doc-garden always runs after audit, not independently — it has no separate counter)
    - **Retrospective due** if `features_since_last_retrospective >= thresholds.retrospective_every_n_features`
-5. For each due task: reset its counter to 0 and set its `last_runs` date to today
-6. Write the updated JSON back to `docs/exec-plans/maintenance-cadence.json`
-7. Stage and commit the state file to main: `"chore: update maintenance cadence counters"`
-8. Push the commit to main
-9. **If any maintenance tasks are due**, report which ones and launch them as **parallel background Task subagents**:
-   - Use `run_in_background: true` for all subagents — do NOT wait for them to complete
-   - **Sweep subagent** (`general-purpose`): "Read `.claude/commands/sweep.md` and execute all instructions in that file against this codebase. You are running as an automated maintenance task triggered by the develop-feature workflow."
-   - **Audit + Doc-garden subagent** (`general-purpose`): "Read `.claude/commands/audit-service.md` and execute all instructions. When the audit is complete, read `.claude/commands/doc-garden.md` and execute those instructions too. You are running as an automated maintenance task triggered by the develop-feature workflow."
-   - **Retrospective subagent** (`general-purpose`): "Read `.claude/commands/retrospective.md` and execute all instructions in that file. You are running as an automated maintenance task triggered by the develop-feature workflow."
-   - Note: doc-garden is bundled with audit (sequential within one subagent) because doc-garden checks for staleness that audit may have just updated
-10. **If no maintenance tasks are due**, report the countdown:
-    - "No maintenance tasks due. Next: sweep in N features, audit in N features, retrospective in N features."
+6. For each due task: reset its counter to 0 and set its `last_runs` date to today
+7. Write the list of due tasks to `pending_runs` (e.g., `["sweep", "audit", "retrospective"]`)
+8. Write the updated JSON back to `docs/exec-plans/maintenance-cadence.json`
+9. Stage, commit, and push the state file to main: `"chore: update maintenance cadence counters"`
+10. **If any maintenance tasks are due** (or recovered from `pending_runs`), report which ones and launch them as **parallel background Task subagents**:
+    - Use `run_in_background: true` for all subagents — do NOT wait for them to complete
+    - **Sweep subagent** (`general-purpose`): "Read `.claude/commands/sweep.md` and execute all instructions in that file against this codebase. You are running as an automated maintenance task triggered by the develop-feature workflow."
+    - **Audit + Doc-garden subagent** (`general-purpose`): "Read `.claude/commands/audit-service.md` and execute all instructions. When the audit is complete, read `.claude/commands/doc-garden.md` and execute those instructions too. You are running as an automated maintenance task triggered by the develop-feature workflow."
+    - **Retrospective subagent** (`general-purpose`): "Read `.claude/commands/retrospective.md` and execute all instructions in that file. You are running as an automated maintenance task triggered by the develop-feature workflow."
+    - Note: doc-garden is bundled with audit (sequential within one subagent) because doc-garden checks for staleness that audit may have just updated
+11. After subagents are launched, clear `pending_runs` to `[]`, write the JSON, stage, commit, and push: `"chore: clear maintenance pending_runs"`
+12. **If no maintenance tasks are due**, report the countdown:
+    - "No maintenance tasks due. Next: sweep in N features, audit in N features, retrospective in N features (last run: DATE)."
     - Calculate N as `threshold - current_counter` for each task
 
 ## Important Rules

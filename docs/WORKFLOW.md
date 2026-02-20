@@ -28,10 +28,10 @@ tech-debt-tracker.md → /develop-feature → /validate → /review-pr → PR
 | `/validate` | Run full validation suite | Before creating a PR |
 | `/review-pr` | Multi-agent self-review | After implementation, before merge |
 | `/review-pr <PR#>` | Review a specific PR | Code review |
-| `/audit-service` | Codebase audit + metrics update | Every 3-5 features |
-| `/retrospective` | Workflow self-improvement | Every 5-10 features |
-| `/doc-garden` | Documentation freshness scan | After audits, before releases |
-| `/sweep` | Golden principles enforcement | Every 2-3 features, or on quality degradation |
+| `/audit-service` | Codebase audit + metrics update | Auto: every 5 features (or manual) |
+| `/retrospective` | Workflow self-improvement | Auto: every 10 features (or manual) |
+| `/doc-garden` | Documentation freshness scan | Auto: runs with audit (or manual) |
+| `/sweep` | Golden principles enforcement | Auto: every 3 features (or manual) |
 | `/i18n-dev` | i18n development guidelines | When adding user-facing strings |
 
 ## Cadence

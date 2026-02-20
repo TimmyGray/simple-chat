@@ -13,7 +13,8 @@ Verify all files referenced in `CLAUDE.md` Quick Reference table exist:
 ARCHITECTURE.md, docs/SECURITY.md, docs/FRONTEND.md, docs/DESIGN.md,
 docs/RELIABILITY.md, docs/PRODUCT_SENSE.md, docs/PLANS.md,
 docs/QUALITY_SCORE.md, docs/design-docs/core-beliefs.md,
-docs/exec-plans/tech-debt-tracker.md, docs/references/nestjs-patterns.md,
+docs/exec-plans/tech-debt-tracker.md, docs/exec-plans/maintenance-cadence.json,
+docs/references/nestjs-patterns.md,
 docs/references/mui-theme-reference.md, docs/references/openrouter-api.md,
 docs/generated/db-schema.md, docs/CONVENTIONS.md, docs/WORKFLOW.md
 ```
