@@ -39,10 +39,20 @@ tech-debt-tracker.md → /develop-feature → /validate → /review-pr → PR
 | Activity | Frequency | Trigger |
 |----------|-----------|---------|
 | `/develop-feature` | On demand | Human triggers |
-| `/sweep` | Every 2-3 features | After merges, quality drops |
-| `/doc-garden` | After every audit | Post-audit, pre-release |
-| `/audit-service` | Every 3-5 features | Feature milestone |
-| `/retrospective` | Every 5-10 features | Quality metrics trend down |
+| `/sweep` | Every 3 features | Auto: Phase 12 of develop-feature |
+| `/doc-garden` | After every audit | Auto: runs with audit in Phase 12 |
+| `/audit-service` | Every 5 features | Auto: Phase 12 of develop-feature |
+| `/retrospective` | Every 10 features | Auto: Phase 12 of develop-feature |
+
+## Maintenance Cadence State
+
+Maintenance cadence is tracked in `docs/exec-plans/maintenance-cadence.json`. This file:
+- Is updated by Phase 12 of `/develop-feature` after every feature merge
+- Contains counters (features since last run), thresholds (trigger points), and last-run dates
+- Is committed to git so state persists across sessions
+- Thresholds are tunable: edit the `thresholds` object to change trigger points
+
+When thresholds are met, Phase 12 launches maintenance tasks as parallel background subagents. Each subagent reads the corresponding `.claude/commands/*.md` file and executes independently, creating its own branch and PR.
 
 ## Principles
 

@@ -144,6 +144,36 @@ $ARGUMENTS — Optional task ID from `docs/exec-plans/tech-debt-tracker.md`. If 
 3. Stage bookkeeping files explicitly by name
 4. Commit bookkeeping changes directly to main and push
 
+### Phase 12: Maintenance Cadence Check
+
+After bookkeeping, check if any maintenance tasks are due and launch them automatically.
+
+1. Read `docs/exec-plans/maintenance-cadence.json`
+   - If the file does not exist, create it with all counters at 0 and today's date for all `last_runs`
+2. Increment all three counters by 1:
+   - `counters.features_since_last_sweep += 1`
+   - `counters.features_since_last_audit += 1`
+   - `counters.features_since_last_retrospective += 1`
+3. Update `last_updated` to today's date
+4. Determine which maintenance tasks are due:
+   - **Sweep due** if `features_since_last_sweep >= thresholds.sweep_every_n_features`
+   - **Audit due** if `features_since_last_audit >= thresholds.audit_every_n_features`
+   - **Doc-garden due** if audit is due (doc-garden always runs after audit, not independently)
+   - **Retrospective due** if `features_since_last_retrospective >= thresholds.retrospective_every_n_features`
+5. For each due task: reset its counter to 0 and set its `last_runs` date to today
+6. Write the updated JSON back to `docs/exec-plans/maintenance-cadence.json`
+7. Stage and commit the state file to main: `"chore: update maintenance cadence counters"`
+8. Push the commit to main
+9. **If any maintenance tasks are due**, report which ones and launch them as **parallel background Task subagents**:
+   - Use `run_in_background: true` for all subagents — do NOT wait for them to complete
+   - **Sweep subagent** (`general-purpose`): "Read `.claude/commands/sweep.md` and execute all instructions in that file against this codebase. You are running as an automated maintenance task triggered by the develop-feature workflow."
+   - **Audit + Doc-garden subagent** (`general-purpose`): "Read `.claude/commands/audit-service.md` and execute all instructions. When the audit is complete, read `.claude/commands/doc-garden.md` and execute those instructions too. You are running as an automated maintenance task triggered by the develop-feature workflow."
+   - **Retrospective subagent** (`general-purpose`): "Read `.claude/commands/retrospective.md` and execute all instructions in that file. You are running as an automated maintenance task triggered by the develop-feature workflow."
+   - Note: doc-garden is bundled with audit (sequential within one subagent) because doc-garden checks for staleness that audit may have just updated
+10. **If no maintenance tasks are due**, report the countdown:
+    - "No maintenance tasks due. Next: sweep in N features, audit in N features, retrospective in N features."
+    - Calculate N as `threshold - current_counter` for each task
+
 ## Important Rules
 - Never skip validation. Fix errors before creating the PR.
 - Stage files explicitly — never use `git add .` or `git add -A` (include generated docs from `docs/generated/` if updated)

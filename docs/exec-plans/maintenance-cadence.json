@@ -1,0 +1,19 @@
+{
+  "counters": {
+    "features_since_last_sweep": 1,
+    "features_since_last_audit": 1,
+    "features_since_last_retrospective": 1
+  },
+  "thresholds": {
+    "sweep_every_n_features": 3,
+    "audit_every_n_features": 5,
+    "retrospective_every_n_features": 10
+  },
+  "last_runs": {
+    "sweep": "2026-02-19",
+    "audit": "2026-02-19",
+    "doc_garden": "2026-02-19",
+    "retrospective": "2026-02-19"
+  },
+  "last_updated": "2026-02-21"
+}

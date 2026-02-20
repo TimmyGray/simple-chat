@@ -18,6 +18,7 @@ This file is the table of contents for Claude Code. It points to deeper sources 
 | Quality metrics | `docs/QUALITY_SCORE.md` |
 | Engineering principles | `docs/design-docs/core-beliefs.md` |
 | Task backlog | `docs/exec-plans/tech-debt-tracker.md` |
+| Maintenance cadence | `docs/exec-plans/maintenance-cadence.json` |
 | NestJS patterns | `docs/references/nestjs-patterns.md` |
 | MUI theme reference | `docs/references/mui-theme-reference.md` |
 | OpenRouter API | `docs/references/openrouter-api.md` |
@@ -38,10 +39,10 @@ npm test                 # Run all tests
 | `/develop-feature` | Pick next task, implement end-to-end, PR, merge |
 | `/validate` | Before creating a PR |
 | `/review-pr` | After implementation, before merge |
-| `/audit-service` | Every 3-5 features |
-| `/sweep` | Every 2-3 features, continuous quality |
-| `/doc-garden` | After audits, when docs seem stale |
-| `/retrospective` | Every 5-10 features |
+| `/audit-service` | Auto: every 5 features (or manual) |
+| `/sweep` | Auto: every 3 features (or manual) |
+| `/doc-garden` | Auto: runs with audit (or manual) |
+| `/retrospective` | Auto: every 10 features (or manual) |
 | `/i18n-dev` | When adding user-facing strings |
 
 ## Key Rules (Non-Negotiable)
