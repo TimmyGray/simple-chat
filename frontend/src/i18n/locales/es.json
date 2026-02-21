@@ -26,7 +26,8 @@
     "sendTooltip": "Enviar (Enter)",
     "noConversation": "Ninguna conversación seleccionada",
     "noConversationHint": "Inicia un nuevo chat o selecciona uno existente",
-    "attachFiles": "Adjuntar archivos"
+    "attachFiles": "Adjuntar archivos",
+    "charCount": "{{current}} / {{max}}"
   },
   "dialog": {
     "deleteTitle": "Eliminar conversación",

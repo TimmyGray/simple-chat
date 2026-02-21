@@ -4,6 +4,8 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  MaxLength,
+  MinLength,
   ValidateNested,
 } from 'class-validator';
 
@@ -23,6 +25,8 @@ export class AttachmentDto {
 
 export class SendMessageDto {
   @IsString()
+  @MinLength(1)
+  @MaxLength(10000)
   content: string;
 
   @IsOptional()

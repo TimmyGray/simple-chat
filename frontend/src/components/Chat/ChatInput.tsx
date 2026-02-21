@@ -8,6 +8,8 @@ import ModelSelector from './ModelSelector';
 import FileAttachment from './FileAttachment';
 import * as api from '../../api/client';
 
+const MAX_MESSAGE_LENGTH = 10_000;
+
 interface ChatInputProps {
   models: ModelInfo[];
   selectedModel: string;
@@ -30,14 +32,16 @@ export default function ChatInput({
   const [focused, setFocused] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
+  const overLimit = input.length > MAX_MESSAGE_LENGTH;
+
   const handleSend = useCallback(() => {
     const text = input.trim();
-    if (!text && attachments.length === 0) return;
+    if ((!text && attachments.length === 0) || overLimit) return;
 
     onSend(text || t('chat.filesAttached'), attachments);
     setInput('');
     setAttachments([]);
-  }, [input, attachments, onSend, t]);
+  }, [input, attachments, onSend, t, overLimit]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -63,7 +67,8 @@ export default function ChatInput({
     setAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const canSend = input.trim().length > 0 || attachments.length > 0;
+  const showCounter = input.length >= MAX_MESSAGE_LENGTH * 0.9;
+  const canSend = (input.trim().length > 0 || attachments.length > 0) && !overLimit;
 
   return (
     <Box sx={{ p: 2, pb: 1.5 }}>
@@ -144,6 +149,21 @@ export default function ChatInput({
         {uploadError && (
           <Typography variant="caption" color="error" sx={{ px: 2, pb: 0.5 }}>
             {uploadError}
+          </Typography>
+        )}
+
+        {/* Character counter */}
+        {showCounter && (
+          <Typography
+            variant="caption"
+            sx={{
+              px: 2,
+              pb: 0.5,
+              textAlign: 'right',
+              color: overLimit ? 'error.main' : 'text.secondary',
+            }}
+          >
+            {t('chat.charCount', { current: input.length, max: MAX_MESSAGE_LENGTH })}
           </Typography>
         )}
 

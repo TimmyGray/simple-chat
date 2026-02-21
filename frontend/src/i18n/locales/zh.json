@@ -26,7 +26,8 @@
     "sendTooltip": "发送 (Enter)",
     "noConversation": "未选择对话",
     "noConversationHint": "开始新聊天或选择已有对话",
-    "attachFiles": "附加文件"
+    "attachFiles": "附加文件",
+    "charCount": "{{current}} / {{max}}"
   },
   "dialog": {
     "deleteTitle": "删除对话",
