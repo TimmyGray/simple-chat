@@ -136,6 +136,7 @@ The project uses the **MongoDB native driver** (not Mongoose). `DatabaseModule` 
 | `role`           | `'user'` \| `'assistant'`      | Message author                 |
 | `content`        | string                         | Message text                   |
 | `model`          | string (optional)              | Model used (assistant messages)|
+| `idempotencyKey` | string (optional)              | Client UUID for dedup (user messages) |
 | `attachments`    | `AttachmentDoc[]`              | File metadata array            |
 | `createdAt`      | Date                           | Creation timestamp             |
 | `updatedAt`      | Date                           | Last modification timestamp    |
@@ -147,6 +148,7 @@ The project uses the **MongoDB native driver** (not Mongoose). `DatabaseModule` 
 Created programmatically in `DatabaseService.onModuleInit()`:
 - `messages(conversationId: 1, createdAt: 1)` -- optimizes message history queries sorted by time.
 - `messages(conversationId: 1)` -- optimizes message count and delete operations.
+- `messages(idempotencyKey: 1)` unique, sparse -- prevents duplicate message creation.
 - `conversations(userId: 1, updatedAt: -1)` -- optimizes user-scoped conversation listing.
 - `users(email: 1)` unique -- fast lookup by email, enforces uniqueness.
 

@@ -22,6 +22,10 @@ export class DatabaseService implements OnModuleInit {
   private async ensureIndexes() {
     await this.messages().createIndex({ conversationId: 1, createdAt: 1 });
     await this.messages().createIndex({ conversationId: 1 });
+    await this.messages().createIndex(
+      { idempotencyKey: 1 },
+      { unique: true, sparse: true },
+    );
     await this.conversations().createIndex({ userId: 1, updatedAt: -1 });
     await this.users().createIndex({ email: 1 }, { unique: true });
   }

@@ -118,7 +118,7 @@ describe('ChatController', () => {
   describe('sendMessage', () => {
     it('should set SSE headers, consume stream events, and end response', async () => {
       const dto = { content: 'Hello' };
-      const mockReq = { on: vi.fn() } as any;
+      const mockReq = { on: vi.fn(), headers: {} } as any;
       const written: string[] = [];
       const mockRes = {
         setHeader: vi.fn(),
@@ -169,7 +169,7 @@ describe('ChatController', () => {
 
     it('should pass AbortSignal to service (not req/res)', async () => {
       const dto = { content: 'Hello' };
-      const mockReq = { on: vi.fn() } as any;
+      const mockReq = { on: vi.fn(), headers: {} } as any;
       const mockRes = {
         setHeader: vi.fn(),
         write: vi.fn(),
@@ -192,18 +192,19 @@ describe('ChatController', () => {
         mockRes,
       );
 
-      // Service should receive (id, dto, userId, AbortSignal) — NOT req/res
+      // Service should receive (id, dto, userId, AbortSignal, idempotencyKey) — NOT req/res
       expect(chatService.sendMessageAndStream).toHaveBeenCalledWith(
         '507f1f77bcf86cd799439011',
         dto,
         mockUserId,
         expect.any(AbortSignal),
+        undefined,
       );
     });
 
     it('should write error event from stream to SSE format', async () => {
       const dto = { content: 'Hello' };
-      const mockReq = { on: vi.fn() } as any;
+      const mockReq = { on: vi.fn(), headers: {} } as any;
       const written: string[] = [];
       const mockRes = {
         setHeader: vi.fn(),
@@ -228,6 +229,43 @@ describe('ChatController', () => {
       );
 
       expect(written).toContain('data: {"error":"LLM failed"}\n\n');
+    });
+
+    it('should extract Idempotency-Key header and pass to service', async () => {
+      const dto = { content: 'Hello' };
+      const mockReq = {
+        on: vi.fn(),
+        headers: { 'idempotency-key': 'test-uuid-123' },
+      } as any;
+      const mockRes = {
+        setHeader: vi.fn(),
+        write: vi.fn(),
+        end: vi.fn(),
+        writableEnded: false,
+      } as any;
+
+      async function* emptyGenerator() {
+        yield { type: 'done' as const };
+      }
+      chatService.sendMessageAndStream = vi
+        .fn()
+        .mockReturnValue(emptyGenerator());
+
+      await controller.sendMessage(
+        mockUser,
+        '507f1f77bcf86cd799439011',
+        dto,
+        mockReq,
+        mockRes,
+      );
+
+      expect(chatService.sendMessageAndStream).toHaveBeenCalledWith(
+        '507f1f77bcf86cd799439011',
+        dto,
+        mockUserId,
+        expect.any(AbortSignal),
+        'test-uuid-123',
+      );
     });
   });
 });

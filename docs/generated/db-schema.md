@@ -29,6 +29,7 @@
 | role | enum | yes | "user" or "assistant" |
 | content | string | yes | Message text content |
 | model | string | no | LLM model used (assistant messages only) |
+| idempotencyKey | string | no | Client-generated UUID to prevent duplicate message creation (user messages only) |
 | attachments | AttachmentDoc[] | yes | File attachments (can be empty array) |
 | createdAt | Date | yes | Creation timestamp |
 | updatedAt | Date | yes | Last update timestamp |
@@ -36,6 +37,7 @@
 **Indexes:**
 - `{ conversationId: 1, createdAt: 1 }` — query messages by conversation, sorted by time
 - `{ conversationId: 1 }` — cascade deletes
+- `{ idempotencyKey: 1 }` (unique, sparse) — prevents duplicate message creation
 
 **Source:** `backend/src/chat/interfaces/message.interface.ts`
 

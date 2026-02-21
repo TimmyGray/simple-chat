@@ -22,6 +22,7 @@ export interface MessageDoc {
   role: 'user' | 'assistant';
   content: string;
   model?: string;
+  idempotencyKey?: string;
   attachments: AttachmentDoc[];
   createdAt: Date;
   updatedAt: Date;
