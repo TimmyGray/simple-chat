@@ -31,6 +31,9 @@
 | model | string | no | LLM model used (assistant messages only) |
 | idempotencyKey | string | no | Client-generated UUID to prevent duplicate message creation (user messages only) |
 | attachments | AttachmentDoc[] | yes | File attachments (can be empty array) |
+| promptTokens | number | no | LLM prompt tokens consumed (assistant messages only) |
+| completionTokens | number | no | LLM completion tokens consumed (assistant messages only) |
+| totalTokens | number | no | Total tokens consumed (assistant messages only) |
 | createdAt | Date | yes | Creation timestamp |
 | updatedAt | Date | yes | Last update timestamp |
 
@@ -59,6 +62,9 @@
 | _id | ObjectId | auto | Primary key |
 | email | string | yes | User email (unique) |
 | password | string | yes | bcrypt-hashed password |
+| totalTokensUsed | number | no | Cumulative total tokens consumed (for billing) |
+| totalPromptTokens | number | no | Cumulative prompt tokens consumed |
+| totalCompletionTokens | number | no | Cumulative completion tokens consumed |
 | createdAt | Date | yes | Creation timestamp |
 | updatedAt | Date | yes | Last update timestamp |
 

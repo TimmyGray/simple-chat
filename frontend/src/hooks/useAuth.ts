@@ -88,7 +88,16 @@ export function useAuth() {
     setUser(null);
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    try {
+      const profile = await api.getProfile();
+      setUser(profile);
+    } catch {
+      // Silently ignore refresh failures — user stays with stale data
+    }
+  }, []);
+
   const clearError = useCallback(() => setError(null), []);
 
-  return { user, loading, error, clearError, login, register, logout };
+  return { user, loading, error, clearError, login, register, logout, refreshUser };
 }

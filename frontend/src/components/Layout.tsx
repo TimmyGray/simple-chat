@@ -20,6 +20,7 @@ interface LayoutProps {
   selectedConversation: Conversation | null;
   selectedModel: string;
   userEmail?: string;
+  tokenUsage?: number;
   onSelectConversation: (id: string) => void;
   onNewChat: () => void;
   onDeleteConversation: (id: string) => void;
@@ -35,6 +36,7 @@ export default function Layout({
   selectedConversation,
   selectedModel,
   userEmail,
+  tokenUsage,
   onSelectConversation,
   onNewChat,
   onDeleteConversation,
@@ -65,6 +67,7 @@ export default function Layout({
       loading={conversationsLoading}
       selectedId={selectedConversation?._id || null}
       userEmail={userEmail}
+      tokenUsage={tokenUsage}
       onSelect={handleSelectConversation}
       onNewChat={handleNewChat}
       onDelete={onDeleteConversation}

@@ -16,6 +16,12 @@ export interface AttachmentDoc {
   fileSize: number;
 }
 
+export interface TokenUsage {
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+}
+
 export interface MessageDoc {
   _id?: ObjectId;
   conversationId: ObjectId;
@@ -24,6 +30,9 @@ export interface MessageDoc {
   model?: string;
   idempotencyKey?: string;
   attachments: AttachmentDoc[];
+  promptTokens?: number;
+  completionTokens?: number;
+  totalTokens?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -32,6 +41,9 @@ export interface UserDoc {
   _id?: ObjectId;
   email: string;
   password: string;
+  totalTokensUsed: number;
+  totalPromptTokens: number;
+  totalCompletionTokens: number;
   createdAt: Date;
   updatedAt: Date;
 }

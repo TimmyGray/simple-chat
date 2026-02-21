@@ -8,11 +8,22 @@ import ConversationItem from './ConversationItem';
 import ConfirmDialog from '../common/ConfirmDialog';
 import LanguageSwitcher from '../common/LanguageSwitcher';
 
+function formatTokenCount(tokens: number): string {
+  if (tokens >= 1_000_000) {
+    return `${(tokens / 1_000_000).toFixed(1)}M`;
+  }
+  if (tokens >= 1_000) {
+    return `${(tokens / 1_000).toFixed(1)}K`;
+  }
+  return String(tokens);
+}
+
 interface SidebarProps {
   conversations: Conversation[];
   loading: boolean;
   selectedId: string | null;
   userEmail?: string;
+  tokenUsage?: number;
   onSelect: (id: string) => void;
   onNewChat: () => void;
   onDelete: (id: string) => void;
@@ -24,6 +35,7 @@ export default function Sidebar({
   loading,
   selectedId,
   userEmail,
+  tokenUsage,
   onSelect,
   onNewChat,
   onDelete,
@@ -83,32 +95,42 @@ export default function Sidebar({
       {userEmail && onLogout && (
         <>
           <Divider sx={{ my: 1 }} />
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              px: 1,
-            }}
-          >
-            <Typography
-              variant="caption"
-              color="text.secondary"
+          <Box sx={{ px: 1 }}>
+            <Box
               sx={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                flex: 1,
-                mr: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
               }}
             >
-              {userEmail}
-            </Typography>
-            <Tooltip title={t('auth.logout')}>
-              <IconButton size="small" onClick={onLogout}>
-                <LogoutIcon sx={{ fontSize: 18 }} />
-              </IconButton>
-            </Tooltip>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  flex: 1,
+                  mr: 1,
+                }}
+              >
+                {userEmail}
+              </Typography>
+              <Tooltip title={t('auth.logout')}>
+                <IconButton size="small" onClick={onLogout}>
+                  <LogoutIcon sx={{ fontSize: 18 }} />
+                </IconButton>
+              </Tooltip>
+            </Box>
+            {tokenUsage != null && tokenUsage > 0 && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ display: 'block', mt: 0.5 }}
+              >
+                {t('sidebar.tokensUsed', { tokens: formatTokenCount(tokenUsage) })}
+              </Typography>
+            )}
           </Box>
         </>
       )}

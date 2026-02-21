@@ -9,7 +9,15 @@ import { useModels } from './hooks/useModels';
 import Layout from './components/Layout';
 import AuthPage from './components/Auth/AuthPage';
 
-function ChatApp({ userEmail, onLogout }: { userEmail: string; onLogout: () => void }) {
+import type { User } from './types';
+
+interface ChatAppProps {
+  user: User;
+  onLogout: () => void;
+  onRefreshUser: () => void;
+}
+
+function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps) {
   const { t } = useTranslation();
   const { conversations, loading: convsLoading, error: convsError, clearError: clearConvsError, refresh, create, remove } = useConversations();
   const { models, error: modelsError, clearError: clearModelsError } = useModels();
@@ -62,12 +70,13 @@ function ChatApp({ userEmail, onLogout }: { userEmail: string; onLogout: () => v
         models={models}
         selectedConversation={selectedConversation}
         selectedModel={selectedModel}
-        userEmail={userEmail}
+        userEmail={user.email}
+        tokenUsage={user.totalTokensUsed}
         onSelectConversation={setSelectedId}
         onNewChat={handleNewChat}
         onDeleteConversation={handleDelete}
         onModelChange={setSelectedModel}
-        onConversationUpdate={refresh}
+        onConversationUpdate={() => { refresh(); onRefreshUser(); }}
         onLogout={onLogout}
       />
       <Snackbar
@@ -85,7 +94,7 @@ function ChatApp({ userEmail, onLogout }: { userEmail: string; onLogout: () => v
 }
 
 export default function App() {
-  const { user, loading: authLoading, error: authError, clearError: clearAuthError, login, register, logout } = useAuth();
+  const { user, loading: authLoading, error: authError, clearError: clearAuthError, login, register, logout, refreshUser } = useAuth();
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
   const handleSwitchMode = useCallback(() => {
@@ -121,7 +130,7 @@ export default function App() {
             <CircularProgress />
           </Box>
         ) : user ? (
-          <ChatApp userEmail={user.email} onLogout={logout} />
+          <ChatApp user={user} onLogout={logout} onRefreshUser={refreshUser} />
         ) : (
           <AuthPage
             mode={authMode}

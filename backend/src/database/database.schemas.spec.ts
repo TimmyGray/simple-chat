@@ -59,6 +59,16 @@ describe('Database Schemas', () => {
       expect(schema.properties.model).toBeDefined();
     });
 
+    it('should allow optional token usage fields', () => {
+      const schema = messagesSchema.$jsonSchema;
+      expect(schema.required).not.toContain('promptTokens');
+      expect(schema.required).not.toContain('completionTokens');
+      expect(schema.required).not.toContain('totalTokens');
+      expect(schema.properties.promptTokens).toBeDefined();
+      expect(schema.properties.completionTokens).toBeDefined();
+      expect(schema.properties.totalTokens).toBeDefined();
+    });
+
     it('should define attachment sub-schema with required fields', () => {
       const attachmentSchema =
         messagesSchema.$jsonSchema.properties.attachments.items;
@@ -84,6 +94,16 @@ describe('Database Schemas', () => {
         'createdAt',
         'updatedAt',
       ]);
+    });
+
+    it('should allow optional token usage fields', () => {
+      const schema = usersSchema.$jsonSchema;
+      expect(schema.required).not.toContain('totalTokensUsed');
+      expect(schema.required).not.toContain('totalPromptTokens');
+      expect(schema.required).not.toContain('totalCompletionTokens');
+      expect(schema.properties.totalTokensUsed).toBeDefined();
+      expect(schema.properties.totalPromptTokens).toBeDefined();
+      expect(schema.properties.totalCompletionTokens).toBeDefined();
     });
 
     it('should disallow additional properties', () => {

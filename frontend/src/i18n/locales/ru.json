@@ -18,7 +18,8 @@
   "sidebar": {
     "title": "Simple Chat",
     "newChat": "Новый чат",
-    "noConversations": "Нет диалогов"
+    "noConversations": "Нет диалогов",
+    "tokensUsed": "Токенов использовано: {{tokens}}"
   },
   "chat": {
     "placeholder": "Введите сообщение...",

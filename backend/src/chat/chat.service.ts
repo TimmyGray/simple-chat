@@ -12,6 +12,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { PDFParse } from 'pdf-parse';
 import { DatabaseService } from '../database/database.service';
+import type { TokenUsage } from '../types/documents';
 import { ConversationDoc } from './interfaces/conversation.interface';
 import { MessageDoc } from './interfaces/message.interface';
 import { StreamEvent } from './interfaces/stream-event.interface';
@@ -206,6 +207,7 @@ export class ChatService {
     const llmMessages = await this.buildLlmMessages(messages);
 
     let fullContent = '';
+    let usage: TokenUsage | undefined;
 
     try {
       this.logger.log(
@@ -215,6 +217,7 @@ export class ChatService {
         model,
         messages: llmMessages,
         stream: true,
+        stream_options: { include_usage: true },
       });
 
       for await (const chunk of stream) {
@@ -231,6 +234,15 @@ export class ChatService {
           fullContent += content;
           yield { type: 'content', content };
         }
+
+        // Extract token usage from the final chunk
+        if (chunk.usage) {
+          usage = {
+            promptTokens: chunk.usage.prompt_tokens,
+            completionTokens: chunk.usage.completion_tokens,
+            totalTokens: chunk.usage.total_tokens,
+          };
+        }
       }
 
       // Save assistant message if we got any content
@@ -242,15 +254,39 @@ export class ChatService {
           content: fullContent,
           model,
           attachments: [],
+          ...(usage
+            ? {
+                promptTokens: usage.promptTokens,
+                completionTokens: usage.completionTokens,
+                totalTokens: usage.totalTokens,
+              }
+            : {}),
           createdAt: assistantNow,
           updatedAt: assistantNow,
         });
       }
 
+      // Update user cumulative token usage
+      if (usage) {
+        await this.databaseService.users().updateOne(
+          { _id: userId },
+          {
+            $inc: {
+              totalTokensUsed: usage.totalTokens,
+              totalPromptTokens: usage.promptTokens,
+              totalCompletionTokens: usage.completionTokens,
+            },
+          },
+        );
+        this.logger.debug(
+          `Token usage for conversation ${conversationId}: prompt=${usage.promptTokens}, completion=${usage.completionTokens}, total=${usage.totalTokens}`,
+        );
+      }
+
       this.logger.log(
         `Stream complete for conversation ${conversationId}: ${fullContent.length} chars`,
       );
-      yield { type: 'done' };
+      yield { type: 'done', usage };
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';

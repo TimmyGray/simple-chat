@@ -9,7 +9,13 @@ describe('ChatController', () => {
   let chatService: any;
 
   const mockUserId = new ObjectId('607f1f77bcf86cd799439099');
-  const mockUser = { _id: mockUserId, email: 'test@example.com' };
+  const mockUser = {
+    _id: mockUserId,
+    email: 'test@example.com',
+    totalTokensUsed: 0,
+    totalPromptTokens: 0,
+    totalCompletionTokens: 0,
+  };
 
   const mockConversation = {
     _id: '507f1f77bcf86cd799439011',
@@ -165,6 +171,46 @@ describe('ChatController', () => {
 
       // Verify response ended
       expect(mockRes.end).toHaveBeenCalled();
+    });
+
+    it('should send usage event before DONE when usage data is present', async () => {
+      const dto = { content: 'Hello' };
+      const mockReq = { on: vi.fn(), headers: {} } as any;
+      const written: string[] = [];
+      const mockRes = {
+        setHeader: vi.fn(),
+        write: vi.fn((data: string) => written.push(data)),
+        end: vi.fn(),
+        writableEnded: false,
+      } as any;
+
+      async function* mockGenerator() {
+        yield { type: 'content' as const, content: 'Hi' };
+        yield {
+          type: 'done' as const,
+          usage: { promptTokens: 10, completionTokens: 5, totalTokens: 15 },
+        };
+      }
+      chatService.sendMessageAndStream = vi
+        .fn()
+        .mockReturnValue(mockGenerator());
+
+      await controller.sendMessage(
+        mockUser,
+        '507f1f77bcf86cd799439011',
+        dto,
+        mockReq,
+        mockRes,
+      );
+
+      // Usage event should appear before [DONE]
+      const usageIdx = written.findIndex((w) => w.includes('"usage"'));
+      const doneIdx = written.findIndex((w) => w === 'data: [DONE]\n\n');
+      expect(usageIdx).toBeGreaterThan(-1);
+      expect(doneIdx).toBeGreaterThan(usageIdx);
+      expect(written[usageIdx]).toBe(
+        'data: {"usage":{"promptTokens":10,"completionTokens":5,"totalTokens":15}}\n\n',
+      );
     });
 
     it('should pass AbortSignal to service (not req/res)', async () => {
