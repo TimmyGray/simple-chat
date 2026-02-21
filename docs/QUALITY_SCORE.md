@@ -1,14 +1,14 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-21 (sweep #4)
+> Last updated: 2026-02-21 (retrospective #2)
 
 ## Test Summary
 
 | Area | Test Files | Tests | Pass Rate |
 |------|-----------|-------|-----------|
-| Backend | 12 | 95 | 100% |
+| Backend | 12 | 100 | 100% |
 | Frontend | 7 | 37 | 100% |
-| **Total** | **19** | **132** | **100%** |
+| **Total** | **19** | **137** | **100%** |
 
 ## Lint Status
 
@@ -50,35 +50,34 @@
 ## Tech Debt
 - Critical: 0 todo, 4 done (JWT authentication completed)
 - High: 0 todo, 7 done — all high-priority items completed
-- Medium: 25 todo, 6 done (B-M5, B-M6, B-M7 completed since last sweep)
+- Medium: 24 todo, 7 done (F-M23 fixed in retrospective #2)
 - Low: 12 todo, 1 done
-- Features: 9 todo, 1 done
+- Features: 8 todo, 2 done (FEAT-6 completed)
 - Total tracked: 65 (see `docs/exec-plans/tech-debt-tracker.md`)
 
-## New Findings (Sweep #4)
-- Backend tests: 90 -> 95 (+5 from idempotency/pool-options specs, PRs #26-#27)
-- Total tests now 132 (target: 100+ sustained)
-- B-M5, B-M6, B-M7 completed since last sweep — medium done count: 3 -> 6
-- chat.service.ts grew from 337 -> 354 lines (still tracked as B-M10)
-- 5 frontend functions exceed 50-line limit (React components/hooks, tracked as F-L2)
-- No new lint, type, or build errors
-- No console.log/warn/error found in source (clean)
-- No TODO/FIXME/HACK comments in source (clean)
-- No dangerouslySetInnerHTML usage (clean)
-- No hardcoded secrets found in source files
-- i18n: all 4 locales in sync (44 keys each), no hardcoded user-facing strings detected
-- All cross-module imports follow approved patterns (chat→auth for guards/decorators)
-- All URLs/ports are in config files or .env defaults (not hardcoded in business logic)
-- No new auto-fixable violations found (codebase is clean)
+## Retrospective #2 Findings
+- Backend tests: 95 -> 100 (+5 from FEAT-6 token usage specs)
+- Total tests now 137 (target: 100+ sustained)
+- FEAT-6 (Token Usage & Cost Tracking) completed (PR #28)
+- F-M23 (hardcoded "Error:" prefix) fixed — now uses i18n key `errors.streamErrorPrefix`
+- chat.service.ts grew from 354 -> 390 lines (tracked as B-M10, increasingly urgent)
+- i18n: all 4 locales in sync (47 keys each, +1 streamErrorPrefix)
+- New ESLint rules promoted:
+  - `window.alert()` ban via `no-restricted-syntax` AST selector (existing usages have eslint-disable with F-M21 task ID)
+  - `no-restricted-globals` for bare `alert()` calls
+- Conventions updated: rules 6 (no window.alert) and 7 (no hardcoded user-facing strings) added
 - Existing tracked violations confirmed still present:
-  - chat.service.ts at 354 lines (tracked as B-M10)
-  - window.alert() in FileAttachment.tsx (tracked as F-M21)
+  - chat.service.ts at 390 lines (tracked as B-M10)
+  - window.alert() in FileAttachment.tsx (tracked as F-M21, now caught by ESLint)
   - Hardcoded rgba/gradient colors: ~27 occurrences across 6 files (tracked as F-M13)
-  - Hardcoded "Error:" prefix in useMessages.ts (tracked as F-M23)
-  - `any` types in test files only (12 occurrences, acceptable per conventions)
+  - `any` types in test files only (acceptable per conventions)
+
+## Previous Findings (Sweep #4)
+- B-M5, B-M6, B-M7 completed since last sweep -- medium done count: 3 -> 6
+- 5 frontend functions exceed 50-line limit (React components/hooks, tracked as F-L2)
 
 ## Targets
-- Test count: 100+ (achieved — currently 132)
+- Test count: 100+ (achieved — currently 137)
 - Coverage: 80%+ (currently 60%/50% thresholds)
 - Lint errors: 0 (achieved)
 - Type errors: 0 (achieved)

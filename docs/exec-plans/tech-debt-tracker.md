@@ -45,7 +45,7 @@ Each task has:
 | B-M6 | Add idempotency key support for message creation | backend | 0.5d | done | PR #26 merged. Sparse unique index + Idempotency-Key header. |
 | B-M7 | Configure MongoDB connection pool options | backend | 0.25d | done | PR #27 merged. minPoolSize=2, maxPoolSize=10 defaults. |
 | B-M8 | Fix ESLint errors in test files (32 errors) | backend | 1d | todo | `any` types in test mocks (lint passes clean — may be warnings only) |
-| B-M10 | Split chat.service.ts (354 lines, exceeds 300-line limit) | backend | 1d | todo | Extract streaming + file-extraction helpers |
+| B-M10 | Split chat.service.ts (390 lines, exceeds 300-line limit) | backend | 1d | todo | Extract streaming + file-extraction helpers. Grew 354->390 with FEAT-6 token tracking. |
 | B-M9 | Add coverage tool, target 80%+ | backend | 0.5d | done | @vitest/coverage-v8 configured, thresholds: 60%/50% |
 | F-M1 | Add list virtualization (react-window) | frontend | 1d | todo | Long conversations cause jank |
 | F-M2 | Throttle scroll-to-bottom during streaming | frontend | 0.25d | todo | Scroll fires on every chunk |
@@ -67,9 +67,9 @@ Each task has:
 | F-M18 | Add hook tests (useMessages streaming) | frontend | 1d | todo | Only component tests exist |
 | F-M19 | Add error scenario tests | frontend | 1d | todo | No failure path tests |
 | F-M20 | Add accessibility tests (axe-core) | frontend | 1d | todo | No a11y testing |
-| F-M21 | Replace window.alert() with Snackbar in FileAttachment | frontend | 0.25d | todo | UX anti-pattern, 2 occurrences (lines 41, 68) |
+| F-M21 | Replace window.alert() with Snackbar in FileAttachment | frontend | 0.25d | todo | UX anti-pattern, 2 occurrences. Now caught by ESLint (eslint-disable with task ID). |
 | F-M22 | Add aria-live to TypingIndicator | frontend | 0.1d | todo | Missing role="status" aria-live="polite" |
-| F-M23 | Localize "Error:" prefix in useMessages error display | frontend | 0.1d | todo | Hardcoded English prefix (line 90) |
+| F-M23 | Localize "Error:" prefix in useMessages error display | frontend | 0.1d | done | Fixed in retrospective #2: uses t('errors.streamErrorPrefix') |
 
 ## Low
 
@@ -144,3 +144,4 @@ Each task has:
 | B-M6 | Add idempotency key support for message creation (PR #26) | 2026-02-21 |
 | B-M7 | Configure MongoDB connection pool options (PR #27) | 2026-02-21 |
 | FEAT-6 | Token Usage & Cost Tracking (PR #28) | 2026-02-21 |
+| F-M23 | Localize "Error:" prefix in useMessages (retrospective #2) | 2026-02-21 |

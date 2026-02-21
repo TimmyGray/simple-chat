@@ -56,6 +56,7 @@
     "fileTooLarge": "\"{{name}}\" excede el límite de 10 MB.",
     "unsupportedType": "\"{{name}}\" tiene un tipo de archivo no compatible ({{type}}).",
     "fetchModels": "Error al obtener los modelos",
-    "filesNotAttached": "Algunos archivos no se adjuntaron:"
+    "filesNotAttached": "Algunos archivos no se adjuntaron:",
+    "streamErrorPrefix": "Error: {{message}}"
   }
 }

@@ -38,6 +38,8 @@ These rules are enforced by ESLint custom rules with remediation messages and st
 3. **No raw HTML in React:** Use MUI components (`Button`, `TextField`, `Select`, etc.)
 4. **No hardcoded colors:** Use `theme.palette.*` tokens
 5. **Dependency direction:** Controllers → Services → Database. Never the reverse.
+6. **No window.alert():** Use MUI `Snackbar` + `Alert` for user notifications. ESLint catches both `window.alert()` and bare `alert()`.
+7. **No hardcoded user-facing strings:** All strings must use `t()` from react-i18next. Error messages, prefixes, and labels included.
 
 ## Environment
 

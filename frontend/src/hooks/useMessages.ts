@@ -90,7 +90,7 @@ export function useMessages() {
               _id: crypto.randomUUID(),
               conversationId,
               role: 'assistant',
-              content: `Error: ${streamError}`,
+              content: tRef.current('errors.streamErrorPrefix', { message: streamError }),
               attachments: [],
               createdAt: new Date().toISOString(),
             };

@@ -43,6 +43,17 @@ export default defineConfig([
           selector: 'Literal[value=/^#[0-9a-fA-F]{3,8}$/]',
           message: 'Hardcoded hex color detected. Use MUI theme tokens instead (e.g., theme.palette.primary.main). Define custom colors in frontend/src/theme.ts. See docs/references/mui-theme-reference.md.',
         },
+        {
+          selector: 'CallExpression[callee.object.name="window"][callee.property.name="alert"]',
+          message: 'window.alert() is a UX anti-pattern. Use MUI Snackbar or a dialog component instead. Import { Snackbar, Alert } from "@mui/material". See tracked task F-M21.',
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'alert',
+          message: 'window.alert() is a UX anti-pattern. Use MUI Snackbar or a dialog component instead. Import { Snackbar, Alert } from "@mui/material". See tracked task F-M21.',
+        },
       ],
     },
   },
