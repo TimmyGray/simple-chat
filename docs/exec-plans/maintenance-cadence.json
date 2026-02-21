@@ -1,19 +1,19 @@
 {
   "schema_version": 1,
   "counters": {
-    "features_since_last_sweep": 1,
-    "features_since_last_audit": 4,
-    "features_since_last_retrospective": 4
+    "features_since_last_sweep": 2,
+    "features_since_last_audit": 0,
+    "features_since_last_retrospective": 5
   },
   "thresholds": {
     "sweep_every_n_features": 3,
     "audit_every_n_features": 5,
     "retrospective_every_n_features": 10
   },
-  "pending_runs": [],
+  "pending_runs": ["audit"],
   "last_runs": {
     "sweep": "2026-02-21",
-    "audit": "2026-02-19",
+    "audit": "2026-02-21",
     "retrospective": "2026-02-19"
   },
   "last_updated": "2026-02-21"
