@@ -69,6 +69,7 @@ export class ChatController {
   }
 
   @Delete('conversations/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   deleteConversation(
     @CurrentUser() user: AuthUser,
     @Param('id', ParseObjectIdPipe) id: string,
