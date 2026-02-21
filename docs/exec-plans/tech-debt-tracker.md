@@ -43,7 +43,7 @@ Each task has:
 | B-M2 | Add @HttpCode decorators to controllers | backend | 0.25d | done | PR #25 merged. Explicit 201 on POST, 204 on DELETE. |
 | B-M5 | Add length limits to DTO fields | backend | 0.25d | done | @MaxLength/@MinLength already in auth DTOs |
 | B-M6 | Add idempotency key support for message creation | backend | 0.5d | done | PR #26 merged. Sparse unique index + Idempotency-Key header. |
-| B-M7 | Configure MongoDB connection pool options | backend | 0.25d | todo | Using default pool settings |
+| B-M7 | Configure MongoDB connection pool options | backend | 0.25d | done | PR #27 merged. minPoolSize=2, maxPoolSize=10 defaults. |
 | B-M8 | Fix ESLint errors in test files (32 errors) | backend | 1d | todo | `any` types in test mocks (lint passes clean — may be warnings only) |
 | B-M10 | Split chat.service.ts (337 lines, exceeds 300-line limit) | backend | 1d | todo | Extract streaming + file-extraction helpers |
 | B-M9 | Add coverage tool, target 80%+ | backend | 0.5d | done | @vitest/coverage-v8 configured, thresholds: 60%/50% |
@@ -142,3 +142,4 @@ Each task has:
 | B-M1 | Add response DTOs and API envelope (PR #23) | 2026-02-21 |
 | B-M2 | Add @HttpCode decorators to controllers (PR #25) | 2026-02-21 |
 | B-M6 | Add idempotency key support for message creation (PR #26) | 2026-02-21 |
+| B-M7 | Configure MongoDB connection pool options (PR #27) | 2026-02-21 |
