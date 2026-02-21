@@ -69,6 +69,9 @@ describe('AuthService', () => {
         expect.objectContaining({
           email: 'new@example.com',
           password: 'hashed-password',
+          totalTokensUsed: 0,
+          totalPromptTokens: 0,
+          totalCompletionTokens: 0,
         }),
       );
       expect(mockJwtService.sign).toHaveBeenCalledWith({
@@ -175,7 +178,30 @@ describe('AuthService', () => {
   });
 
   describe('validateUser', () => {
-    it('should return user data for valid payload', async () => {
+    it('should return user data with token usage for valid payload', async () => {
+      mockUsersCollection.findOne.mockResolvedValue({
+        _id: mockUserId,
+        email: 'test@example.com',
+        totalTokensUsed: 100,
+        totalPromptTokens: 60,
+        totalCompletionTokens: 40,
+      });
+
+      const result = await service.validateUser({
+        sub: mockUserId.toHexString(),
+        email: 'test@example.com',
+      });
+
+      expect(result).toEqual({
+        _id: mockUserId,
+        email: 'test@example.com',
+        totalTokensUsed: 100,
+        totalPromptTokens: 60,
+        totalCompletionTokens: 40,
+      });
+    });
+
+    it('should default token fields to 0 for legacy users', async () => {
       mockUsersCollection.findOne.mockResolvedValue({
         _id: mockUserId,
         email: 'test@example.com',
@@ -189,6 +215,9 @@ describe('AuthService', () => {
       expect(result).toEqual({
         _id: mockUserId,
         email: 'test@example.com',
+        totalTokensUsed: 0,
+        totalPromptTokens: 0,
+        totalCompletionTokens: 0,
       });
     });
 

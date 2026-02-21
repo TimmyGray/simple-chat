@@ -11,6 +11,7 @@ describe('ChatService', () => {
   let service: ChatService;
   let mockConversationsCollection: any;
   let mockMessagesCollection: any;
+  let mockUsersCollection: any;
 
   const mockObjectId = new ObjectId('507f1f77bcf86cd799439011');
   const mockMessageId = new ObjectId('507f1f77bcf86cd799439012');
@@ -61,9 +62,14 @@ describe('ChatService', () => {
       countDocuments: vi.fn().mockResolvedValue(1),
     };
 
+    mockUsersCollection = {
+      updateOne: vi.fn().mockResolvedValue({ modifiedCount: 1 }),
+    };
+
     const mockDatabaseService = {
       conversations: vi.fn().mockReturnValue(mockConversationsCollection),
       messages: vi.fn().mockReturnValue(mockMessagesCollection),
+      users: vi.fn().mockReturnValue(mockUsersCollection),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -272,6 +278,14 @@ describe('ChatService', () => {
       const mockChunks = [
         { choices: [{ delta: { content: 'Hello' } }] },
         { choices: [{ delta: { content: ' world' } }] },
+        {
+          choices: [],
+          usage: {
+            prompt_tokens: 10,
+            completion_tokens: 5,
+            total_tokens: 15,
+          },
+        },
       ];
       const mockStream = {
         [Symbol.asyncIterator]: async function* () {
@@ -295,12 +309,29 @@ describe('ChatService', () => {
       expect(events).toEqual([
         { type: 'content', content: 'Hello' },
         { type: 'content', content: ' world' },
-        { type: 'done' },
+        {
+          type: 'done',
+          usage: {
+            promptTokens: 10,
+            completionTokens: 5,
+            totalTokens: 15,
+          },
+        },
       ]);
     });
 
-    it('should save user and assistant messages to the database', async () => {
-      const mockChunks = [{ choices: [{ delta: { content: 'Response' } }] }];
+    it('should save user and assistant messages to the database with token usage', async () => {
+      const mockChunks = [
+        { choices: [{ delta: { content: 'Response' } }] },
+        {
+          choices: [],
+          usage: {
+            prompt_tokens: 20,
+            completion_tokens: 8,
+            total_tokens: 28,
+          },
+        },
+      ];
       const mockStream = {
         [Symbol.asyncIterator]: async function* () {
           for (const chunk of mockChunks) {
@@ -325,6 +356,52 @@ describe('ChatService', () => {
       const assistantCall = mockMessagesCollection.insertOne.mock.calls[1][0];
       expect(assistantCall.role).toBe('assistant');
       expect(assistantCall.content).toBe('Response');
+      expect(assistantCall.promptTokens).toBe(20);
+      expect(assistantCall.completionTokens).toBe(8);
+      expect(assistantCall.totalTokens).toBe(28);
+    });
+
+    it('should update user cumulative token usage', async () => {
+      const mockChunks = [
+        { choices: [{ delta: { content: 'Hi' } }] },
+        {
+          choices: [],
+          usage: {
+            prompt_tokens: 15,
+            completion_tokens: 3,
+            total_tokens: 18,
+          },
+        },
+      ];
+      const mockStream = {
+        [Symbol.asyncIterator]: async function* () {
+          for (const chunk of mockChunks) {
+            yield chunk;
+          }
+        },
+        controller: { abort: vi.fn() },
+      };
+      vi.spyOn(service['openai'].chat.completions, 'create').mockResolvedValue(
+        mockStream as any,
+      );
+
+      const gen = service.sendMessageAndStream(
+        '507f1f77bcf86cd799439011',
+        { content: 'Test' },
+        mockUserId,
+      );
+      await collectEvents(gen);
+
+      expect(mockUsersCollection.updateOne).toHaveBeenCalledWith(
+        { _id: mockUserId },
+        {
+          $inc: {
+            totalTokensUsed: 18,
+            totalPromptTokens: 15,
+            totalCompletionTokens: 3,
+          },
+        },
+      );
     });
 
     it('should skip empty delta content', async () => {

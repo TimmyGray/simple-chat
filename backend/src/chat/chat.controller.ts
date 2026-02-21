@@ -163,6 +163,9 @@ export class ChatController {
           res.write(`data: ${JSON.stringify({ content: event.content })}\n\n`);
           break;
         case 'done':
+          if (event.usage) {
+            res.write(`data: ${JSON.stringify({ usage: event.usage })}\n\n`);
+          }
           res.write('data: [DONE]\n\n');
           break;
         case 'error':

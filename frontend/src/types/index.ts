@@ -1,6 +1,9 @@
 export interface User {
   _id: string;
   email: string;
+  totalTokensUsed: number;
+  totalPromptTokens: number;
+  totalCompletionTokens: number;
 }
 
 export interface AuthResponse {

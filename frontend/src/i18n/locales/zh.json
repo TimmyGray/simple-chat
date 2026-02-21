@@ -18,7 +18,8 @@
   "sidebar": {
     "title": "Simple Chat",
     "newChat": "新建聊天",
-    "noConversations": "暂无对话"
+    "noConversations": "暂无对话",
+    "tokensUsed": "已用令牌: {{tokens}}"
   },
   "chat": {
     "placeholder": "输入消息...",

@@ -33,6 +33,9 @@ export class AuthService {
       const result = await this.databaseService.users().insertOne({
         email: dto.email,
         password: hashedPassword,
+        totalTokensUsed: 0,
+        totalPromptTokens: 0,
+        totalCompletionTokens: 0,
         createdAt: now,
         updatedAt: now,
       });
@@ -80,7 +83,14 @@ export class AuthService {
 
   async validateUser(
     payload: JwtPayload,
-  ): Promise<Pick<UserDoc, '_id' | 'email'> | null> {
+  ): Promise<Pick<
+    UserDoc,
+    | '_id'
+    | 'email'
+    | 'totalTokensUsed'
+    | 'totalPromptTokens'
+    | 'totalCompletionTokens'
+  > | null> {
     if (!ObjectId.isValid(payload.sub)) {
       return null;
     }
@@ -96,6 +106,12 @@ export class AuthService {
       return null;
     }
 
-    return { _id: user._id, email: user.email };
+    return {
+      _id: user._id,
+      email: user.email,
+      totalTokensUsed: user.totalTokensUsed ?? 0,
+      totalPromptTokens: user.totalPromptTokens ?? 0,
+      totalCompletionTokens: user.totalCompletionTokens ?? 0,
+    };
   }
 }

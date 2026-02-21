@@ -18,7 +18,8 @@
   "sidebar": {
     "title": "Simple Chat",
     "newChat": "New Chat",
-    "noConversations": "No conversations yet"
+    "noConversations": "No conversations yet",
+    "tokensUsed": "Tokens used: {{tokens}}"
   },
   "chat": {
     "placeholder": "Type your message...",
