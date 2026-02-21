@@ -23,6 +23,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
+  @HttpCode(HttpStatus.CREATED)
   @Throttle({ default: { ttl: 60000, limit: 5 } })
   async register(@Body() dto: RegisterDto) {
     this.logger.log('Registration attempt received');
