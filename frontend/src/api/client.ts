@@ -30,7 +30,21 @@ api.interceptors.request.use((config) => {
 });
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Unwrap API envelope: { data: T } → T
+    // Only unwrap when the response is exactly { data: ... } (single key) to avoid
+    // false-positive matches on responses that incidentally have a 'data' property.
+    if (
+      response.data != null &&
+      typeof response.data === 'object' &&
+      !Array.isArray(response.data) &&
+      'data' in response.data &&
+      Object.keys(response.data).length === 1
+    ) {
+      response.data = response.data.data;
+    }
+    return response;
+  },
   (error) => {
     const url = error.config?.url || '';
     const isAuthEndpoint = url.includes('/auth/login') || url.includes('/auth/register');
