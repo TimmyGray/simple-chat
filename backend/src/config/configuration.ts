@@ -1,5 +1,6 @@
 export default () => ({
   port: parseInt(process.env.PORT || '3001', 10),
+  corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
   mongodb: {
     uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/simple-chat',
   },

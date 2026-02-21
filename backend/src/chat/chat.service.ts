@@ -33,7 +33,9 @@ export class ChatService {
       apiKey: this.configService.get<string>('openrouter.apiKey'),
       baseURL: this.configService.get<string>('openrouter.baseUrl'),
       defaultHeaders: {
-        'HTTP-Referer': 'http://localhost:5173',
+        'HTTP-Referer':
+          this.configService.get<string>('corsOrigin') ||
+          'http://localhost:5173',
         'X-Title': 'Simple Chat',
       },
     });
