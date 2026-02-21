@@ -129,19 +129,34 @@ The project uses the **MongoDB native driver** (not Mongoose). `DatabaseModule` 
 | `updatedAt` | Date     | Last modification timestamp      |
 
 **messages**
-| Field            | Type                           | Description                    |
-|------------------|--------------------------------|--------------------------------|
-| `_id`            | ObjectId                       | Primary key                    |
-| `conversationId` | ObjectId                       | Foreign key to conversations   |
-| `role`           | `'user'` \| `'assistant'`      | Message author                 |
-| `content`        | string                         | Message text                   |
-| `model`          | string (optional)              | Model used (assistant messages)|
-| `idempotencyKey` | string (optional)              | Client UUID for dedup (user messages) |
-| `attachments`    | `AttachmentDoc[]`              | File metadata array            |
-| `createdAt`      | Date                           | Creation timestamp             |
-| `updatedAt`      | Date                           | Last modification timestamp    |
+| Field              | Type                           | Description                    |
+|--------------------|--------------------------------|--------------------------------|
+| `_id`              | ObjectId                       | Primary key                    |
+| `conversationId`   | ObjectId                       | Foreign key to conversations   |
+| `role`             | `'user'` \| `'assistant'`      | Message author                 |
+| `content`          | string                         | Message text                   |
+| `model`            | string (optional)              | Model used (assistant messages)|
+| `idempotencyKey`   | string (optional)              | Client UUID for dedup (user messages) |
+| `attachments`      | `AttachmentDoc[]`              | File metadata array            |
+| `promptTokens`     | number (optional)              | LLM prompt tokens consumed (assistant messages) |
+| `completionTokens` | number (optional)              | LLM completion tokens consumed (assistant messages) |
+| `totalTokens`      | number (optional)              | Total tokens consumed (assistant messages) |
+| `createdAt`        | Date                           | Creation timestamp             |
+| `updatedAt`        | Date                           | Last modification timestamp    |
 
 **AttachmentDoc** shape: `{ fileName, fileType, filePath, fileSize }`
+
+**users**
+| Field                   | Type     | Description                              |
+|-------------------------|----------|------------------------------------------|
+| `_id`                   | ObjectId | Primary key                              |
+| `email`                 | string   | User email (unique)                      |
+| `password`              | string   | bcrypt-hashed password                   |
+| `totalTokensUsed`       | number   | Cumulative total tokens consumed         |
+| `totalPromptTokens`     | number   | Cumulative prompt tokens consumed        |
+| `totalCompletionTokens` | number   | Cumulative completion tokens consumed    |
+| `createdAt`             | Date     | Creation timestamp                       |
+| `updatedAt`             | Date     | Last modification timestamp              |
 
 #### Indexes
 

@@ -1,6 +1,6 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-21 (retrospective #2)
+> Last updated: 2026-02-21 (audit #5 + retrospective #2)
 
 ## Test Summary
 
@@ -40,8 +40,8 @@
 | Area | Total | Outdated | Vulnerabilities |
 |------|-------|----------|----------------|
 | Root | 3 | 0 | 0 |
-| Backend | ~25 | 12 (5 patch, 4 minor, 3 major) | 35 (5 moderate, 30 high — all in jest/babel transitive deps) |
-| Frontend | ~20 | 8 (3 patch, 2 minor, 3 major) | 11 (1 moderate, 10 high — all in eslint/minimatch transitive deps) |
+| Backend | ~25 | 12 (4 patch, 4 minor, 3 major) | 35 (5 moderate, 30 high — all in jest/babel transitive deps) |
+| Frontend | ~20 | 8 (2 patch, 3 minor, 3 major) | 11 (1 moderate, 10 high — all in eslint/minimatch transitive deps) |
 
 ## Bundle Size
 - Backend: 1.1 MB (dist/)
@@ -55,13 +55,26 @@
 - Features: 8 todo, 2 done (FEAT-6 completed)
 - Total tracked: 65 (see `docs/exec-plans/tech-debt-tracker.md`)
 
-## Retrospective #2 Findings
-- Backend tests: 95 -> 100 (+5 from FEAT-6 token usage specs)
+## Audit #5 Findings
+- Backend tests: 95 -> 100 (+5 from token usage/controller specs, PR #28)
 - Total tests now 137 (target: 100+ sustained)
+- FEAT-6 (Token Usage & Cost Tracking) completed since last audit
+- chat.service.ts grew from 354 -> 390 lines (still tracked as B-M10, increasingly urgent)
+- No new lint, type, or build errors
+- No console.log/warn/error found in source (clean)
+- No TODO/FIXME/HACK comments in source (clean)
+- No dangerouslySetInnerHTML usage (clean)
+- No hardcoded secrets found in source files
+- No `any` types in non-test source files (clean)
+- i18n: all 4 locales in sync (47 keys each)
+- All cross-module imports follow approved patterns (chat->auth for guards/decorators)
+- All URLs/ports are in config files or .env defaults (not hardcoded in business logic)
+- ARCHITECTURE.md drift found and fixed: messages collection missing token usage fields, users collection table absent
+
+## Retrospective #2 Findings
 - FEAT-6 (Token Usage & Cost Tracking) completed (PR #28)
 - F-M23 (hardcoded "Error:" prefix) fixed — now uses i18n key `errors.streamErrorPrefix`
 - chat.service.ts grew from 354 -> 390 lines (tracked as B-M10, increasingly urgent)
-- i18n: all 4 locales in sync (47 keys each, +1 streamErrorPrefix)
 - New ESLint rules promoted:
   - `window.alert()` ban via `no-restricted-syntax` AST selector (existing usages have eslint-disable with F-M21 task ID)
   - `no-restricted-globals` for bare `alert()` calls
