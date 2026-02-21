@@ -39,7 +39,7 @@ Each task has:
 
 | ID | Task | Area | Effort | Status | Notes |
 |----|------|------|--------|--------|-------|
-| B-M1 | Add response DTOs and API envelope | backend | 1d | todo | No consistent response format |
+| B-M1 | Add response DTOs and API envelope | backend | 1d | done | PR #23 merged. TransformResponseInterceptor wraps in { data: T }. |
 | B-M2 | Add @HttpCode decorators to controllers | backend | 0.25d | todo | POST returns 200 instead of 201 |
 | B-M5 | Add length limits to DTO fields | backend | 0.25d | done | @MaxLength/@MinLength already in auth DTOs |
 | B-M6 | Add idempotency key support for message creation | backend | 0.5d | todo | Duplicate sends possible |
@@ -139,3 +139,4 @@ Each task has:
 | F-H3 | Use useRef for streaming content accumulation (PR #18) | 2026-02-21 |
 | F-H5 | Add input length validation to ChatInput (PR #20) | 2026-02-21 |
 | F-H6 | Memoize MessageBubble with React.memo (PR #21) | 2026-02-21 |
+| B-M1 | Add response DTOs and API envelope (PR #23) | 2026-02-21 |
