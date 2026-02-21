@@ -32,7 +32,7 @@ Each task has:
 | B-H6 | Make frontend origin configurable in LLM headers | backend | 0.25d | done | PR #16 merged. Uses CORS_ORIGIN via ConfigService. |
 | B-H7 | Refactor SSE: return AsyncIterable from service, not Response | backend | 1d | done | PR #17 merged. Service returns AsyncGenerator<StreamEvent>, controller owns SSE transport. |
 | F-H3 | Use useRef for streaming content accumulation | frontend | 0.25d | done | PR #18 merged. `fullContentRef` replaces closure `let`. |
-| F-H5 | Add input length validation to ChatInput | frontend | 0.25d | todo | No max character count enforced |
+| F-H5 | Add input length validation to ChatInput | frontend | 0.25d | done | PR #20 merged. 10K char limit, counter at 90%, backend @MaxLength. |
 | F-H6 | Memoize MessageBubble with React.memo | frontend | 0.5d | todo | All bubbles re-render on every parent update |
 
 ## Medium
@@ -137,3 +137,4 @@ Each task has:
 | B-H6 | Make frontend origin configurable in LLM headers (PR #16) | 2026-02-21 |
 | B-H7 | Refactor SSE: return AsyncIterable from service (PR #17) | 2026-02-21 |
 | F-H3 | Use useRef for streaming content accumulation (PR #18) | 2026-02-21 |
+| F-H5 | Add input length validation to ChatInput (PR #20) | 2026-02-21 |
