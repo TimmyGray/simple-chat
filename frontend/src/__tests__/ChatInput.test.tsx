@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from '../theme';
@@ -107,6 +107,55 @@ describe('ChatInput', () => {
 
     const input = screen.getByPlaceholderText('Type your message...');
     expect(input).toBeDisabled();
+  });
+
+  it('shows character counter near the limit', () => {
+    renderWithTheme(
+      <ChatInput
+        models={mockModels}
+        selectedModel="openrouter/free"
+        onModelChange={vi.fn()}
+        onSend={vi.fn()}
+      />,
+    );
+
+    const input = screen.getByPlaceholderText('Type your message...');
+    fireEvent.change(input, { target: { value: 'a'.repeat(9500) } });
+
+    expect(screen.getByText('9500 / 10000')).toBeInTheDocument();
+  });
+
+  it('disables send button when over character limit', () => {
+    renderWithTheme(
+      <ChatInput
+        models={mockModels}
+        selectedModel="openrouter/free"
+        onModelChange={vi.fn()}
+        onSend={vi.fn()}
+      />,
+    );
+
+    const input = screen.getByPlaceholderText('Type your message...');
+    fireEvent.change(input, { target: { value: 'a'.repeat(10001) } });
+
+    const sendBtn = screen.getByTestId('SendIcon').closest('button')!;
+    expect(sendBtn).toBeDisabled();
+  });
+
+  it('does not show counter for short input', () => {
+    renderWithTheme(
+      <ChatInput
+        models={mockModels}
+        selectedModel="openrouter/free"
+        onModelChange={vi.fn()}
+        onSend={vi.fn()}
+      />,
+    );
+
+    const input = screen.getByPlaceholderText('Type your message...');
+    fireEvent.change(input, { target: { value: 'Hello' } });
+
+    expect(screen.queryByText(/\/ 10000/)).not.toBeInTheDocument();
   });
 
   it('clears input after sending', async () => {

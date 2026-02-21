@@ -26,7 +26,8 @@
     "sendTooltip": "Отправить (Enter)",
     "noConversation": "Диалог не выбран",
     "noConversationHint": "Начните новый чат или выберите существующий",
-    "attachFiles": "Прикрепить файлы"
+    "attachFiles": "Прикрепить файлы",
+    "charCount": "{{current}} / {{max}}"
   },
   "dialog": {
     "deleteTitle": "Удалить диалог",
