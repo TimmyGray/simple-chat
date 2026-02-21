@@ -1,14 +1,14 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-19 (audit #2)
+> Last updated: 2026-02-21 (sweep #2)
 
 ## Test Summary
 
 | Area | Test Files | Tests | Pass Rate |
 |------|-----------|-------|-----------|
-| Backend | 11 | 75 | 100% |
+| Backend | 11 | 84 | 100% |
 | Frontend | 7 | 33 | 100% |
-| **Total** | **18** | **108** | **100%** |
+| **Total** | **18** | **117** | **100%** |
 
 ## Lint Status
 
@@ -49,24 +49,25 @@
 
 ## Tech Debt
 - Critical: 0 (JWT authentication completed)
-- High: 5 (unchanged — B-H5, B-H6, B-H7, F-H3, F-H5, F-H6)
+- High: 2 todo (F-H5, F-H6) — B-H5, B-H6, B-H7, F-H3 completed since audit #2
 - Medium: 24 (unchanged)
-- Low: 11 (F-L3 completed in sweep)
+- Low: 11 (F-L3 completed in prior sweep)
 - Features: 9 todo, 1 done
 - Total tracked: 64 (see `docs/exec-plans/tech-debt-tracker.md`)
 
-## New Findings (Audit #2)
-- Backend test count jumped from 58 → 75 (+17 tests, new spec files for schemas, arch, middleware)
-- Backend test file count jumped from 9 → 11 (+2 new spec files)
-- Total tests now 108 (target: 100+ achieved!)
-- No new lint or type errors
-- `npm audit` vulnerabilities are all in dev-only transitive dependencies (jest, eslint) — no production risk
-- Outdated deps are mostly patch/minor; major bumps (eslint 10, @types/node 25, globals 17) require migration
-- Frontend: 2 `window.alert()` usages should migrate to Snackbar (tracked as F-M21)
-- Frontend: 5 minor accessibility gaps (tracked as F-M6, existing)
+## New Findings (Sweep #2)
+- Backend test count jumped from 75 → 84 (+9 tests from chat.service.spec additions)
+- Total tests now 117 (target: 100+ achieved!)
+- 4 high-priority items completed since last audit: B-H5, B-H6, B-H7, F-H3
+- Removed redundant localhost fallback in chat.service.ts (config already provides default)
+- No new lint, type, or build errors
+- i18n: all 4 locale files (en, ru, zh, es) have identical key structure — no gaps
+- No new cross-module import violations or architecture regressions
+- `any` types: only in test files (allowed per conventions)
+- Hardcoded rgba/gradient colors: 16 occurrences across 5 files (tracked as F-M13)
 
 ## Targets
-- Test count: 100+ (achieved — currently 108)
+- Test count: 100+ (achieved — currently 117)
 - Coverage: 80%+ (currently 60%/50% thresholds)
 - Lint errors: 0 (achieved)
 - Type errors: 0 (achieved)
