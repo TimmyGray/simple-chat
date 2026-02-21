@@ -8,6 +8,8 @@ export const envValidationSchema = Joi.object({
   MONGODB_URI: Joi.string()
     .uri({ scheme: ['mongodb', 'mongodb+srv'] })
     .default('mongodb://localhost:27017/simple-chat'),
+  MONGO_POOL_SIZE_MIN: Joi.number().integer().min(0).max(100).default(2),
+  MONGO_POOL_SIZE_MAX: Joi.number().integer().min(1).max(200).default(10),
   PORT: Joi.number().integer().min(1).max(65535).default(3001),
   LLM_URL_KEY: Joi.string().uri().optional(),
   CORS_ORIGIN: Joi.string().optional(),

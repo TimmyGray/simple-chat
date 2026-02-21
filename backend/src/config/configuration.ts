@@ -3,6 +3,8 @@ export default () => ({
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
   mongodb: {
     uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/simple-chat',
+    poolSizeMin: parseInt(process.env.MONGO_POOL_SIZE_MIN || '2', 10),
+    poolSizeMax: parseInt(process.env.MONGO_POOL_SIZE_MAX || '10', 10),
   },
   openrouter: {
     apiKey: process.env.OPENROUTER_API_KEY || '',
