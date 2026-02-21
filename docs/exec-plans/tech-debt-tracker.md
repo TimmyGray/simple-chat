@@ -33,7 +33,7 @@ Each task has:
 | B-H7 | Refactor SSE: return AsyncIterable from service, not Response | backend | 1d | done | PR #17 merged. Service returns AsyncGenerator<StreamEvent>, controller owns SSE transport. |
 | F-H3 | Use useRef for streaming content accumulation | frontend | 0.25d | done | PR #18 merged. `fullContentRef` replaces closure `let`. |
 | F-H5 | Add input length validation to ChatInput | frontend | 0.25d | done | PR #20 merged. 10K char limit, counter at 90%, backend @MaxLength. |
-| F-H6 | Memoize MessageBubble with React.memo | frontend | 0.5d | todo | All bubbles re-render on every parent update |
+| F-H6 | Memoize MessageBubble with React.memo | frontend | 0.5d | done | PR #21 merged. React.memo + module-scope constants. |
 
 ## Medium
 
@@ -138,3 +138,4 @@ Each task has:
 | B-H7 | Refactor SSE: return AsyncIterable from service (PR #17) | 2026-02-21 |
 | F-H3 | Use useRef for streaming content accumulation (PR #18) | 2026-02-21 |
 | F-H5 | Add input length validation to ChatInput (PR #20) | 2026-02-21 |
+| F-H6 | Memoize MessageBubble with React.memo (PR #21) | 2026-02-21 |
