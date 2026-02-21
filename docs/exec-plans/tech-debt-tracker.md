@@ -29,7 +29,7 @@ Each task has:
 |----|------|------|--------|--------|-------|
 | B-H4 | Add MongoDB JSON schema validation on collections | backend | 1d | done | PR #11 merged. Validators on all 3 collections. |
 | B-H5 | Move `require('pdf-parse')` to module-level import | backend | 0.25d | done | PR #14. Module-level import, v2 class API. |
-| B-H6 | Make frontend origin configurable in LLM headers | backend | 0.25d | todo | Hardcoded `http://localhost:5173` in OpenAI headers |
+| B-H6 | Make frontend origin configurable in LLM headers | backend | 0.25d | done | PR #16 merged. Uses CORS_ORIGIN via ConfigService. |
 | B-H7 | Refactor SSE: return AsyncIterable from service, not Response | backend | 1d | todo | Service layer should not know about HTTP transport |
 | F-H3 | Use useRef for streaming content accumulation | frontend | 0.25d | todo | `finally` cleanup done, but `fullContent` still uses closure `let` |
 | F-H5 | Add input length validation to ChatInput | frontend | 0.25d | todo | No max character count enforced |
@@ -134,3 +134,4 @@ Each task has:
 | FEAT-1 | User Authentication & Multi-Tenancy | 2026-02-19 |
 | F-L3 | Remove frontend console.error (sweep) | 2026-02-19 |
 | B-H4 | MongoDB JSON schema validation on collections (PR #11) | 2026-02-19 |
+| B-H6 | Make frontend origin configurable in LLM headers (PR #16) | 2026-02-21 |
