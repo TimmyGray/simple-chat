@@ -275,6 +275,8 @@ Language detection order: `localStorage` then `navigator`. Fallback: English. Th
 | `OPENROUTER_API_KEY` | Yes      | --                                         | API key for OpenRouter LLM calls   |
 | `JWT_SECRET`         | Yes      | --                                         | Secret key for JWT token signing   |
 | `MONGODB_URI`        | No       | `mongodb://localhost:27017/simple-chat`     | MongoDB connection string          |
+| `MONGO_POOL_SIZE_MIN`| No       | `2`                                        | Minimum connections in pool        |
+| `MONGO_POOL_SIZE_MAX`| No       | `10`                                       | Maximum connections in pool        |
 | `PORT`               | No       | `3001`                                     | Backend HTTP port                  |
 | `LLM_URL_KEY`        | No       | `https://openrouter.ai/api/v1`             | Override LLM base URL              |
 | `CORS_ORIGIN`        | No       | `http://localhost:5173`                    | Allowed CORS origin                |

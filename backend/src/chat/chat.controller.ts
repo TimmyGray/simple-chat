@@ -100,8 +100,7 @@ export class ChatController {
     @Res() res: Response,
   ) {
     const rawKey = req.headers['idempotency-key'] as string;
-    const idempotencyKey =
-      rawKey && rawKey.length <= 64 ? rawKey : undefined;
+    const idempotencyKey = rawKey && rawKey.length <= 64 ? rawKey : undefined;
     this.logger.log(
       `Starting SSE stream for conversation ${id}, model="${dto.model || 'default'}", attachments=${dto.attachments?.length || 0}`,
     );

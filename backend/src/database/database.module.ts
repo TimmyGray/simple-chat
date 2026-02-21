@@ -14,7 +14,10 @@ import { DATABASE_CONNECTION, MONGO_CLIENT } from './database.constants';
       ): Promise<MongoClient> => {
         const uri = configService.get<string>('mongodb.uri');
         if (!uri) throw new Error('MongoDB URI not configured');
-        const client = new MongoClient(uri);
+        const client = new MongoClient(uri, {
+          minPoolSize: configService.get<number>('mongodb.poolSizeMin', 2),
+          maxPoolSize: configService.get<number>('mongodb.poolSizeMax', 10),
+        });
         await client.connect();
         return client;
       },
