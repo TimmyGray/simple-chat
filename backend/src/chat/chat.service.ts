@@ -1,11 +1,12 @@
 import {
+  ConflictException,
   Injectable,
   ForbiddenException,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ObjectId } from 'mongodb';
+import { ObjectId, MongoServerError } from 'mongodb';
 import OpenAI from 'openai';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -144,20 +145,36 @@ export class ChatService {
     dto: SendMessageDto,
     userId: ObjectId,
     abortSignal?: AbortSignal,
+    idempotencyKey?: string,
   ): AsyncGenerator<StreamEvent> {
     const conversation = await this.getConversation(conversationId, userId);
     const model = dto.model || conversation.model;
 
-    // Save user message
+    // Save user message (with optional idempotency key for duplicate detection)
     const now = new Date();
-    await this.databaseService.messages().insertOne({
-      conversationId: new ObjectId(conversationId),
-      role: 'user',
-      content: dto.content,
-      attachments: dto.attachments || [],
-      createdAt: now,
-      updatedAt: now,
-    });
+    try {
+      await this.databaseService.messages().insertOne({
+        conversationId: new ObjectId(conversationId),
+        role: 'user' as const,
+        content: dto.content,
+        attachments: dto.attachments || [],
+        createdAt: now,
+        updatedAt: now,
+        ...(idempotencyKey ? { idempotencyKey } : {}),
+      });
+    } catch (error) {
+      if (
+        error instanceof MongoServerError &&
+        error.code === 11000 &&
+        idempotencyKey
+      ) {
+        this.logger.warn(
+          `Duplicate message rejected (idempotencyKey=${idempotencyKey})`,
+        );
+        throw new ConflictException('Duplicate message');
+      }
+      throw error;
+    }
     this.logger.debug(`User message saved for conversation ${conversationId}`);
 
     // Auto-title: use first message as conversation title

@@ -115,6 +115,7 @@ export async function sendMessageStream(
   onDone?: () => void,
   onError?: (error: string) => void,
   abortSignal?: AbortSignal,
+  idempotencyKey?: string,
 ): Promise<void> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), STREAM_TIMEOUT_MS);
@@ -131,6 +132,9 @@ export async function sendMessageStream(
     const token = getStoredToken();
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
+    }
+    if (idempotencyKey) {
+      headers['Idempotency-Key'] = idempotencyKey;
     }
 
     const response = await fetch(

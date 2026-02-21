@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { NotFoundException } from '@nestjs/common';
-import { ObjectId } from 'mongodb';
+import { ConflictException, NotFoundException } from '@nestjs/common';
+import { MongoServerError, ObjectId } from 'mongodb';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ChatService } from './chat.service';
 import { DatabaseService } from '../database/database.service';
@@ -446,6 +446,88 @@ describe('ChatService', () => {
       expect(mockMessagesCollection.insertOne.mock.calls[0][0].role).toBe(
         'user',
       );
+    });
+
+    it('should include idempotencyKey in user message when provided', async () => {
+      const mockStream = {
+        [Symbol.asyncIterator]: async function* () {
+          yield { choices: [{ delta: { content: 'Hi' } }] };
+        },
+        controller: { abort: vi.fn() },
+      };
+      vi.spyOn(service['openai'].chat.completions, 'create').mockResolvedValue(
+        mockStream as any,
+      );
+
+      const gen = service.sendMessageAndStream(
+        '507f1f77bcf86cd799439011',
+        { content: 'Test' },
+        mockUserId,
+        undefined,
+        'test-key-123',
+      );
+      await collectEvents(gen);
+
+      const userInsert = mockMessagesCollection.insertOne.mock.calls[0][0];
+      expect(userInsert.idempotencyKey).toBe('test-key-123');
+    });
+
+    it('should not include idempotencyKey when not provided', async () => {
+      const mockStream = {
+        [Symbol.asyncIterator]: async function* () {
+          yield { choices: [{ delta: { content: 'Hi' } }] };
+        },
+        controller: { abort: vi.fn() },
+      };
+      vi.spyOn(service['openai'].chat.completions, 'create').mockResolvedValue(
+        mockStream as any,
+      );
+
+      const gen = service.sendMessageAndStream(
+        '507f1f77bcf86cd799439011',
+        { content: 'Test' },
+        mockUserId,
+      );
+      await collectEvents(gen);
+
+      const userInsert = mockMessagesCollection.insertOne.mock.calls[0][0];
+      expect(userInsert).not.toHaveProperty('idempotencyKey');
+    });
+
+    it('should throw ConflictException on duplicate idempotency key', async () => {
+      const duplicateError = new MongoServerError({
+        message: 'E11000 duplicate key error',
+      });
+      duplicateError.code = 11000;
+      mockMessagesCollection.insertOne = vi
+        .fn()
+        .mockRejectedValue(duplicateError);
+
+      const gen = service.sendMessageAndStream(
+        '507f1f77bcf86cd799439011',
+        { content: 'Test' },
+        mockUserId,
+        undefined,
+        'duplicate-key',
+      );
+
+      await expect(collectEvents(gen)).rejects.toThrow(ConflictException);
+    });
+
+    it('should rethrow non-duplicate insert errors', async () => {
+      mockMessagesCollection.insertOne = vi
+        .fn()
+        .mockRejectedValue(new Error('Connection lost'));
+
+      const gen = service.sendMessageAndStream(
+        '507f1f77bcf86cd799439011',
+        { content: 'Test' },
+        mockUserId,
+        undefined,
+        'some-key',
+      );
+
+      await expect(collectEvents(gen)).rejects.toThrow('Connection lost');
     });
   });
 });

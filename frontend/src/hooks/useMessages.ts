@@ -60,6 +60,8 @@ export function useMessages() {
       fullContentRef.current = '';
       let completed = false;
 
+      const idempotencyKey = crypto.randomUUID();
+
       try {
         await api.sendMessageStream(
           conversationId,
@@ -95,6 +97,7 @@ export function useMessages() {
             setMessages((prev) => [...prev, errorMsg]);
           },
           abortController.signal,
+          idempotencyKey,
         );
       } catch (err) {
         if (!completed) {

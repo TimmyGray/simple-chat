@@ -99,6 +99,8 @@ export class ChatController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
+    const idempotencyKey =
+      (req.headers['idempotency-key'] as string) || undefined;
     this.logger.log(
       `Starting SSE stream for conversation ${id}, model="${dto.model || 'default'}", attachments=${dto.attachments?.length || 0}`,
     );
@@ -129,6 +131,7 @@ export class ChatController {
         dto,
         user._id,
         abortController.signal,
+        idempotencyKey,
       );
       await this.consumeStreamAsSSE(stream, res);
     } catch (error) {
