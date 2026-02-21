@@ -32,7 +32,15 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => {
     // Unwrap API envelope: { data: T } → T
-    if (response.data != null && typeof response.data === 'object' && 'data' in response.data) {
+    // Only unwrap when the response is exactly { data: ... } (single key) to avoid
+    // false-positive matches on responses that incidentally have a 'data' property.
+    if (
+      response.data != null &&
+      typeof response.data === 'object' &&
+      !Array.isArray(response.data) &&
+      'data' in response.data &&
+      Object.keys(response.data).length === 1
+    ) {
       response.data = response.data.data;
     }
     return response;
