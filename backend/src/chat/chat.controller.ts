@@ -22,6 +22,7 @@ import { ChatService } from './chat.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { SendMessageDto } from './dto/send-message.dto';
+import type { StreamEvent } from './interfaces/stream-event.interface';
 import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -125,24 +126,7 @@ export class ChatController {
         user._id,
         abortController.signal,
       );
-
-      for await (const event of stream) {
-        if (res.writableEnded) break;
-
-        switch (event.type) {
-          case 'content':
-            res.write(
-              `data: ${JSON.stringify({ content: event.content })}\n\n`,
-            );
-            break;
-          case 'done':
-            res.write('data: [DONE]\n\n');
-            break;
-          case 'error':
-            res.write(`data: ${JSON.stringify({ error: event.message })}\n\n`);
-            break;
-        }
-      }
+      await this.consumeStreamAsSSE(stream, res);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -156,6 +140,27 @@ export class ChatController {
       clearTimeout(streamTimeout);
       if (!res.writableEnded) {
         res.end();
+      }
+    }
+  }
+
+  private async consumeStreamAsSSE(
+    stream: AsyncGenerator<StreamEvent>,
+    res: Response,
+  ): Promise<void> {
+    for await (const event of stream) {
+      if (res.writableEnded) break;
+
+      switch (event.type) {
+        case 'content':
+          res.write(`data: ${JSON.stringify({ content: event.content })}\n\n`);
+          break;
+        case 'done':
+          res.write('data: [DONE]\n\n');
+          break;
+        case 'error':
+          res.write(`data: ${JSON.stringify({ error: event.message })}\n\n`);
+          break;
       }
     }
   }

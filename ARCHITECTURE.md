@@ -107,8 +107,8 @@ Frontend                          Backend                           OpenRouter
 ```
 
 Key behaviors:
-- Client disconnect detection via `req.on('close')` -- aborts the LLM stream.
-- 5-minute stream timeout -- sends an error event and closes the connection.
+- Client disconnect detection via `AbortController` in the controller -- signals the service to abort the LLM stream.
+- 5-minute stream timeout in the controller -- sends an error event and closes the connection.
 - File content extraction supports `.txt`, `.md`, `.csv` (read as UTF-8) and `.pdf` (via `pdf-parse`). Binary files are passed as `[Binary file: name]` placeholders.
 - Path traversal protection: file paths are reconstructed from `path.basename()` only, with a defense-in-depth resolved path check against the uploads directory.
 
@@ -174,7 +174,7 @@ All `:id` parameters are validated by `ParseObjectIdPipe` (returns 400 for inval
 ### Key Backend Patterns
 
 - **LLM integration**: OpenAI SDK with `baseURL` pointed at OpenRouter (`https://openrouter.ai/api/v1`). Custom headers include `HTTP-Referer` and `X-Title`.
-- **SSE streaming**: The controller passes the Express `Response` object to the service. The service sets `Content-Type: text/event-stream` headers and writes `data: {json}\n\n` chunks. Stream ends with `data: [DONE]\n\n`.
+- **SSE streaming**: The service returns an `AsyncGenerator<StreamEvent>` (discriminated union: `content`, `done`, `error`). The controller owns SSE headers, wire format (`data: {json}\n\n`), timeout, and disconnect detection via `AbortController`/`AbortSignal`.
 - **File uploads**: Multer with `diskStorage` to `./uploads/`. MIME whitelist: `application/pdf`, `text/plain`, `text/markdown`, `text/csv`, `image/png`, `image/jpeg`, `image/gif`, `image/webp`. Unique filenames via timestamp + random suffix.
 - **Upload cleanup**: `UploadsCleanupService` runs an hourly cron job that deletes files older than a configurable TTL (default 24 hours, set via `UPLOAD_TTL_HOURS`).
 - **Error handling**: `AllExceptionsFilter` catches all unhandled exceptions, includes `correlationId` in the response, logs 5xx at error level and 4xx at warn level.
