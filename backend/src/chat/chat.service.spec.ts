@@ -5,6 +5,7 @@ import { ObjectId } from 'mongodb';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ChatService } from './chat.service';
 import { DatabaseService } from '../database/database.service';
+import type { StreamEvent } from './interfaces/stream-event.interface';
 
 describe('ChatService', () => {
   let service: ChatService;
@@ -252,6 +253,199 @@ describe('ChatService', () => {
       await expect(
         service.getMessages('507f1f77bcf86cd799439011', otherUserId),
       ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('sendMessageAndStream', () => {
+    async function collectEvents(
+      gen: AsyncGenerator<StreamEvent>,
+    ): Promise<StreamEvent[]> {
+      const events: StreamEvent[] = [];
+      for await (const event of gen) {
+        events.push(event);
+      }
+      return events;
+    }
+
+    it('should yield content events and a done event on successful stream', async () => {
+      // Mock OpenAI streaming response
+      const mockChunks = [
+        { choices: [{ delta: { content: 'Hello' } }] },
+        { choices: [{ delta: { content: ' world' } }] },
+      ];
+      const mockStream = {
+        [Symbol.asyncIterator]: async function* () {
+          for (const chunk of mockChunks) {
+            yield chunk;
+          }
+        },
+        controller: { abort: vi.fn() },
+      };
+      vi.spyOn(service['openai'].chat.completions, 'create').mockResolvedValue(
+        mockStream as any,
+      );
+
+      const gen = service.sendMessageAndStream(
+        '507f1f77bcf86cd799439011',
+        { content: 'Test message' },
+        mockUserId,
+      );
+      const events = await collectEvents(gen);
+
+      expect(events).toEqual([
+        { type: 'content', content: 'Hello' },
+        { type: 'content', content: ' world' },
+        { type: 'done' },
+      ]);
+    });
+
+    it('should save user and assistant messages to the database', async () => {
+      const mockChunks = [{ choices: [{ delta: { content: 'Response' } }] }];
+      const mockStream = {
+        [Symbol.asyncIterator]: async function* () {
+          for (const chunk of mockChunks) {
+            yield chunk;
+          }
+        },
+        controller: { abort: vi.fn() },
+      };
+      vi.spyOn(service['openai'].chat.completions, 'create').mockResolvedValue(
+        mockStream as any,
+      );
+
+      const gen = service.sendMessageAndStream(
+        '507f1f77bcf86cd799439011',
+        { content: 'Hello' },
+        mockUserId,
+      );
+      await collectEvents(gen);
+
+      // First call saves user message, second saves assistant message
+      expect(mockMessagesCollection.insertOne).toHaveBeenCalledTimes(2);
+      const assistantCall = mockMessagesCollection.insertOne.mock.calls[1][0];
+      expect(assistantCall.role).toBe('assistant');
+      expect(assistantCall.content).toBe('Response');
+    });
+
+    it('should skip empty delta content', async () => {
+      const mockChunks = [
+        { choices: [{ delta: {} }] },
+        { choices: [{ delta: { content: '' } }] },
+        { choices: [{ delta: { content: 'Real content' } }] },
+      ];
+      const mockStream = {
+        [Symbol.asyncIterator]: async function* () {
+          for (const chunk of mockChunks) {
+            yield chunk;
+          }
+        },
+        controller: { abort: vi.fn() },
+      };
+      vi.spyOn(service['openai'].chat.completions, 'create').mockResolvedValue(
+        mockStream as any,
+      );
+
+      const gen = service.sendMessageAndStream(
+        '507f1f77bcf86cd799439011',
+        { content: 'Test' },
+        mockUserId,
+      );
+      const events = await collectEvents(gen);
+
+      const contentEvents = events.filter((e) => e.type === 'content');
+      expect(contentEvents).toHaveLength(1);
+      expect(contentEvents[0]).toEqual({
+        type: 'content',
+        content: 'Real content',
+      });
+    });
+
+    it('should yield error event when LLM call fails', async () => {
+      vi.spyOn(service['openai'].chat.completions, 'create').mockRejectedValue(
+        new Error('API rate limit exceeded'),
+      );
+
+      const gen = service.sendMessageAndStream(
+        '507f1f77bcf86cd799439011',
+        { content: 'Test' },
+        mockUserId,
+      );
+      const events = await collectEvents(gen);
+
+      expect(events).toEqual([
+        { type: 'error', message: 'API rate limit exceeded' },
+      ]);
+    });
+
+    it('should abort LLM stream when abortSignal is triggered', async () => {
+      const abortFn = vi.fn();
+      const abortController = new AbortController();
+
+      const mockChunks = [
+        { choices: [{ delta: { content: 'First' } }] },
+        { choices: [{ delta: { content: 'Second' } }] },
+      ];
+      const mockStream = {
+        [Symbol.asyncIterator]: async function* () {
+          yield mockChunks[0];
+          // Abort after first chunk
+          abortController.abort();
+          yield mockChunks[1];
+        },
+        controller: { abort: abortFn },
+      };
+      vi.spyOn(service['openai'].chat.completions, 'create').mockResolvedValue(
+        mockStream as any,
+      );
+
+      const gen = service.sendMessageAndStream(
+        '507f1f77bcf86cd799439011',
+        { content: 'Test' },
+        mockUserId,
+        abortController.signal,
+      );
+      const events = await collectEvents(gen);
+
+      // Should have yielded the first chunk, then detected abort
+      expect(events[0]).toEqual({ type: 'content', content: 'First' });
+      expect(abortFn).toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException for non-existent conversation', async () => {
+      mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
+
+      const gen = service.sendMessageAndStream(
+        '507f1f77bcf86cd799439011',
+        { content: 'Test' },
+        mockUserId,
+      );
+
+      await expect(collectEvents(gen)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should not save assistant message if stream yields no content', async () => {
+      const mockStream = {
+        [Symbol.asyncIterator]: async function* () {
+          // Empty stream - no chunks
+        },
+        controller: { abort: vi.fn() },
+      };
+      vi.spyOn(service['openai'].chat.completions, 'create').mockResolvedValue(
+        mockStream as any,
+      );
+
+      const gen = service.sendMessageAndStream(
+        '507f1f77bcf86cd799439011',
+        { content: 'Test' },
+        mockUserId,
+      );
+      await collectEvents(gen);
+
+      // Only user message saved, not assistant
+      expect(mockMessagesCollection.insertOne).toHaveBeenCalledTimes(1);
+      expect(mockMessagesCollection.insertOne.mock.calls[0][0].role).toBe(
+        'user',
+      );
     });
   });
 });

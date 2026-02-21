@@ -9,11 +9,11 @@ import { ObjectId } from 'mongodb';
 import OpenAI from 'openai';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Request, Response } from 'express';
 import { PDFParse } from 'pdf-parse';
 import { DatabaseService } from '../database/database.service';
 import { ConversationDoc } from './interfaces/conversation.interface';
 import { MessageDoc } from './interfaces/message.interface';
+import { StreamEvent } from './interfaces/stream-event.interface';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { SendMessageDto } from './dto/send-message.dto';
@@ -141,15 +141,12 @@ export class ChatService {
     return messages;
   }
 
-  private static readonly STREAM_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
-
-  async sendMessageAndStream(
+  async *sendMessageAndStream(
     conversationId: string,
     dto: SendMessageDto,
-    req: Request,
-    res: Response,
     userId: ObjectId,
-  ): Promise<void> {
+    abortSignal?: AbortSignal,
+  ): AsyncGenerator<StreamEvent> {
     const conversation = await this.getConversation(conversationId, userId);
     const model = dto.model || conversation.model;
 
@@ -193,26 +190,7 @@ export class ChatService {
       .toArray();
     const llmMessages = await this.buildLlmMessages(messages);
 
-    // Set SSE headers
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.setHeader('X-Accel-Buffering', 'no');
-
-    // Detect client disconnect
-    let clientDisconnected = false;
-    req.on('close', () => {
-      clientDisconnected = true;
-    });
-
     let fullContent = '';
-    const streamTimeout = setTimeout(() => {
-      this.logger.warn(`Stream timeout for conversation ${conversationId}`);
-      if (!res.writableEnded) {
-        res.write(`data: ${JSON.stringify({ error: 'Stream timeout' })}\n\n`);
-        res.end();
-      }
-    }, ChatService.STREAM_TIMEOUT_MS);
 
     try {
       this.logger.log(
@@ -225,7 +203,7 @@ export class ChatService {
       });
 
       for await (const chunk of stream) {
-        if (clientDisconnected) {
+        if (abortSignal?.aborted) {
           this.logger.log(
             `Client disconnected during stream for conversation ${conversationId}`,
           );
@@ -236,7 +214,7 @@ export class ChatService {
         const content = chunk.choices[0]?.delta?.content || '';
         if (content) {
           fullContent += content;
-          res.write(`data: ${JSON.stringify({ content })}\n\n`);
+          yield { type: 'content', content };
         }
       }
 
@@ -257,10 +235,7 @@ export class ChatService {
       this.logger.log(
         `Stream complete for conversation ${conversationId}: ${fullContent.length} chars`,
       );
-      if (!res.writableEnded) {
-        res.write(`data: [DONE]\n\n`);
-        res.end();
-      }
+      yield { type: 'done' };
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -268,12 +243,7 @@ export class ChatService {
         `LLM stream failed for conversation ${conversationId}: ${errorMessage}`,
         error instanceof Error ? error.stack : undefined,
       );
-      if (!res.writableEnded) {
-        res.write(`data: ${JSON.stringify({ error: errorMessage })}\n\n`);
-        res.end();
-      }
-    } finally {
-      clearTimeout(streamTimeout);
+      yield { type: 'error', message: errorMessage };
     }
   }
 

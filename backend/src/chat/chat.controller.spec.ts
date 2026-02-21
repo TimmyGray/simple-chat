@@ -116,10 +116,25 @@ describe('ChatController', () => {
   });
 
   describe('sendMessage', () => {
-    it('should call sendMessageAndStream with userId', async () => {
+    it('should set SSE headers, consume stream events, and end response', async () => {
       const dto = { content: 'Hello' };
-      const mockReq = {} as any;
-      const mockRes = {} as any;
+      const mockReq = { on: vi.fn() } as any;
+      const written: string[] = [];
+      const mockRes = {
+        setHeader: vi.fn(),
+        write: vi.fn((data: string) => written.push(data)),
+        end: vi.fn(),
+        writableEnded: false,
+      } as any;
+
+      // Mock service to return an async generator
+      async function* mockGenerator() {
+        yield { type: 'content' as const, content: 'Hi' };
+        yield { type: 'done' as const };
+      }
+      chatService.sendMessageAndStream = vi
+        .fn()
+        .mockReturnValue(mockGenerator());
 
       await controller.sendMessage(
         mockUser,
@@ -128,13 +143,91 @@ describe('ChatController', () => {
         mockReq,
         mockRes,
       );
-      expect(chatService.sendMessageAndStream).toHaveBeenCalledWith(
+
+      // Verify SSE headers
+      expect(mockRes.setHeader).toHaveBeenCalledWith(
+        'Content-Type',
+        'text/event-stream',
+      );
+      expect(mockRes.setHeader).toHaveBeenCalledWith(
+        'Cache-Control',
+        'no-cache',
+      );
+      expect(mockRes.setHeader).toHaveBeenCalledWith(
+        'Connection',
+        'keep-alive',
+      );
+      expect(mockRes.setHeader).toHaveBeenCalledWith('X-Accel-Buffering', 'no');
+
+      // Verify SSE wire format
+      expect(written).toContain('data: {"content":"Hi"}\n\n');
+      expect(written).toContain('data: [DONE]\n\n');
+
+      // Verify response ended
+      expect(mockRes.end).toHaveBeenCalled();
+    });
+
+    it('should pass AbortSignal to service (not req/res)', async () => {
+      const dto = { content: 'Hello' };
+      const mockReq = { on: vi.fn() } as any;
+      const mockRes = {
+        setHeader: vi.fn(),
+        write: vi.fn(),
+        end: vi.fn(),
+        writableEnded: false,
+      } as any;
+
+      async function* emptyGenerator() {
+        yield { type: 'done' as const };
+      }
+      chatService.sendMessageAndStream = vi
+        .fn()
+        .mockReturnValue(emptyGenerator());
+
+      await controller.sendMessage(
+        mockUser,
         '507f1f77bcf86cd799439011',
         dto,
         mockReq,
         mockRes,
-        mockUserId,
       );
+
+      // Service should receive (id, dto, userId, AbortSignal) — NOT req/res
+      expect(chatService.sendMessageAndStream).toHaveBeenCalledWith(
+        '507f1f77bcf86cd799439011',
+        dto,
+        mockUserId,
+        expect.any(AbortSignal),
+      );
+    });
+
+    it('should write error event from stream to SSE format', async () => {
+      const dto = { content: 'Hello' };
+      const mockReq = { on: vi.fn() } as any;
+      const written: string[] = [];
+      const mockRes = {
+        setHeader: vi.fn(),
+        write: vi.fn((data: string) => written.push(data)),
+        end: vi.fn(),
+        writableEnded: false,
+      } as any;
+
+      async function* errorGenerator() {
+        yield { type: 'error' as const, message: 'LLM failed' };
+      }
+      chatService.sendMessageAndStream = vi
+        .fn()
+        .mockReturnValue(errorGenerator());
+
+      await controller.sendMessage(
+        mockUser,
+        '507f1f77bcf86cd799439011',
+        dto,
+        mockReq,
+        mockRes,
+      );
+
+      expect(written).toContain('data: {"error":"LLM failed"}\n\n');
     });
   });
 });

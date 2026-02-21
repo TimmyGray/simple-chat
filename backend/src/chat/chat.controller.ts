@@ -22,6 +22,7 @@ import { ChatService } from './chat.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { SendMessageDto } from './dto/send-message.dto';
+import type { StreamEvent } from './interfaces/stream-event.interface';
 import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -83,9 +84,11 @@ export class ChatController {
     return this.chatService.getMessages(id, user._id);
   }
 
+  private static readonly STREAM_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+
   @Post('conversations/:id/messages')
   @Throttle({ default: { ttl: 60000, limit: 10 } })
-  sendMessage(
+  async sendMessage(
     @CurrentUser() user: AuthUser,
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() dto: SendMessageDto,
@@ -95,7 +98,71 @@ export class ChatController {
     this.logger.log(
       `Starting SSE stream for conversation ${id}, model="${dto.model || 'default'}", attachments=${dto.attachments?.length || 0}`,
     );
-    return this.chatService.sendMessageAndStream(id, dto, req, res, user._id);
+
+    // SSE headers (transport concern)
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+
+    // Disconnect detection via AbortController
+    const abortController = new AbortController();
+    req.on('close', () => abortController.abort());
+
+    // Stream timeout guard
+    const streamTimeout = setTimeout(() => {
+      this.logger.warn(`Stream timeout for conversation ${id}`);
+      if (!res.writableEnded) {
+        res.write(`data: ${JSON.stringify({ error: 'Stream timeout' })}\n\n`);
+        res.end();
+      }
+      abortController.abort();
+    }, ChatController.STREAM_TIMEOUT_MS);
+
+    try {
+      const stream = this.chatService.sendMessageAndStream(
+        id,
+        dto,
+        user._id,
+        abortController.signal,
+      );
+      await this.consumeStreamAsSSE(stream, res);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `SSE stream failed for conversation ${id}: ${errorMessage}`,
+      );
+      if (!res.writableEnded) {
+        res.write(`data: ${JSON.stringify({ error: errorMessage })}\n\n`);
+      }
+    } finally {
+      clearTimeout(streamTimeout);
+      if (!res.writableEnded) {
+        res.end();
+      }
+    }
+  }
+
+  private async consumeStreamAsSSE(
+    stream: AsyncGenerator<StreamEvent>,
+    res: Response,
+  ): Promise<void> {
+    for await (const event of stream) {
+      if (res.writableEnded) break;
+
+      switch (event.type) {
+        case 'content':
+          res.write(`data: ${JSON.stringify({ content: event.content })}\n\n`);
+          break;
+        case 'done':
+          res.write('data: [DONE]\n\n');
+          break;
+        case 'error':
+          res.write(`data: ${JSON.stringify({ error: event.message })}\n\n`);
+          break;
+      }
+    }
   }
 
   // File upload
