@@ -98,7 +98,7 @@ Each task has:
 | FEAT-3 | Message Editing & Regeneration | fullstack | 3d | todo | Edit sent messages, regenerate responses |
 | FEAT-4 | Conversation Export (Markdown/PDF/JSON) | fullstack | 2d | todo | Data portability |
 | FEAT-5 | System Prompts / Custom Instructions | fullstack | 1d | todo | Per-conversation system prompt |
-| FEAT-6 | Token Usage & Cost Tracking | fullstack | 2d | todo | Parse OpenRouter response headers |
+| FEAT-6 | Token Usage & Cost Tracking | fullstack | 2d | done | PR #28 merged. stream_options usage extraction, per-message + cumulative tracking. |
 | FEAT-7 | Streaming Response Controls (stop/copy/retry) | frontend | 1d | todo | AbortController for stop exists |
 | FEAT-8 | Dark/Light Theme Toggle | frontend | 1d | todo | System preference detection |
 | FEAT-9 | Keyboard Shortcuts | frontend | 1d | todo | Cmd+N, Cmd+K, Escape, etc. |
@@ -143,3 +143,4 @@ Each task has:
 | B-M2 | Add @HttpCode decorators to controllers (PR #25) | 2026-02-21 |
 | B-M6 | Add idempotency key support for message creation (PR #26) | 2026-02-21 |
 | B-M7 | Configure MongoDB connection pool options (PR #27) | 2026-02-21 |
+| FEAT-6 | Token Usage & Cost Tracking (PR #28) | 2026-02-21 |
