@@ -32,10 +32,7 @@ const MAX_FILE_LINES = 300;
  * Each exception MUST reference a tech-debt-tracker task ID.
  * Remove the exception when the task is completed.
  */
-const FILE_SIZE_EXCEPTIONS: Record<string, string> = {
-  'chat/chat.service.ts':
-    'B-M10: Split chat.service.ts (extract streaming + file-extraction helpers)',
-};
+const FILE_SIZE_EXCEPTIONS: Record<string, string> = {};
 
 function getAllTsFiles(dir: string): string[] {
   const files: string[] = [];

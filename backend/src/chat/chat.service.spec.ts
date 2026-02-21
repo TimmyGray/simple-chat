@@ -5,6 +5,7 @@ import { MongoServerError, ObjectId } from 'mongodb';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ChatService } from './chat.service';
 import { DatabaseService } from '../database/database.service';
+import { FileExtractionService } from './file-extraction.service';
 import type { StreamEvent } from './interfaces/stream-event.interface';
 
 describe('ChatService', () => {
@@ -72,12 +73,22 @@ describe('ChatService', () => {
       users: vi.fn().mockReturnValue(mockUsersCollection),
     };
 
+    const mockFileExtractionService = {
+      buildLlmMessages: vi
+        .fn()
+        .mockResolvedValue([{ role: 'user', content: 'Hello' }]),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ChatService,
         {
           provide: DatabaseService,
           useValue: mockDatabaseService,
+        },
+        {
+          provide: FileExtractionService,
+          useValue: mockFileExtractionService,
         },
         {
           provide: ConfigService,
