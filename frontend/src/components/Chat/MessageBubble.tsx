@@ -1,18 +1,46 @@
+import { memo } from 'react';
 import { Box, Typography, Paper, Chip } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import type { Message } from '../../types';
 
+const remarkPlugins = [remarkGfm];
+const rehypePlugins = [rehypeSanitize];
+const markdownComponents: Components = {
+  code(props) {
+    const { children, className, ...rest } = props;
+    const match = /language-(\w+)/.exec(className || '');
+    const inline = !match;
+    return !inline ? (
+      <SyntaxHighlighter
+        style={oneDark}
+        language={match[1]}
+        PreTag="div"
+        customStyle={{
+          borderRadius: 8,
+          fontSize: '0.85rem',
+        }}
+      >
+        {String(children).replace(/\n$/, '')}
+      </SyntaxHighlighter>
+    ) : (
+      <code className={className} {...rest}>
+        {children}
+      </code>
+    );
+  },
+};
+
 interface MessageBubbleProps {
   message: Message;
 }
 
-export default function MessageBubble({ message }: MessageBubbleProps) {
+function MessageBubble({ message }: MessageBubbleProps) {
   const isUser = message.role === 'user';
 
   return (
@@ -130,32 +158,9 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
             }}
           >
             <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeSanitize]}
-              components={{
-                code(props) {
-                  const { children, className, ...rest } = props;
-                  const match = /language-(\w+)/.exec(className || '');
-                  const inline = !match;
-                  return !inline ? (
-                    <SyntaxHighlighter
-                      style={oneDark}
-                      language={match[1]}
-                      PreTag="div"
-                      customStyle={{
-                        borderRadius: 8,
-                        fontSize: '0.85rem',
-                      }}
-                    >
-                      {String(children).replace(/\n$/, '')}
-                    </SyntaxHighlighter>
-                  ) : (
-                    <code className={className} {...rest}>
-                      {children}
-                    </code>
-                  );
-                },
-              }}
+              remarkPlugins={remarkPlugins}
+              rehypePlugins={rehypePlugins}
+              components={markdownComponents}
             >
               {message.content}
             </ReactMarkdown>
@@ -176,3 +181,5 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
     </Box>
   );
 }
+
+export default memo(MessageBubble);
