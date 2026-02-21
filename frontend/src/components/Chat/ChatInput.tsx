@@ -32,14 +32,16 @@ export default function ChatInput({
   const [focused, setFocused] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
+  const overLimit = input.length > MAX_MESSAGE_LENGTH;
+
   const handleSend = useCallback(() => {
     const text = input.trim();
-    if (!text && attachments.length === 0) return;
+    if ((!text && attachments.length === 0) || overLimit) return;
 
     onSend(text || t('chat.filesAttached'), attachments);
     setInput('');
     setAttachments([]);
-  }, [input, attachments, onSend, t]);
+  }, [input, attachments, onSend, t, overLimit]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -65,7 +67,6 @@ export default function ChatInput({
     setAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const overLimit = input.length > MAX_MESSAGE_LENGTH;
   const showCounter = input.length >= MAX_MESSAGE_LENGTH * 0.9;
   const canSend = (input.trim().length > 0 || attachments.length > 0) && !overLimit;
 

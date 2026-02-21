@@ -142,6 +142,26 @@ describe('ChatInput', () => {
     expect(sendBtn).toBeDisabled();
   });
 
+  it('does not send via Enter when over character limit', async () => {
+    const user = userEvent.setup();
+    const onSend = vi.fn();
+
+    renderWithTheme(
+      <ChatInput
+        models={mockModels}
+        selectedModel="openrouter/free"
+        onModelChange={vi.fn()}
+        onSend={onSend}
+      />,
+    );
+
+    const input = screen.getByPlaceholderText('Type your message...');
+    fireEvent.change(input, { target: { value: 'a'.repeat(10001) } });
+    await user.type(input, '{Enter}');
+
+    expect(onSend).not.toHaveBeenCalled();
+  });
+
   it('does not show counter for short input', () => {
     renderWithTheme(
       <ChatInput
