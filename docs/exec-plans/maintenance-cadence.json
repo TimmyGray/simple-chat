@@ -10,7 +10,7 @@
     "audit_every_n_features": 5,
     "retrospective_every_n_features": 10
   },
-  "pending_runs": ["audit"],
+  "pending_runs": [],
   "last_runs": {
     "sweep": "2026-02-21",
     "audit": "2026-02-21",
