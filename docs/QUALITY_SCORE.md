@@ -1,14 +1,14 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-21 (sweep #2)
+> Last updated: 2026-02-21 (audit #3)
 
 ## Test Summary
 
 | Area | Test Files | Tests | Pass Rate |
 |------|-----------|-------|-----------|
 | Backend | 11 | 84 | 100% |
-| Frontend | 7 | 33 | 100% |
-| **Total** | **18** | **117** | **100%** |
+| Frontend | 7 | 37 | 100% |
+| **Total** | **18** | **121** | **100%** |
 
 ## Lint Status
 
@@ -40,8 +40,8 @@
 | Area | Total | Outdated | Vulnerabilities |
 |------|-------|----------|----------------|
 | Root | 3 | 0 | 0 |
-| Backend | ~25 | 12 (5 patch, 4 minor, 3 major) | 40 (11 moderate, 29 high — all in jest/babel transitive deps) |
-| Frontend | ~20 | 7 (2 patch, 2 minor, 3 major) | 11 (1 moderate, 10 high — all in eslint/minimatch transitive deps) |
+| Backend | ~25 | 12 (5 patch, 4 minor, 3 major) | 35 (5 moderate, 30 high — all in jest/babel transitive deps) |
+| Frontend | ~20 | 8 (3 patch, 2 minor, 3 major) | 11 (1 moderate, 10 high — all in eslint/minimatch transitive deps) |
 
 ## Bundle Size
 - Backend: 1.1 MB (dist/)
@@ -49,26 +49,31 @@
 
 ## Tech Debt
 - Critical: 0 (JWT authentication completed)
-- High: 2 todo (F-H5, F-H6) — B-H5, B-H6, B-H7, F-H3 completed since audit #2
-- Medium: 24 (unchanged)
-- Low: 11 (F-L3 completed in prior sweep)
+- High: 0 todo — all 7 high-priority items completed (F-H5, F-H6 done since audit #2)
+- Medium: 29 todo, 2 done
+- Low: 12 todo, 1 done
 - Features: 9 todo, 1 done
-- Total tracked: 64 (see `docs/exec-plans/tech-debt-tracker.md`)
+- Total tracked: 65 (see `docs/exec-plans/tech-debt-tracker.md`)
 
-## New Findings (Sweep #2)
-- Backend test count jumped from 75 → 84 (+9 tests from chat.service.spec additions)
-- Total tests now 117 (target: 100+ achieved!)
-- 4 high-priority items completed since last audit: B-H5, B-H6, B-H7, F-H3
-- Removed redundant localhost fallback in chat.service.ts (config already provides default)
+## New Findings (Audit #3)
+- Frontend test count jumped from 33 → 37 (+4 ChatInput validation tests from PR #20)
+- Total tests now 121 (target: 100+ sustained)
+- All high-priority items now complete: F-H5 (input validation), F-H6 (React.memo)
+- Backend vulnerabilities decreased: 40 → 35 (jest/babel transitive deps)
+- Frontend outdated count increased slightly: 7 → 8 (jsdom minor available)
 - No new lint, type, or build errors
-- i18n: all 4 locale files (en, ru, zh, es) have identical key structure — no gaps
-- No new cross-module import violations or architecture regressions
-- `any` types: only in test files (allowed per conventions)
-- Hardcoded rgba/gradient colors: 16 occurrences across 5 files (tracked as F-M13)
+- No console.log/warn/error found in source (clean)
+- No TODO/FIXME/HACK comments in source (clean)
+- chat.service.ts at 337 lines — still exceeds 300-line limit (tracked as B-M10)
+- window.alert() still used in FileAttachment.tsx (tracked as F-M21)
+- Hardcoded rgba/gradient colors: ~16 occurrences across 5 files (tracked as F-M13)
+- No hardcoded secrets found in source files
+- i18n: ChatInput uses t() properly, no new hardcoded strings detected
 
 ## Targets
-- Test count: 100+ (achieved — currently 117)
+- Test count: 100+ (achieved — currently 121)
 - Coverage: 80%+ (currently 60%/50% thresholds)
 - Lint errors: 0 (achieved)
 - Type errors: 0 (achieved)
 - Critical tech debt: 0 (achieved)
+- High tech debt: 0 (achieved)
