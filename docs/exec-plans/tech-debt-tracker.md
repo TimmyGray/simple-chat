@@ -45,7 +45,7 @@ Each task has:
 | B-M6 | Add idempotency key support for message creation | backend | 0.5d | done | PR #26 merged. Sparse unique index + Idempotency-Key header. |
 | B-M7 | Configure MongoDB connection pool options | backend | 0.25d | done | PR #27 merged. minPoolSize=2, maxPoolSize=10 defaults. |
 | B-M8 | Fix ESLint errors in test files (32 errors) | backend | 1d | todo | `any` types in test mocks (lint passes clean — may be warnings only) |
-| B-M10 | Split chat.service.ts (337 lines, exceeds 300-line limit) | backend | 1d | todo | Extract streaming + file-extraction helpers |
+| B-M10 | Split chat.service.ts (354 lines, exceeds 300-line limit) | backend | 1d | todo | Extract streaming + file-extraction helpers |
 | B-M9 | Add coverage tool, target 80%+ | backend | 0.5d | done | @vitest/coverage-v8 configured, thresholds: 60%/50% |
 | F-M1 | Add list virtualization (react-window) | frontend | 1d | todo | Long conversations cause jank |
 | F-M2 | Throttle scroll-to-bottom during streaming | frontend | 0.25d | todo | Scroll fires on every chunk |
