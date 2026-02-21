@@ -9,6 +9,8 @@ import {
   Req,
   Res,
   Logger,
+  HttpCode,
+  HttpStatus,
   UseGuards,
   UseInterceptors,
   UploadedFiles,
@@ -45,6 +47,7 @@ export class ChatController {
   }
 
   @Post('conversations')
+  @HttpCode(HttpStatus.CREATED)
   createConversation(
     @CurrentUser() user: AuthUser,
     @Body() dto: CreateConversationDto,
@@ -167,6 +170,7 @@ export class ChatController {
 
   // File upload
   @Post('upload')
+  @HttpCode(HttpStatus.CREATED)
   @Throttle({ default: { ttl: 60000, limit: 20 } })
   @UseInterceptors(
     FilesInterceptor('files', 5, {
