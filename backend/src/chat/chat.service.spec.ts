@@ -79,6 +79,7 @@ describe('ChatService', () => {
               if (key === 'openrouter.apiKey') return 'test-key';
               if (key === 'openrouter.baseUrl')
                 return 'https://openrouter.ai/api/v1';
+              if (key === 'corsOrigin') return 'http://localhost:5173';
               return null;
             }),
           },
