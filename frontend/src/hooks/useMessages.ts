@@ -14,6 +14,7 @@ export function useMessages() {
   const [streamingContent, setStreamingContent] = useState('');
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const fullContentRef = useRef('');
 
   const fetchMessages = useCallback(async (conversationId: string) => {
     setLoading(true);
@@ -56,7 +57,7 @@ export function useMessages() {
 
       const abortController = new AbortController();
       abortRef.current = abortController;
-      let fullContent = '';
+      fullContentRef.current = '';
       let completed = false;
 
       try {
@@ -66,8 +67,8 @@ export function useMessages() {
           model,
           attachments,
           (chunk) => {
-            fullContent += chunk;
-            setStreamingContent(fullContent);
+            fullContentRef.current += chunk;
+            setStreamingContent(fullContentRef.current);
           },
           () => {
             completed = true;
@@ -75,7 +76,7 @@ export function useMessages() {
               _id: crypto.randomUUID(),
               conversationId,
               role: 'assistant',
-              content: fullContent,
+              content: fullContentRef.current,
               model,
               attachments: [],
               createdAt: new Date().toISOString(),
@@ -103,6 +104,7 @@ export function useMessages() {
       } finally {
         setStreaming(false);
         setStreamingContent('');
+        fullContentRef.current = '';
         abortRef.current = null;
       }
     },
@@ -113,6 +115,7 @@ export function useMessages() {
     abortRef.current?.abort();
     setMessages([]);
     setStreamingContent('');
+    fullContentRef.current = '';
     setStreaming(false);
     setError(null);
   }, []);

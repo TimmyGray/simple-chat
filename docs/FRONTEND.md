@@ -473,6 +473,6 @@ This codebase passes data through props from `App` down the tree. Do not introdu
 When adding new streaming features, follow the existing pattern:
 1. Create an `AbortController`.
 2. Start with `setStreaming(true)` and `setStreamingContent('')`.
-3. Accumulate chunks into a local variable AND call `setStreamingContent`.
-4. On done, create the final message from the accumulated content.
-5. Always clean up in `finally`: `setStreaming(false)`, `setStreamingContent('')`, cancel reader.
+3. Accumulate chunks into a `useRef` AND call `setStreamingContent`.
+4. On done, create the final message from the ref's accumulated content.
+5. Always clean up in `finally`: `setStreaming(false)`, `setStreamingContent('')`, reset ref, cancel reader.
