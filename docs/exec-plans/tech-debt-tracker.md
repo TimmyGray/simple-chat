@@ -44,8 +44,8 @@ Each task has:
 | B-M5 | Add length limits to DTO fields | backend | 0.25d | done | @MaxLength/@MinLength already in auth DTOs |
 | B-M6 | Add idempotency key support for message creation | backend | 0.5d | done | PR #26 merged. Sparse unique index + Idempotency-Key header. |
 | B-M7 | Configure MongoDB connection pool options | backend | 0.25d | done | PR #27 merged. minPoolSize=2, maxPoolSize=10 defaults. |
-| B-M8 | Fix ESLint errors in test files (32 errors) | backend | 1d | todo | `any` types in test mocks (lint passes clean — may be warnings only) |
-| B-M10 | Split chat.service.ts (390 lines, exceeds 300-line limit) | backend | 1d | todo | Extract streaming + file-extraction helpers. Grew 354->390 with FEAT-6 token tracking. |
+| B-M8 | Fix ESLint errors in test files (32 errors) | backend | 1d | wont-fix | Lint passes clean. `any` allowed in tests per CONVENTIONS.md. |
+| B-M10 | Split chat.service.ts (390 lines, exceeds 300-line limit) | backend | 1d | done | PR #30 merged. Extracted FileExtractionService (297+102 lines). |
 | B-M9 | Add coverage tool, target 80%+ | backend | 0.5d | done | @vitest/coverage-v8 configured, thresholds: 60%/50% |
 | F-M1 | Add list virtualization (react-window) | frontend | 1d | todo | Long conversations cause jank |
 | F-M2 | Throttle scroll-to-bottom during streaming | frontend | 0.25d | todo | Scroll fires on every chunk |
@@ -145,3 +145,4 @@ Each task has:
 | B-M7 | Configure MongoDB connection pool options (PR #27) | 2026-02-21 |
 | FEAT-6 | Token Usage & Cost Tracking (PR #28) | 2026-02-21 |
 | F-M23 | Localize "Error:" prefix in useMessages (retrospective #2) | 2026-02-21 |
+| B-M10 | Split chat.service.ts — extract FileExtractionService (PR #30) | 2026-02-21 |
