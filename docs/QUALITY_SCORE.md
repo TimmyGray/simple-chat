@@ -1,14 +1,14 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-21 (audit #3)
+> Last updated: 2026-02-21 (sweep post-audit #3)
 
 ## Test Summary
 
 | Area | Test Files | Tests | Pass Rate |
 |------|-----------|-------|-----------|
-| Backend | 11 | 84 | 100% |
+| Backend | 12 | 90 | 100% |
 | Frontend | 7 | 37 | 100% |
-| **Total** | **18** | **121** | **100%** |
+| **Total** | **19** | **127** | **100%** |
 
 ## Lint Status
 
@@ -48,30 +48,35 @@
 - Frontend: 1.4 MB (dist/)
 
 ## Tech Debt
-- Critical: 0 (JWT authentication completed)
-- High: 0 todo — all 7 high-priority items completed (F-H5, F-H6 done since audit #2)
-- Medium: 29 todo, 2 done
+- Critical: 0 todo, 4 done (JWT authentication completed)
+- High: 0 todo, 7 done — all high-priority items completed
+- Medium: 28 todo, 3 done (B-M1 response DTOs done since audit #3)
 - Low: 12 todo, 1 done
 - Features: 9 todo, 1 done
 - Total tracked: 65 (see `docs/exec-plans/tech-debt-tracker.md`)
 
-## New Findings (Audit #3)
-- Frontend test count jumped from 33 → 37 (+4 ChatInput validation tests from PR #20)
-- Total tests now 121 (target: 100+ sustained)
-- All high-priority items now complete: F-H5 (input validation), F-H6 (React.memo)
-- Backend vulnerabilities decreased: 40 → 35 (jest/babel transitive deps)
-- Frontend outdated count increased slightly: 7 → 8 (jsdom minor available)
+## New Findings (Sweep post-audit #3)
+- Backend tests jumped from 84 → 90 (+6 from transform-response interceptor tests, PR #23)
+- Backend test files: 11 → 12 (new interceptor spec)
+- Total tests now 127 (target: 100+ sustained)
+- B-M1 (response DTOs) completed since audit #3 — medium done count: 2 → 3
 - No new lint, type, or build errors
 - No console.log/warn/error found in source (clean)
 - No TODO/FIXME/HACK comments in source (clean)
-- chat.service.ts at 337 lines — still exceeds 300-line limit (tracked as B-M10)
-- window.alert() still used in FileAttachment.tsx (tracked as F-M21)
-- Hardcoded rgba/gradient colors: ~16 occurrences across 5 files (tracked as F-M13)
+- No dangerouslySetInnerHTML usage (clean)
 - No hardcoded secrets found in source files
-- i18n: ChatInput uses t() properly, no new hardcoded strings detected
+- i18n: all 4 locales in sync (44 keys each), no hardcoded user-facing strings detected
+- All cross-module imports follow approved patterns (chat→auth for guards/decorators)
+- All URLs/ports are in config files or .env defaults (not hardcoded in business logic)
+- Existing tracked violations confirmed still present:
+  - chat.service.ts at 337 lines (tracked as B-M10)
+  - window.alert() in FileAttachment.tsx (tracked as F-M21)
+  - Hardcoded rgba/gradient colors: ~27 occurrences across 6 files (tracked as F-M13)
+  - Hardcoded "Error:" prefix in useMessages.ts (tracked as F-M23)
+  - `any` types in test files only (12 occurrences, acceptable per conventions)
 
 ## Targets
-- Test count: 100+ (achieved — currently 121)
+- Test count: 100+ (achieved — currently 127)
 - Coverage: 80%+ (currently 60%/50% thresholds)
 - Lint errors: 0 (achieved)
 - Type errors: 0 (achieved)
