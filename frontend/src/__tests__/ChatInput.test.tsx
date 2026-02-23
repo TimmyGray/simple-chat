@@ -196,4 +196,43 @@ describe('ChatInput', () => {
 
     expect(input).toHaveValue('');
   });
+
+  it('refocuses input after sending a message', async () => {
+    const user = userEvent.setup();
+    const onSend = vi.fn();
+
+    renderWithTheme(
+      <ChatInput
+        models={mockModels}
+        selectedModel="openrouter/free"
+        onModelChange={vi.fn()}
+        onSend={onSend}
+      />,
+    );
+
+    const input = screen.getByPlaceholderText('Type your message...');
+    await user.type(input, 'Hello{Enter}');
+
+    expect(input).toHaveFocus();
+  });
+
+  it('refocuses input when re-enabled after streaming', () => {
+    const props = {
+      models: mockModels,
+      selectedModel: 'openrouter/free',
+      onModelChange: vi.fn(),
+      onSend: vi.fn(),
+    };
+
+    const { rerender } = renderWithTheme(<ChatInput {...props} disabled />);
+
+    rerender(
+      <ThemeProvider theme={theme}>
+        <ChatInput {...props} />
+      </ThemeProvider>,
+    );
+
+    const input = screen.getByPlaceholderText('Type your message...');
+    expect(input).toHaveFocus();
+  });
 });
