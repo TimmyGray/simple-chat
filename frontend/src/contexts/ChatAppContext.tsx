@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
-import type { Conversation } from '../types';
+import type { Conversation, ConversationId } from '../types';
 
 export interface ChatAppContextValue {
   conversations: Conversation[];
@@ -9,9 +9,9 @@ export interface ChatAppContextValue {
   userEmail: string | undefined;
   tokenUsage: number | undefined;
   isOnline: boolean;
-  selectConversation: (id: string) => void;
+  selectConversation: (id: ConversationId) => void;
   newChat: () => void;
-  deleteConversation: (id: string) => void;
+  deleteConversation: (id: ConversationId) => void;
   onConversationUpdate: () => void;
   logout: () => void;
 }

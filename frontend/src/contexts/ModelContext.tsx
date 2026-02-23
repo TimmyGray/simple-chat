@@ -1,11 +1,11 @@
 import { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
-import type { ModelInfo } from '../types';
+import type { ModelInfo, ModelId } from '../types';
 
 export interface ModelContextValue {
   models: ModelInfo[];
-  selectedModel: string;
-  changeModel: (model: string) => void;
+  selectedModel: ModelId;
+  changeModel: (model: ModelId) => void;
 }
 
 const ModelContext = createContext<ModelContextValue | null>(null);

@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from '../theme';
+import { asModelId } from '../types';
 import ChatInput from '../components/Chat/ChatInput';
 
 const renderWithTheme = (ui: React.ReactElement) =>
@@ -10,7 +11,7 @@ const renderWithTheme = (ui: React.ReactElement) =>
 
 const mockModels = [
   {
-    id: 'openrouter/free',
+    id: asModelId('openrouter/free'),
     name: 'Gemini 2.0 Flash',
     description: 'Fast',
     free: true,
@@ -24,7 +25,7 @@ describe('ChatInput', () => {
     renderWithTheme(
       <ChatInput
         models={mockModels}
-        selectedModel="openrouter/free"
+        selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
         onSend={vi.fn()}
       />,
@@ -41,7 +42,7 @@ describe('ChatInput', () => {
     renderWithTheme(
       <ChatInput
         models={mockModels}
-        selectedModel="openrouter/free"
+        selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
         onSend={onSend}
       />,
@@ -63,7 +64,7 @@ describe('ChatInput', () => {
     renderWithTheme(
       <ChatInput
         models={mockModels}
-        selectedModel="openrouter/free"
+        selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
         onSend={onSend}
       />,
@@ -82,7 +83,7 @@ describe('ChatInput', () => {
     renderWithTheme(
       <ChatInput
         models={mockModels}
-        selectedModel="openrouter/free"
+        selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
         onSend={onSend}
       />,
@@ -98,7 +99,7 @@ describe('ChatInput', () => {
     renderWithTheme(
       <ChatInput
         models={mockModels}
-        selectedModel="openrouter/free"
+        selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
         onSend={vi.fn()}
         disabled
@@ -113,7 +114,7 @@ describe('ChatInput', () => {
     renderWithTheme(
       <ChatInput
         models={mockModels}
-        selectedModel="openrouter/free"
+        selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
         onSend={vi.fn()}
       />,
@@ -129,7 +130,7 @@ describe('ChatInput', () => {
     renderWithTheme(
       <ChatInput
         models={mockModels}
-        selectedModel="openrouter/free"
+        selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
         onSend={vi.fn()}
       />,
@@ -149,7 +150,7 @@ describe('ChatInput', () => {
     renderWithTheme(
       <ChatInput
         models={mockModels}
-        selectedModel="openrouter/free"
+        selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
         onSend={onSend}
       />,
@@ -166,7 +167,7 @@ describe('ChatInput', () => {
     renderWithTheme(
       <ChatInput
         models={mockModels}
-        selectedModel="openrouter/free"
+        selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
         onSend={vi.fn()}
       />,
@@ -185,7 +186,7 @@ describe('ChatInput', () => {
     renderWithTheme(
       <ChatInput
         models={mockModels}
-        selectedModel="openrouter/free"
+        selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
         onSend={onSend}
       />,
@@ -204,7 +205,7 @@ describe('ChatInput', () => {
     renderWithTheme(
       <ChatInput
         models={mockModels}
-        selectedModel="openrouter/free"
+        selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
         onSend={onSend}
       />,
@@ -219,7 +220,7 @@ describe('ChatInput', () => {
   it('refocuses input when re-enabled after streaming', () => {
     const props = {
       models: mockModels,
-      selectedModel: 'openrouter/free',
+      selectedModel: asModelId('openrouter/free'),
       onModelChange: vi.fn(),
       onSend: vi.fn(),
     };

@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, List, Typography, Divider, CircularProgress, IconButton, Tooltip } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
+import type { ConversationId } from '../../types';
 import { useChatApp } from '../../contexts/ChatAppContext';
 import NewChatButton from './NewChatButton';
 import ConversationItem from './ConversationItem';
@@ -36,12 +37,12 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
     logout,
   } = useChatApp();
 
-  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ConversationId | null>(null);
 
   const selectedId = selectedConversation?._id ?? null;
 
   const handleSelect = useCallback(
-    (id: string) => {
+    (id: ConversationId) => {
       selectConversation(id);
       onMobileClose?.();
     },

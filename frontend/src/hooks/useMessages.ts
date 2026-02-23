@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Message, Attachment } from '../types';
+import type { Message, Attachment, ConversationId, ModelId } from '../types';
+import { asMessageId } from '../types';
 import * as api from '../api/client';
 import { getErrorMessage } from '../utils/getErrorMessage';
 
@@ -17,7 +18,7 @@ export function useMessages() {
   const abortRef = useRef<AbortController | null>(null);
   const fullContentRef = useRef('');
 
-  const fetchMessages = useCallback(async (conversationId: string) => {
+  const fetchMessages = useCallback(async (conversationId: ConversationId) => {
     setLoading(true);
     setError(null);
     try {
@@ -37,14 +38,14 @@ export function useMessages() {
 
   const sendMessage = useCallback(
     async (
-      conversationId: string,
+      conversationId: ConversationId,
       content: string,
-      model?: string,
+      model?: ModelId,
       attachments?: Attachment[],
     ) => {
       // Optimistically add user message
       const userMsg: Message = {
-        _id: crypto.randomUUID(),
+        _id: asMessageId(crypto.randomUUID()),
         conversationId,
         role: 'user',
         content,
@@ -76,7 +77,7 @@ export function useMessages() {
           () => {
             completed = true;
             const assistantMsg: Message = {
-              _id: crypto.randomUUID(),
+              _id: asMessageId(crypto.randomUUID()),
               conversationId,
               role: 'assistant',
               content: fullContentRef.current,
@@ -88,7 +89,7 @@ export function useMessages() {
           },
           (streamError) => {
             const errorMsg: Message = {
-              _id: crypto.randomUUID(),
+              _id: asMessageId(crypto.randomUUID()),
               conversationId,
               role: 'assistant',
               content: tRef.current('errors.streamErrorPrefix', { message: streamError }),
