@@ -5,6 +5,8 @@ import type { Message } from '../../types';
 import MessageBubble from './MessageBubble';
 import TypingIndicator from './TypingIndicator';
 
+const SCROLL_THROTTLE_MS = 150;
+
 interface MessageListProps {
   messages: Message[];
   loading: boolean;
@@ -36,18 +38,40 @@ export default function MessageList({
     ];
   }, [messages, streaming, streamingContent]);
 
-  // Auto-scroll during streaming when content grows
+  // Throttle scroll-to-bottom during streaming (F-M2)
+  const lastScrollRef = useRef(0);
+  const scrollTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  const scrollToBottom = useCallback(() => {
+    lastScrollRef.current = Date.now();
+    virtuosoRef.current?.scrollToIndex({
+      index: items.length - 1,
+      align: 'end',
+      behavior: 'smooth',
+    });
+  }, [items.length]);
+
   useEffect(() => {
-    if (isAtBottomRef.current && streaming && streamingContent && items.length > 0) {
-      requestAnimationFrame(() => {
-        virtuosoRef.current?.scrollToIndex({
-          index: items.length - 1,
-          align: 'end',
-          behavior: 'smooth',
-        });
-      });
+    if (!isAtBottomRef.current || !streaming || !streamingContent || items.length === 0) return;
+
+    const elapsed = Date.now() - lastScrollRef.current;
+    if (elapsed >= SCROLL_THROTTLE_MS) {
+      requestAnimationFrame(scrollToBottom);
+    } else if (!scrollTimerRef.current) {
+      scrollTimerRef.current = setTimeout(() => {
+        scrollTimerRef.current = null;
+        requestAnimationFrame(scrollToBottom);
+      }, SCROLL_THROTTLE_MS - elapsed);
     }
-  }, [streamingContent, streaming, items.length]);
+  }, [streamingContent, streaming, items.length, scrollToBottom]);
+
+  // Final scroll when streaming ends + cleanup
+  useEffect(() => {
+    if (!streaming && scrollTimerRef.current) {
+      clearTimeout(scrollTimerRef.current);
+      scrollTimerRef.current = null;
+    }
+  }, [streaming]);
 
   const handleAtBottomChange = useCallback((atBottom: boolean) => {
     isAtBottomRef.current = atBottom;
