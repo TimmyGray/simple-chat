@@ -214,20 +214,21 @@ App (useAuth hook)
 │       │   ├── LanguageSwitcher
 │       │   └── Login/Register form
 │       ├── ChatApp (shown when authenticated)
-│       │   ├── Layout
-│       │   │   ├── Sidebar
-│       │   │   │   ├── LanguageSwitcher
-│       │   │   │   ├── NewChatButton
-│       │   │   │   ├── ConversationItem[] (list with delete)
-│       │   │   │   └── User email + Logout button
-│       │   │   └── ChatArea
-│       │   │       ├── ModelSelector (dropdown)
-│       │   │       ├── MessageList
-│       │   │       │   ├── MessageBubble[] (markdown rendering)
-│       │   │       │   └── TypingIndicator (during streaming)
-│       │   │       ├── EmptyState (no conversation selected)
-│       │   │       └── ChatInput
-│       │   │           └── FileAttachment (upload UI)
+│       │   ├── ChatAppProvider (React Context for shared state)
+│       │   │   └── Layout (pure layout, no data props)
+│       │   │       ├── Sidebar (reads from ChatAppContext)
+│       │   │       │   ├── LanguageSwitcher
+│       │   │       │   ├── NewChatButton
+│       │   │       │   ├── ConversationItem[] (list with delete)
+│       │   │       │   └── User email + Logout button
+│       │   │       └── ChatArea (reads from ChatAppContext)
+│       │   │           ├── ModelSelector (dropdown)
+│       │   │           ├── MessageList
+│       │   │           │   ├── MessageBubble[] (markdown rendering)
+│       │   │           │   └── TypingIndicator (during streaming)
+│       │   │           ├── EmptyState (no conversation selected)
+│       │   │           └── ChatInput
+│       │   │               └── FileAttachment (upload UI)
 │       │   └── ConfirmDialog (shared delete confirmation)
 │       │   └── Snackbar + Alert (error display, auto-dismiss 4s)
 │       └── Loading spinner (during auth session restore)
@@ -235,16 +236,17 @@ App (useAuth hook)
 
 ### State Management
 
-Custom hooks with no external state library:
+Custom hooks with one React Context (`ChatAppContext`). No Redux, Zustand, or other external state library.
 
-| Hook               | Responsibilities                                                    |
+| Hook / Context     | Responsibilities                                                    |
 |--------------------|---------------------------------------------------------------------|
+| `ChatAppContext`   | Shared state (conversations, models, selection, user info) + action callbacks. Provided by `ChatApp`, consumed by `Sidebar` and `ChatArea` via `useChatApp()`. |
 | `useAuth`          | JWT token management (localStorage), login, register, logout, session restore on mount. |
 | `useConversations` | Fetch, create, update, delete conversations. Error state. Auto-fetch on mount. |
 | `useMessages`      | Fetch messages, send with SSE streaming, optimistic user message insertion, stop streaming. Manages `streaming`, `streamingContent`, abort controller. |
 | `useModels`        | Fetch available models on mount. Error state.                       |
 
-State coordination happens in `App.tsx`, which lifts `selectedId`, `selectedModel`, and error state across the Sidebar and ChatArea.
+State coordination happens in `ChatApp` (within `App.tsx`), which assembles the `ChatAppContext` value from `useConversations`, `useModels`, and local state (`selectedId`, `selectedModel`). `Layout` is a pure layout component with no data props.
 
 ### API Layer
 

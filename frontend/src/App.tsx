@@ -6,10 +6,12 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { useAuth } from './hooks/useAuth';
 import { useConversations } from './hooks/useConversations';
 import { useModels } from './hooks/useModels';
+import { ChatAppProvider } from './contexts/ChatAppContext';
 import Layout from './components/Layout';
 import AuthPage from './components/Auth/AuthPage';
 
 import type { User } from './types';
+import type { ChatAppContextValue } from './contexts/ChatAppContext';
 
 interface ChatAppProps {
   user: User;
@@ -62,23 +64,47 @@ function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps) {
     [remove, selectedId, t],
   );
 
+  const handleConversationUpdate = useCallback(() => {
+    refresh();
+    onRefreshUser();
+  }, [refresh, onRefreshUser]);
+
+  const contextValue = useMemo<ChatAppContextValue>(
+    () => ({
+      conversations,
+      conversationsLoading: convsLoading,
+      models,
+      selectedConversation,
+      selectedModel,
+      userEmail: user.email,
+      tokenUsage: user.totalTokensUsed,
+      selectConversation: setSelectedId,
+      newChat: handleNewChat,
+      deleteConversation: handleDelete,
+      changeModel: setSelectedModel,
+      onConversationUpdate: handleConversationUpdate,
+      logout: onLogout,
+    }),
+    [
+      conversations,
+      convsLoading,
+      models,
+      selectedConversation,
+      selectedModel,
+      user.email,
+      user.totalTokensUsed,
+      handleNewChat,
+      handleDelete,
+      handleConversationUpdate,
+      onLogout,
+    ],
+  );
+
   return (
     <>
-      <Layout
-        conversations={conversations}
-        conversationsLoading={convsLoading}
-        models={models}
-        selectedConversation={selectedConversation}
-        selectedModel={selectedModel}
-        userEmail={user.email}
-        tokenUsage={user.totalTokensUsed}
-        onSelectConversation={setSelectedId}
-        onNewChat={handleNewChat}
-        onDeleteConversation={handleDelete}
-        onModelChange={setSelectedModel}
-        onConversationUpdate={() => { refresh(); onRefreshUser(); }}
-        onLogout={onLogout}
-      />
+      <ChatAppProvider value={contextValue}>
+        <Layout />
+      </ChatAppProvider>
       <Snackbar
         open={!!error}
         autoHideDuration={4000}

@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, List, Typography, Divider, CircularProgress, IconButton, Tooltip } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
-import type { Conversation } from '../../types';
+import { useChatApp } from '../../contexts/ChatAppContext';
 import NewChatButton from './NewChatButton';
 import ConversationItem from './ConversationItem';
 import ConfirmDialog from '../common/ConfirmDialog';
@@ -19,30 +19,39 @@ function formatTokenCount(tokens: number): string {
 }
 
 interface SidebarProps {
-  conversations: Conversation[];
-  loading: boolean;
-  selectedId: string | null;
-  userEmail?: string;
-  tokenUsage?: number;
-  onSelect: (id: string) => void;
-  onNewChat: () => void;
-  onDelete: (id: string) => void;
-  onLogout?: () => void;
+  onMobileClose?: () => void;
 }
 
-export default function Sidebar({
-  conversations,
-  loading,
-  selectedId,
-  userEmail,
-  tokenUsage,
-  onSelect,
-  onNewChat,
-  onDelete,
-  onLogout,
-}: SidebarProps) {
+export default function Sidebar({ onMobileClose }: SidebarProps) {
   const { t } = useTranslation();
+  const {
+    conversations,
+    conversationsLoading,
+    selectedConversation,
+    userEmail,
+    tokenUsage,
+    selectConversation,
+    newChat,
+    deleteConversation,
+    logout,
+  } = useChatApp();
+
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+
+  const selectedId = selectedConversation?._id ?? null;
+
+  const handleSelect = useCallback(
+    (id: string) => {
+      selectConversation(id);
+      onMobileClose?.();
+    },
+    [selectConversation, onMobileClose],
+  );
+
+  const handleNewChat = useCallback(() => {
+    newChat();
+    onMobileClose?.();
+  }, [newChat, onMobileClose]);
 
   return (
     <Box
@@ -57,12 +66,12 @@ export default function Sidebar({
         {t('sidebar.title')}
       </Typography>
 
-      <NewChatButton onClick={onNewChat} />
+      <NewChatButton onClick={handleNewChat} />
 
       <Divider sx={{ my: 1 }} />
 
       <Box sx={{ flex: 1, overflow: 'auto' }}>
-        {loading ? (
+        {conversationsLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', pt: 4 }}>
             <CircularProgress size={24} />
           </Box>
@@ -81,7 +90,7 @@ export default function Sidebar({
                 key={conv._id}
                 conversation={conv}
                 selected={conv._id === selectedId}
-                onClick={() => onSelect(conv._id)}
+                onClick={() => handleSelect(conv._id)}
                 onDelete={() => setDeleteTarget(conv._id)}
               />
             ))}
@@ -92,7 +101,7 @@ export default function Sidebar({
       <Divider sx={{ my: 1 }} />
       <LanguageSwitcher />
 
-      {userEmail && onLogout && (
+      {userEmail && (
         <>
           <Divider sx={{ my: 1 }} />
           <Box sx={{ px: 1 }}>
@@ -117,7 +126,7 @@ export default function Sidebar({
                 {userEmail}
               </Typography>
               <Tooltip title={t('auth.logout')}>
-                <IconButton size="small" onClick={onLogout}>
+                <IconButton size="small" onClick={logout}>
                   <LogoutIcon sx={{ fontSize: 18 }} />
                 </IconButton>
               </Tooltip>
@@ -141,7 +150,7 @@ export default function Sidebar({
         message={t('dialog.deleteMessage')}
         onConfirm={() => {
           if (deleteTarget) {
-            onDelete(deleteTarget);
+            deleteConversation(deleteTarget);
             setDeleteTarget(null);
           }
         }}

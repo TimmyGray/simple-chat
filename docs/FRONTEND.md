@@ -17,14 +17,19 @@ App (src/App.tsx)
 |     "Try Again" (resets state) and "Reload Page" (window.location.reload).
 |     Uses i18n.t() directly (not useTranslation, since it is a class).
 |
++-- ChatAppProvider (src/contexts/ChatAppContext.tsx)
+|     Provides ChatAppContextValue to Layout, Sidebar, and ChatArea.
+|     Eliminates prop drilling through Layout.
+|
 +-- Layout (src/components/Layout.tsx)
-|     props: conversations, models, selectedConversation, selectedModel, callbacks
+|     No data props. Pure layout concern.
 |     Responsive split: persistent sidebar on desktop, temporary Drawer on mobile.
 |     Breakpoint: theme.breakpoints.down('md') (< 900px).
 |     SIDEBAR_WIDTH = 280px.
 |
 |   +-- Sidebar (src/components/Sidebar/Sidebar.tsx)
-|   |     props: conversations, loading, selectedId, onSelect, onNewChat, onDelete
+|   |     props: onMobileClose (optional, from Layout)
+|   |     Reads data from ChatAppContext via useChatApp() hook.
 |   |     Manages deleteTarget state for confirmation dialog.
 |   |
 |   |   +-- LanguageSwitcher (src/components/common/LanguageSwitcher.tsx)
@@ -43,7 +48,7 @@ App (src/App.tsx)
 |   |         MUI Dialog for delete confirmation. Receives title/message as props.
 |   |
 |   +-- ChatArea (src/components/Chat/ChatArea.tsx)
-|         props: conversation, models, selectedModel, onModelChange, onConversationUpdate
+|         No props. Reads data from ChatAppContext via useChatApp() hook.
 |         hook: useMessages()
 |         Shows EmptyState when conversation is null.
 |         Fetches messages on conversation change.
@@ -89,7 +94,8 @@ App (src/App.tsx)
 
 ### Key Observations
 
-- **No context providers** for app state. State lives in `App` and is threaded through props.
+- **ChatAppContext** provides shared app state (conversations, models, selection, user info, callbacks) to `Sidebar` and `ChatArea`, eliminating prop drilling through `Layout`.
+- **Layout** is a pure layout component — it manages responsive sidebar (mobile drawer) and renders `Sidebar` + `ChatArea` with no data props.
 - **useMessages** lives inside `ChatArea`, not `App`. Each conversation change triggers a fresh fetch.
 - **Optimistic updates**: user messages are added to state immediately before the stream begins.
 - **Streaming messages** are rendered as a temporary `MessageBubble` with `_id: 'streaming'` until the stream completes.
@@ -98,7 +104,13 @@ App (src/App.tsx)
 
 ## State Management Pattern
 
-Three custom hooks in `src/hooks/`. No Redux, Zustand, or other external state library.
+Three custom hooks in `src/hooks/` plus one React Context (`ChatAppContext`). No Redux, Zustand, or other external state library.
+
+### ChatAppContext
+
+**File:** `src/contexts/ChatAppContext.tsx`
+
+Provides shared app state and callbacks to `Sidebar` and `ChatArea` without prop drilling through `Layout`. The context value is assembled in `ChatApp` (within `App.tsx`) and includes: conversations, models, selected conversation/model, user info, and action callbacks (select, create, delete, model change, logout).
 
 ### useConversations()
 
@@ -360,6 +372,8 @@ frontend/src/
     index.ts                       # Conversation, Message, Attachment, ModelInfo
   api/
     client.ts                      # REST + SSE API functions
+  contexts/
+    ChatAppContext.tsx              # Shared app state context (conversations, models, selection)
   hooks/
     useConversations.ts            # Conversations CRUD state
     useMessages.ts                 # Messages + streaming state
@@ -464,9 +478,9 @@ const someCallback = useCallback(() => {
 }, []); // No t in dependency array
 ```
 
-### 7. Component prop threading over context
+### 7. Use ChatAppContext for shared app state
 
-This codebase passes data through props from `App` down the tree. Do not introduce context providers without discussion. This keeps data flow explicit and traceable.
+App-level state (conversations, models, selection, user info) is provided via `ChatAppContext`. `Sidebar` and `ChatArea` consume it via the `useChatApp()` hook. `Layout` is a pure layout component with no data props. Leaf components (ChatInput, MessageList, etc.) still receive data as props from their parent.
 
 ### 8. Streaming pattern
 
