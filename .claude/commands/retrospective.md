@@ -20,6 +20,7 @@ Look for:
 - **Validation failures:** Common lint/type/test errors that could be prevented
 - **Command effectiveness:** Are the develop-feature/validate/review steps catching issues?
 - **Sweep findings:** Were the same violations found by `/sweep` repeatedly?
+- **Phase 9b entries:** Read `pitfalls.md` for `## Per-Feature Learning:` entries. Count by root cause category (`CONV`, `OVER`, `RAIL`, `PROC`, `MODEL`, `COPY`). Any category at 3+ that hasn't been promoted → escalate to ESLint rule or architecture test
 
 ### 3. Identify Improvements
 For each pattern found, propose a concrete improvement:
@@ -62,6 +63,12 @@ If the issue is a process violation:
 If the issue reveals a gap in documentation:
 1. Update the relevant doc (`docs/CONVENTIONS.md`, `docs/SECURITY.md`, etc.)
 2. Add a pointer from `CLAUDE.md` if the doc is new
+
+#### 4e. Review Phase 9b Promotions
+If Phase 9b previously promoted a finding into a prompt addition (`.md` file update):
+1. Check if the same root cause category has recurred since the promotion
+2. If yes → the prompt-level fix was insufficient. Escalate to ESLint rule (`no-restricted-syntax`) or architecture test
+3. If no → the prompt-level fix is working. No action needed.
 
 ### 5. Apply Improvements
 For each approved improvement:

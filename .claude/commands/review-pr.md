@@ -32,6 +32,8 @@ Launch these reviews as parallel Task agents (using `code-review-advisor` subage
 - Check: no unused imports, no `any` types, error handling, no hardcoded values
 - Check: no cross-module imports, file size limits, function size limits
 - Check: `console.log` usage (should use Pino logger in backend)
+- Check: exported utility functions have assumptions that hold for ALL callers, not just the immediate use case
+- Check: functions adapted from another context still have valid assumptions (no copy-paste drift)
 - Severity: critical, warning, or suggestion
 
 **Agent C: i18n & Pattern Review**
@@ -39,6 +41,7 @@ Launch these reviews as parallel Task agents (using `code-review-advisor` subage
 - Check: all user-facing strings use `t()`, keys in all 4 locale files
 - Check: MUI components used (not raw HTML), theme tokens (not hardcoded colors)
 - Check: DTOs for request validation (backend), proper hook patterns (frontend)
+- Check: plain `.ts` modules (non-React) that produce user-facing strings accept them as parameters, not hardcoded
 - Severity: critical or warning
 
 **Agent D: Test Coverage Review**
@@ -57,6 +60,7 @@ For each issue, report:
 - Review agent (Security / Quality / i18n / Testing)
 - Severity (critical, warning, suggestion)
 - Description and fix recommendation (with remediation instructions)
+- **Root cause hint** (one-line analysis of why the agent likely made this mistake, e.g., "Agent likely hardcoded because client.ts has no `t()` access")
 
 ### 4. Verdict
 
