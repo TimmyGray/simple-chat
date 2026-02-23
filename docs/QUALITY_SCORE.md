@@ -1,14 +1,14 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-21 (audit #5 + retrospective #2)
+> Last updated: 2026-02-23 (sweep #5)
 
 ## Test Summary
 
 | Area | Test Files | Tests | Pass Rate |
 |------|-----------|-------|-----------|
-| Backend | 12 | 100 | 100% |
-| Frontend | 7 | 37 | 100% |
-| **Total** | **19** | **137** | **100%** |
+| Backend | 13 | 112 | 100% |
+| Frontend | 8 | 42 | 100% |
+| **Total** | **21** | **154** | **100%** |
 
 ## Lint Status
 
@@ -50,10 +50,31 @@
 ## Tech Debt
 - Critical: 0 todo, 4 done (JWT authentication completed)
 - High: 0 todo, 7 done — all high-priority items completed
-- Medium: 24 todo, 7 done (F-M23 fixed in retrospective #2)
+- Medium: 21 todo, 9 done, 1 wont-fix (B-M10, F-M1 completed since last audit)
 - Low: 12 todo, 1 done
 - Features: 8 todo, 2 done (FEAT-6 completed)
 - Total tracked: 65 (see `docs/exec-plans/tech-debt-tracker.md`)
+
+## Sweep #5 Findings
+- All validation passing: lint 0 errors, typecheck 0 errors, build passing
+- Backend tests: 100 -> 112 (+12 from file-extraction.service.spec, new test file)
+- Frontend tests: 37 -> 42 (+5 from MessageList.test.tsx updates)
+- Total tests: 137 -> 154 (target: 100+ sustained, comfortably exceeded)
+- B-M10 completed: chat.service.ts split, now 297 lines (under 300-line limit)
+- F-M1 completed: list virtualization with react-virtuoso (PR #31)
+- No auto-fixable violations found this sweep (codebase is clean)
+- No console.log/warn/error in source (clean)
+- No dangerouslySetInnerHTML (clean)
+- No hardcoded secrets (clean)
+- No `any` types in non-test source files (clean)
+- No hardcoded user-facing strings (all use t())
+- i18n: all 4 locales in sync (46 keys each)
+- All cross-module imports follow approved patterns
+- Existing tracked violations confirmed still present:
+  - window.alert() in FileAttachment.tsx (tracked as F-M21, caught by ESLint)
+  - Hardcoded rgba/gradient colors: ~27 occurrences across 6 files (tracked as F-M13)
+  - 7 frontend functions exceed 50-line limit (tracked as F-L2)
+  - Frontend bundle 1.4 MB, still needs code splitting (tracked as F-M17)
 
 ## Audit #5 Findings
 - Backend tests: 95 -> 100 (+5 from token usage/controller specs, PR #28)
@@ -90,7 +111,7 @@
 - 5 frontend functions exceed 50-line limit (React components/hooks, tracked as F-L2)
 
 ## Targets
-- Test count: 100+ (achieved — currently 137)
+- Test count: 100+ (achieved — currently 154)
 - Coverage: 80%+ (currently 60%/50% thresholds)
 - Lint errors: 0 (achieved)
 - Type errors: 0 (achieved)
