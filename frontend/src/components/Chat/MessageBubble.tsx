@@ -1,40 +1,10 @@
-import { memo } from 'react';
+import { lazy, memo, Suspense } from 'react';
 import { Box, Typography, Paper, Chip } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
-import ReactMarkdown, { type Components } from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeSanitize from 'rehype-sanitize';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import type { Message } from '../../types';
 
-const remarkPlugins = [remarkGfm];
-const rehypePlugins = [rehypeSanitize];
-const markdownComponents: Components = {
-  code(props) {
-    const { children, className, ...rest } = props;
-    const match = /language-(\w+)/.exec(className || '');
-    const inline = !match;
-    return !inline ? (
-      <SyntaxHighlighter
-        style={oneDark}
-        language={match[1]}
-        PreTag="div"
-        customStyle={{
-          borderRadius: 8,
-          fontSize: '0.85rem',
-        }}
-      >
-        {String(children).replace(/\n$/, '')}
-      </SyntaxHighlighter>
-    ) : (
-      <code className={className} {...rest}>
-        {children}
-      </code>
-    );
-  },
-};
+const LazyMarkdownRenderer = lazy(() => import('./MarkdownRenderer'));
 
 interface MessageBubbleProps {
   message: Message;
@@ -157,13 +127,15 @@ function MessageBubble({ message }: MessageBubbleProps) {
               },
             }}
           >
-            <ReactMarkdown
-              remarkPlugins={remarkPlugins}
-              rehypePlugins={rehypePlugins}
-              components={markdownComponents}
+            <Suspense
+              fallback={
+                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                  {message.content}
+                </Typography>
+              }
             >
-              {message.content}
-            </ReactMarkdown>
+              <LazyMarkdownRenderer content={message.content} />
+            </Suspense>
           </Box>
         )}
 

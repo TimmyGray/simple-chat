@@ -24,7 +24,7 @@ describe('MessageBubble', () => {
     expect(screen.getByText('Hello AI!')).toBeInTheDocument();
   });
 
-  it('renders assistant message with markdown', () => {
+  it('renders assistant message with markdown', async () => {
     renderWithTheme(
       <MessageBubble
         message={{
@@ -38,11 +38,11 @@ describe('MessageBubble', () => {
         }}
       />,
     );
-    expect(screen.getByText('Bold text')).toBeInTheDocument();
+    expect(await screen.findByText('Bold text')).toBeInTheDocument();
     expect(screen.getByText('inline code')).toBeInTheDocument();
   });
 
-  it('shows model name for assistant messages', () => {
+  it('shows model name for assistant messages', async () => {
     renderWithTheme(
       <MessageBubble
         message={{
@@ -56,6 +56,7 @@ describe('MessageBubble', () => {
         }}
       />,
     );
+    expect(await screen.findByText('Response')).toBeInTheDocument();
     expect(screen.getByText('openrouter/free')).toBeInTheDocument();
   });
 
