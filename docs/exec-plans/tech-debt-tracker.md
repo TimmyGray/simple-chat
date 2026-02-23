@@ -53,7 +53,7 @@ Each task has:
 | F-M4 | Add cache invalidation / SWR pattern | frontend | 0.5d | done | PR #34 merged. Focus revalidation + dedup + stale data preservation. |
 | F-M5 | Add offline/connectivity detection | frontend | 0.5d | done | PR #35 merged. useOnlineStatus hook, offline Snackbar, ChatInput disabled. |
 | F-M6 | Add ARIA labels to IconButtons | frontend | 0.25d | done | PR #36 merged. aria-label on all 5 IconButtons + sidebar.openMenu i18n key. |
-| F-M7 | Use semantic HTML in message list | frontend | 0.25d | todo | Should use main, article |
+| F-M7 | Use semantic HTML in message list | frontend | 0.25d | done | PR #37 merged. `<main>`, `<article>`, `<nav>` via MUI component prop. |
 | F-M8 | Add focus management after message send | frontend | 0.25d | todo | Input not refocused |
 | F-M9 | Lazy-load react-markdown + react-syntax-highlighter | frontend | 0.5d | todo | Heavy libs loaded eagerly |
 | F-M10 | Prevent full page re-render on model change | frontend | 0.5d | todo | Memoize or use Context |
@@ -152,3 +152,4 @@ Each task has:
 | F-M4 | Add SWR focus revalidation (PR #34) | 2026-02-23 |
 | F-M5 | Add offline/connectivity detection (PR #35) | 2026-02-23 |
 | F-M6 | Add ARIA labels to IconButtons (PR #36) | 2026-02-23 |
+| F-M7 | Use semantic HTML in message list (PR #37) | 2026-02-23 |
