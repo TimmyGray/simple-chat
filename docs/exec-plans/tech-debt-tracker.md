@@ -47,7 +47,7 @@ Each task has:
 | B-M8 | Fix ESLint errors in test files (32 errors) | backend | 1d | wont-fix | Lint passes clean. `any` allowed in tests per CONVENTIONS.md. |
 | B-M10 | Split chat.service.ts (390 lines, exceeds 300-line limit) | backend | 1d | done | PR #30 merged. Extracted FileExtractionService (297+102 lines). |
 | B-M9 | Add coverage tool, target 80%+ | backend | 0.5d | done | @vitest/coverage-v8 configured, thresholds: 60%/50% |
-| F-M1 | Add list virtualization (react-window) | frontend | 1d | todo | Long conversations cause jank |
+| F-M1 | Add list virtualization (react-window) | frontend | 1d | done | PR #31 merged. react-virtuoso (better for variable-height chat). |
 | F-M2 | Throttle scroll-to-bottom during streaming | frontend | 0.25d | todo | Scroll fires on every chunk |
 | F-M3 | Replace 9-prop drill with React Context | frontend | 1d | todo | Layout has too many props |
 | F-M4 | Add cache invalidation / SWR pattern | frontend | 0.5d | todo | No background refresh |
@@ -146,3 +146,4 @@ Each task has:
 | FEAT-6 | Token Usage & Cost Tracking (PR #28) | 2026-02-21 |
 | F-M23 | Localize "Error:" prefix in useMessages (retrospective #2) | 2026-02-21 |
 | B-M10 | Split chat.service.ts — extract FileExtractionService (PR #30) | 2026-02-21 |
+| F-M1 | Add list virtualization with react-virtuoso (PR #31) | 2026-02-23 |
