@@ -1,5 +1,22 @@
 import { createTheme } from '@mui/material/styles';
 
+declare module '@mui/material/styles' {
+  interface Palette {
+    gradients: {
+      primary: string;
+      primaryHover: string;
+      accent: string;
+    };
+  }
+  interface PaletteOptions {
+    gradients?: {
+      primary?: string;
+      primaryHover?: string;
+      accent?: string;
+    };
+  }
+}
+
 const theme = createTheme({
   palette: {
     mode: 'dark',
@@ -20,6 +37,11 @@ const theme = createTheme({
       secondary: '#9090a0',
     },
     divider: 'rgba(255, 255, 255, 0.08)',
+    gradients: {
+      primary: 'linear-gradient(135deg, #7c4dff 0%, #448aff 100%)',
+      primaryHover: 'linear-gradient(135deg, #651fff 0%, #2979ff 100%)',
+      accent: 'linear-gradient(135deg, #00e5ff 0%, #1de9b6 100%)',
+    },
   },
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
@@ -49,9 +71,9 @@ const theme = createTheme({
     },
     MuiDrawer: {
       styleOverrides: {
-        paper: {
-          borderRight: '1px solid rgba(255, 255, 255, 0.08)',
-        },
+        paper: ({ theme: t }) => ({
+          borderRight: `1px solid ${t.palette.divider}`,
+        }),
       },
     },
   },

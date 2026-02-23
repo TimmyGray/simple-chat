@@ -1,5 +1,6 @@
 import { lazy, memo, Suspense } from 'react';
 import { Box, Typography, Paper, Chip } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import PersonIcon from '@mui/icons-material/Person';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import type { Message } from '../../types';
@@ -33,9 +34,10 @@ function MessageBubble({ message }: MessageBubbleProps) {
           alignItems: 'center',
           justifyContent: 'center',
           flexShrink: 0,
-          background: isUser
-            ? 'linear-gradient(135deg, #7c4dff 0%, #448aff 100%)'
-            : 'linear-gradient(135deg, #00e5ff 0%, #1de9b6 100%)',
+          background: (theme) =>
+            isUser
+              ? theme.palette.gradients.primary
+              : theme.palette.gradients.accent,
         }}
       >
         {isUser ? (
@@ -55,13 +57,15 @@ function MessageBubble({ message }: MessageBubbleProps) {
           borderRadius: isUser
             ? '16px 16px 4px 16px'
             : '16px 16px 16px 4px',
-          backgroundColor: isUser
-            ? 'rgba(124, 77, 255, 0.12)'
-            : 'rgba(255, 255, 255, 0.05)',
+          backgroundColor: (theme) =>
+            isUser
+              ? alpha(theme.palette.primary.main, 0.12)
+              : alpha(theme.palette.common.white, 0.05),
           border: '1px solid',
-          borderColor: isUser
-            ? 'rgba(124, 77, 255, 0.2)'
-            : 'rgba(255, 255, 255, 0.08)',
+          borderColor: (theme) =>
+            isUser
+              ? alpha(theme.palette.primary.main, 0.2)
+              : theme.palette.divider,
         }}
       >
         {/* Attachments */}
@@ -93,7 +97,7 @@ function MessageBubble({ message }: MessageBubbleProps) {
                 fontSize: '0.85rem',
               },
               '& p code': {
-                backgroundColor: 'rgba(255,255,255,0.1)',
+                backgroundColor: (theme) => alpha(theme.palette.common.white, 0.1),
                 px: 0.5,
                 borderRadius: 0.5,
               },
@@ -105,17 +109,17 @@ function MessageBubble({ message }: MessageBubbleProps) {
                 fontSize: '0.85rem',
               },
               '& th, & td': {
-                border: '1px solid rgba(255, 255, 255, 0.15)',
+                border: (theme) => `1px solid ${alpha(theme.palette.common.white, 0.15)}`,
                 px: 1.5,
                 py: 0.75,
                 textAlign: 'left',
               },
               '& th': {
-                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                backgroundColor: (theme) => alpha(theme.palette.common.white, 0.08),
                 fontWeight: 600,
               },
               '& tr:nth-of-type(even)': {
-                backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                backgroundColor: (theme) => alpha(theme.palette.common.white, 0.03),
               },
               '& ul, & ol': { pl: 2, mb: 1 },
               '& blockquote': {

@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { FormControl, Select, MenuItem, Chip } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import type { SelectChangeEvent } from '@mui/material';
 import type { ModelInfo } from '../../types';
 
@@ -33,10 +34,10 @@ export default function ModelSelector({
             fontSize: '0.8rem',
           },
           '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'rgba(255, 255, 255, 0.08)',
+            borderColor: 'divider',
           },
           '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: 'rgba(255, 255, 255, 0.16)',
+            borderColor: (theme) => alpha(theme.palette.common.white, 0.16),
           },
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
             borderColor: 'primary.main',

@@ -1,20 +1,17 @@
 import { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
-import type { Conversation, ModelInfo } from '../types';
+import type { Conversation } from '../types';
 
 export interface ChatAppContextValue {
   conversations: Conversation[];
   conversationsLoading: boolean;
-  models: ModelInfo[];
   selectedConversation: Conversation | null;
-  selectedModel: string;
   userEmail: string | undefined;
   tokenUsage: number | undefined;
   isOnline: boolean;
   selectConversation: (id: string) => void;
   newChat: () => void;
   deleteConversation: (id: string) => void;
-  changeModel: (model: string) => void;
   onConversationUpdate: () => void;
   logout: () => void;
 }

@@ -27,7 +27,7 @@ export default function LanguageSwitcher() {
           py: 0.5,
           fontSize: '0.7rem',
           color: 'text.secondary',
-          borderColor: 'rgba(255, 255, 255, 0.08)',
+          borderColor: 'divider',
           '&.Mui-selected': {
             backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.15),
             color: 'primary.light',

@@ -2,6 +2,7 @@ import { useEffect, useCallback } from 'react';
 import { Box } from '@mui/material';
 import type { Attachment } from '../../types';
 import { useChatApp } from '../../contexts/ChatAppContext';
+import { useModel } from '../../contexts/ModelContext';
 import { useMessages } from '../../hooks/useMessages';
 import MessageList from './MessageList';
 import ChatInput from './ChatInput';
@@ -10,12 +11,10 @@ import EmptyState from '../common/EmptyState';
 export default function ChatArea() {
   const {
     selectedConversation: conversation,
-    models,
-    selectedModel,
     isOnline,
-    changeModel,
     onConversationUpdate,
   } = useChatApp();
+  const { models, selectedModel, changeModel } = useModel();
 
   const { messages, loading, streaming, streamingContent, fetchMessages, sendMessage, clear } =
     useMessages();
