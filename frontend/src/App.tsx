@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ThemeProvider, CssBaseline, Snackbar, Alert, Box, CircularProgress } from '@mui/material';
 import WifiOffIcon from '@mui/icons-material/WifiOff';
@@ -9,11 +9,13 @@ import { useConversations } from './hooks/useConversations';
 import { useModels } from './hooks/useModels';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
 import { ChatAppProvider } from './contexts/ChatAppContext';
+import { ModelProvider } from './contexts/ModelContext';
 import Layout from './components/Layout';
 import AuthPage from './components/Auth/AuthPage';
 
 import type { User } from './types';
 import type { ChatAppContextValue } from './contexts/ChatAppContext';
+import type { ModelContextValue } from './contexts/ModelContext';
 
 interface ChatAppProps {
   user: User;
@@ -31,6 +33,12 @@ function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps) {
   const [selectedModel, setSelectedModel] = useState('openrouter/free');
   const [localError, setLocalError] = useState<string | null>(null);
 
+  // Ref keeps handleNewChat stable when only selectedModel changes
+  const selectedModelRef = useRef(selectedModel);
+  useEffect(() => {
+    selectedModelRef.current = selectedModel;
+  }, [selectedModel]);
+
   const error = convsError || modelsError || localError;
 
   const clearError = useCallback(() => {
@@ -46,12 +54,12 @@ function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps) {
 
   const handleNewChat = useCallback(async () => {
     try {
-      const conv = await create(selectedModel);
+      const conv = await create(selectedModelRef.current);
       setSelectedId(conv._id);
     } catch {
       setLocalError(t('errors.createConversation'));
     }
-  }, [create, selectedModel, t]);
+  }, [create, t]);
 
   const handleDelete = useCallback(
     async (id: string) => {
@@ -72,29 +80,24 @@ function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps) {
     onRefreshUser();
   }, [refresh, onRefreshUser]);
 
-  const contextValue = useMemo<ChatAppContextValue>(
+  const chatContextValue = useMemo<ChatAppContextValue>(
     () => ({
       conversations,
       conversationsLoading: convsLoading,
-      models,
       selectedConversation,
-      selectedModel,
       userEmail: user.email,
       tokenUsage: user.totalTokensUsed,
       isOnline,
       selectConversation: setSelectedId,
       newChat: handleNewChat,
       deleteConversation: handleDelete,
-      changeModel: setSelectedModel,
       onConversationUpdate: handleConversationUpdate,
       logout: onLogout,
     }),
     [
       conversations,
       convsLoading,
-      models,
       selectedConversation,
-      selectedModel,
       user.email,
       user.totalTokensUsed,
       isOnline,
@@ -105,10 +108,21 @@ function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps) {
     ],
   );
 
+  const modelContextValue = useMemo<ModelContextValue>(
+    () => ({
+      models,
+      selectedModel,
+      changeModel: setSelectedModel,
+    }),
+    [models, selectedModel],
+  );
+
   return (
     <>
-      <ChatAppProvider value={contextValue}>
-        <Layout />
+      <ChatAppProvider value={chatContextValue}>
+        <ModelProvider value={modelContextValue}>
+          <Layout />
+        </ModelProvider>
       </ChatAppProvider>
       <Snackbar
         open={!isOnline}

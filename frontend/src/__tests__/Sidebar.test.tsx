@@ -27,16 +27,13 @@ const mockConversations = [
 const defaultContext: ChatAppContextValue = {
   conversations: mockConversations,
   conversationsLoading: false,
-  models: [],
   selectedConversation: null,
-  selectedModel: 'openrouter/free',
   userEmail: undefined,
   tokenUsage: undefined,
   isOnline: true,
   selectConversation: vi.fn(),
   newChat: vi.fn(),
   deleteConversation: vi.fn(),
-  changeModel: vi.fn(),
   onConversationUpdate: vi.fn(),
   logout: vi.fn(),
 };
