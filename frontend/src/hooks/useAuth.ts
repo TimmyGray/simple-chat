@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { User } from '../types';
 import * as api from '../api/client';
+import { hasResponseStatus } from '../utils/getErrorMessage';
 
 export function useAuth() {
   const { t } = useTranslation();
@@ -48,12 +49,9 @@ export function useAuth() {
         setError(tRef.current('auth.loginFailed'));
       }
     } catch (err) {
-      if (err instanceof Error && 'response' in err) {
-        const axiosErr = err as { response?: { status?: number } };
-        if (axiosErr.response?.status === 401) {
-          setError(tRef.current('auth.invalidCredentials'));
-          return;
-        }
+      if (hasResponseStatus(err) && err.response.status === 401) {
+        setError(tRef.current('auth.invalidCredentials'));
+        return;
       }
       setError(tRef.current('auth.loginFailed'));
     }
@@ -72,12 +70,9 @@ export function useAuth() {
         setError(tRef.current('auth.registerFailed'));
       }
     } catch (err) {
-      if (err instanceof Error && 'response' in err) {
-        const axiosErr = err as { response?: { status?: number } };
-        if (axiosErr.response?.status === 409) {
-          setError(tRef.current('auth.emailTaken'));
-          return;
-        }
+      if (hasResponseStatus(err) && err.response.status === 409) {
+        setError(tRef.current('auth.emailTaken'));
+        return;
       }
       setError(tRef.current('auth.registerFailed'));
     }
