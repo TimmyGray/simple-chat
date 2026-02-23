@@ -55,7 +55,6 @@
 - Features: 8 todo, 2 done (FEAT-6 completed)
 - Total tracked: 65 (see `docs/exec-plans/tech-debt-tracker.md`)
 
-<<<<<<< HEAD
 ## Audit #7 Findings
 - Backend tests: 112, unchanged. Frontend tests: 48 -> 50 (+2 from ChatInput focus tests)
 - Total tests now 162 (target: 100+ sustained, comfortably exceeded)
@@ -64,7 +63,7 @@
 - Frontend initial bundle reduced from 1.47 MB to 671 KB + 796 KB lazy chunk (F-M9)
 - New `useOnlineStatus` hook added, was missing from ARCHITECTURE.md hooks table (fixed)
 - `MarkdownRenderer` lazy-loaded component not documented in ARCHITECTURE.md (fixed)
-- ARCHITECTURE.md drift fixed: added useOnlineStatus hook, updated markdown rendering section for lazy loading
+- ARCHITECTURE.md drift fixed: added auth/ and types/ to backend file tree
 - Medium tech debt count was incorrect in quality score (showed 11/19, actually 13/17) — corrected
 - No new lint, type, or build errors
 - No console.log/warn/error found in source (clean)
@@ -80,8 +79,6 @@
   - 7 frontend functions exceed 50-line limit (tracked as F-L2, up from 5 — sendMessageStream and createTheme now counted)
   - Frontend bundle 1.4 MB total, split via lazy loading (tracked as F-M17)
 
-=======
->>>>>>> a977789 (chore: retrospective #3 — promote error handling pattern to ESLint rule)
 ## Retrospective #3 Findings
 - PRs analyzed: 10 (PRs #30-#40), date range: 2026-02-21 to 2026-02-23
 - 10 features completed since last retrospective: B-M10, F-M1 through F-M9
