@@ -55,7 +55,7 @@ Each task has:
 | F-M6 | Add ARIA labels to IconButtons | frontend | 0.25d | done | PR #36 merged. aria-label on all 5 IconButtons + sidebar.openMenu i18n key. |
 | F-M7 | Use semantic HTML in message list | frontend | 0.25d | done | PR #37 merged. `<main>`, `<article>`, `<nav>` via MUI component prop. |
 | F-M8 | Add focus management after message send | frontend | 0.25d | done | PR #39 merged. inputRef + useEffect auto-focus on send and streaming end. |
-| F-M9 | Lazy-load react-markdown + react-syntax-highlighter | frontend | 0.5d | todo | Heavy libs loaded eagerly |
+| F-M9 | Lazy-load react-markdown + react-syntax-highlighter | frontend | 0.5d | done | PR #40 merged. React.lazy + Suspense, separate 796KB chunk. |
 | F-M10 | Prevent full page re-render on model change | frontend | 0.5d | todo | Memoize or use Context |
 | F-M11 | Strengthen TypeScript interfaces (branded types) | frontend | 0.5d | todo | Weak type definitions |
 | F-M12 | Add type guards for caught errors | frontend | 0.25d | todo | Implicit `unknown` error handling |
@@ -154,3 +154,4 @@ Each task has:
 | F-M6 | Add ARIA labels to IconButtons (PR #36) | 2026-02-23 |
 | F-M7 | Use semantic HTML in message list (PR #37) | 2026-02-23 |
 | F-M8 | Add focus management after message send (PR #39) | 2026-02-23 |
+| F-M9 | Lazy-load react-markdown + react-syntax-highlighter (PR #40) | 2026-02-23 |
