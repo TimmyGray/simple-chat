@@ -11,12 +11,13 @@ $ARGUMENTS — Optional task ID from `docs/exec-plans/tech-debt-tracker.md`. If 
 
 Before task selection, set up for safe parallel execution with other agents.
 
-1. Read `docs/exec-plans/active-work.json`. If the file is missing or corrupt, create it with: `{"schema_version":1,"sessions":[]}`
+1. Read `docs/exec-plans/active-work.json`. If the file is missing or corrupt, back up the corrupt file (`cp active-work.json active-work.json.bak 2>/dev/null || true`), then create a fresh file with: `{"schema_version":1,"sessions":[]}`
 2. **Stale cleanup**: For each session entry:
    - Check if PID is alive: `kill -0 <pid> 2>/dev/null`
-   - If the PID check fails (process dead) OR `started_at` is older than 24 hours → remove the entry
-3. Write the cleaned registry back to `docs/exec-plans/active-work.json`
-4. **Port allocation**: Find the lowest available slot number (0, 1, 2, ...) not used by any remaining session:
+   - If `kill -0` succeeds, verify it's a Claude/node process: `ps -p <pid> -o command=` should contain "claude" or "node". If the process exists but is unrelated, treat the entry as stale.
+   - If the PID check fails (process dead), the process is unrelated, OR `started_at` is older than 24 hours → remove the entry
+3. Write the cleaned registry using atomic rename: write to `active-work.json.tmp`, then `mv active-work.json.tmp active-work.json`
+4. **Port allocation**: Find the lowest available slot number (0, 1, 2, ...) not used by any remaining session. Base ports match `backend/.env.example` (PORT=3001) and frontend default `VITE_API_URL` (localhost:3001):
    - Slot 0: backend port 3001, frontend port 5173
    - Slot 1: backend port 3002, frontend port 5174
    - Slot 2: backend port 3003, frontend port 5175
@@ -33,9 +34,13 @@ Before task selection, set up for safe parallel execution with other agents.
    - `task_id`: the selected task ID
    - `branch`: the branch name to be created (e.g., `feat/<kebab-case-task-name>`)
    - `started_at`: current ISO 8601 timestamp
-   - `pid`: current process ID (`$$` in bash)
+   - `pid`: parent process ID (`$PPID` in bash — this is the Claude Code process, which persists across subshell invocations unlike `$$`)
    - `ports`: `{"backend": <allocated_backend_port>, "frontend": <allocated_frontend_port>}`
-6. Write the updated registry back to the file
+6. Write the updated registry using atomic rename (write to `.tmp`, then `mv`)
+7. **Post-write verification**: Re-read `active-work.json` and confirm that:
+   - Own entry is present
+   - No other entry has the same slot number or task_id
+   - If a conflict is detected (another agent registered simultaneously), pick a new slot/task and retry from step 1 (max 3 retries)
 
 ### Phase 2: Context Gathering
 1. Read `ARCHITECTURE.md` for system overview
@@ -90,7 +95,8 @@ Use the ports allocated in Phase 0. This ensures multiple agents can run dev ser
 
 1. Start dev servers in background using allocated ports:
    - `PORT=<allocated_backend_port> npm run dev:backend &`
-   - `cd frontend && npx vite --port <allocated_frontend_port> &`
+   - `cd frontend && VITE_API_URL=http://localhost:<allocated_backend_port>/api npx vite --port <allocated_frontend_port> &`
+   - Note: `VITE_API_URL` must be set so the frontend calls the correct backend port (the default fallback in `client.ts` is port 3001, which is wrong for slot 1+)
 2. Wait for servers to be ready:
    - Poll `http://localhost:<allocated_backend_port>/api/health` until it responds (max 30s)
    - Poll `http://localhost:<allocated_frontend_port>` until it responds (max 30s)
@@ -120,9 +126,10 @@ Use the ports allocated in Phase 0. This ensures multiple agents can run dev ser
    - Flag any ERROR or WARN level log entries that occurred during the test
    - If backend errors found, treat as a validation failure
 
-6. Kill dev servers precisely (won't interfere with other agents' servers):
-   - `lsof -ti:<allocated_backend_port> | xargs kill 2>/dev/null || true`
-   - `lsof -ti:<allocated_frontend_port> | xargs kill 2>/dev/null || true`
+6. Kill dev servers precisely (won't interfere with other agents' servers or unrelated processes):
+   - `lsof -ti:<allocated_backend_port> -c node | xargs kill 2>/dev/null || true`
+   - `lsof -ti:<allocated_frontend_port> -c node -c vite | xargs kill 2>/dev/null || true`
+   - The `-c` flag filters by command name, preventing accidental termination of non-dev-server processes
 7. If smoke test reveals critical issues (JS errors, broken UI, failed API calls, backend errors):
    - Fix the code
    - Return to Phase 5 (max 3 retry cycles across Phases 5-6)
@@ -167,7 +174,8 @@ Use the ports allocated in Phase 0. This ensures multiple agents can run dev ser
 2. If not mergeable (e.g., conflicts):
    - Attempt rebase onto main: `git fetch origin main && git rebase origin/main`
    - If rebase succeeds, force-push the rebased branch: `git push --force-with-lease`
-   - If rebase fails due to conflicts, attempt to resolve them, then continue rebase
+   - If rebase fails due to conflicts in **bookkeeping files only** (`tech-debt-tracker.md`, `maintenance-cadence.json`, `db-schema.md`): resolve by accepting the main branch version and re-applying own changes, then `git rebase --continue`
+   - If rebase fails due to conflicts in **application source code** (`.ts`, `.tsx`, `.spec.ts`, etc.): abort the rebase (`git rebase --abort`), stop, and report the conflict — do not auto-resolve source code conflicts
    - Retry the merge check. If still not mergeable after one rebase attempt, stop and report
 3. Merge: `gh pr merge --squash --delete-branch`
 4. Switch to main: `git checkout main && git pull origin main`
@@ -177,7 +185,7 @@ Use the ports allocated in Phase 0. This ensures multiple agents can run dev ser
 2. If an exec plan was created, move it to `docs/exec-plans/completed/`
 3. Stage bookkeeping files explicitly by name
 4. Commit bookkeeping changes directly to main and push
-5. **Unregister from active-work registry**: Read `docs/exec-plans/active-work.json`, remove own session entry (matching own PID or task_id), write the updated registry back. No need to commit — it's gitignored.
+5. **Unregister from active-work registry**: Read `docs/exec-plans/active-work.json`, remove own session entry (matching own `task_id` — this is the authoritative identifier), write the updated registry back using atomic rename. No need to commit — it's gitignored.
 
 ### Phase 12: Maintenance Cadence Check
 
@@ -201,7 +209,7 @@ After bookkeeping, check if any maintenance tasks are due and launch them automa
 6. For each due task: reset its counter to 0 and set its `last_runs` date to today
 7. Write the list of due tasks to `pending_runs` (e.g., `["sweep", "audit", "retrospective"]`)
 8. Write the updated JSON back to `docs/exec-plans/maintenance-cadence.json`
-9. Stage, commit, and push the state file to main: `"chore: update maintenance cadence counters"`
+9. Stage, commit, and push the state file to main: `"chore: update maintenance cadence counters"`. If the push fails due to a non-fast-forward rejection (another agent pushed first), run `git pull --rebase origin main`, re-read `maintenance-cadence.json`, and re-evaluate whether maintenance is still due based on the pulled state. If counters were already reset by another agent, skip to step 13.
 10. **Double-check before launching**: Re-read `pending_runs` from `docs/exec-plans/maintenance-cadence.json`. If another agent has already cleared `pending_runs` to `[]` since step 7, skip launching — the other agent already handled it.
 11. **If any maintenance tasks are due** (or recovered from `pending_runs`), report which ones and launch them as **parallel background Task subagents**:
     - Use `run_in_background: true` for all subagents — do NOT wait for them to complete
