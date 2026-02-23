@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, TextField, IconButton, Tooltip, Paper, Chip, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
@@ -26,6 +26,7 @@ export default function ChatInput({
   disabled,
 }: ChatInputProps) {
   const { t } = useTranslation();
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const [input, setInput] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -34,6 +35,12 @@ export default function ChatInput({
 
   const overLimit = input.length > MAX_MESSAGE_LENGTH;
 
+  useEffect(() => {
+    if (!disabled) {
+      inputRef.current?.focus();
+    }
+  }, [disabled]);
+
   const handleSend = useCallback(() => {
     const text = input.trim();
     if ((!text && attachments.length === 0) || overLimit) return;
@@ -41,6 +48,7 @@ export default function ChatInput({
     onSend(text || t('chat.filesAttached'), attachments);
     setInput('');
     setAttachments([]);
+    inputRef.current?.focus();
   }, [input, attachments, onSend, t, overLimit]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -91,6 +99,7 @@ export default function ChatInput({
       >
         {/* Textarea */}
         <TextField
+          inputRef={inputRef}
           fullWidth
           multiline
           minRows={3}
