@@ -63,15 +63,21 @@ export default function MessageList({
         requestAnimationFrame(scrollToBottom);
       }, SCROLL_THROTTLE_MS - elapsed);
     }
+
+    return () => {
+      if (scrollTimerRef.current) {
+        clearTimeout(scrollTimerRef.current);
+        scrollTimerRef.current = null;
+      }
+    };
   }, [streamingContent, streaming, items.length, scrollToBottom]);
 
-  // Final scroll when streaming ends + cleanup
+  // Deliver final scroll when streaming ends (pending timer would be cleared)
   useEffect(() => {
-    if (!streaming && scrollTimerRef.current) {
-      clearTimeout(scrollTimerRef.current);
-      scrollTimerRef.current = null;
+    if (!streaming && isAtBottomRef.current) {
+      requestAnimationFrame(scrollToBottom);
     }
-  }, [streaming]);
+  }, [streaming, scrollToBottom]);
 
   const handleAtBottomChange = useCallback((atBottom: boolean) => {
     isAtBottomRef.current = atBottom;
@@ -97,7 +103,7 @@ export default function MessageList({
       ref={virtuosoRef}
       style={{ flex: 1 }}
       data={items}
-      followOutput="smooth"
+      followOutput={(atBottom) => (atBottom && !streaming ? 'smooth' : false)}
       atBottomStateChange={handleAtBottomChange}
       atBottomThreshold={100}
       initialTopMostItemIndex={items.length > 0 ? items.length - 1 : 0}
