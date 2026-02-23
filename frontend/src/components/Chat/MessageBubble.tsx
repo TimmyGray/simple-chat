@@ -115,7 +115,7 @@ function MessageBubble({ message }: MessageBubbleProps) {
                 textAlign: 'left',
               },
               '& th': {
-                backgroundColor: 'divider',
+                backgroundColor: (theme) => alpha(theme.palette.common.white, 0.08),
                 fontWeight: 600,
               },
               '& tr:nth-of-type(even)': {

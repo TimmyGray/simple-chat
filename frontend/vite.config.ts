@@ -5,6 +5,8 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
+    // MarkdownRenderer (react-markdown + react-syntax-highlighter) is ~796KB
+    // but lazy-loaded via React.lazy; raise limit to avoid false positives
     chunkSizeWarningLimit: 850,
     rollupOptions: {
       output: {
