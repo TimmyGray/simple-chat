@@ -184,19 +184,26 @@ Use the ports allocated in Phase 0. This ensures multiple agents can run dev ser
    - `PROC` — Workflow/process bug (wrong directory, wrong paths, stale state)
    - `MODEL` — Incomplete mental model (didn't consider all callers/contexts)
    - `COPY` — Copy-paste drift (adapted from similar code without verifying assumptions)
-3. **Write structured entries** to `pitfalls.md` (in the Claude Code auto-memory directory) under a `## Per-Feature Learning:` section with:
+3. **Write structured entries** to `pitfalls.md` (in the Claude Code auto-memory directory — the path is shown in your system prompt, e.g., `~/.claude/projects/.../memory/pitfalls.md`) under a `## Per-Feature Learning:` section with:
    - Finding (what was caught)
    - Category (from above)
    - Root cause analysis (why it happened)
    - Prevention (what would have caught it earlier)
    - Promotion candidacy (is this promotable to a lint rule/test/prompt?)
-4. **Check promotion threshold**: Count same-category occurrences in `pitfalls.md`. If **2+ occurrences** of the same category, promote immediately:
+4. **Check promotion threshold**: Count same-category occurrences in `pitfalls.md`. If **2+ occurrences** of the same category, promote immediately (this is the first-tier prompt-level promotion; if the same category reaches 3+ in `/retrospective`, it gets escalated further to a lint rule or architecture test):
    - `CONV` → Update `docs/CONVENTIONS.md` + `review-pr.md` agent prompt
    - `OVER` / `MODEL` / `COPY` → Update `review-pr.md` agent prompt with a new check
    - `RAIL` → Add ESLint rule (`no-restricted-syntax`) or architecture test
    - `PROC` → Add safeguard to `develop-feature.md`
 5. **If promotion applied**: Stage the changed `.md`/config files, commit with message `"chore: phase 9b promotion — <category>"`, and push to the feature branch
-6. **Append root cause summary** to the PR description: `gh pr edit --add-body "## Root Cause Analysis\n<summary>"`
+6. **Append root cause summary** to the PR description:
+   ```bash
+   BODY=$(gh pr view --json body -q '.body')
+   gh pr edit --body "$BODY
+
+   ## Root Cause Analysis
+   <summary>"
+   ```
 
 ### Phase 10: Auto-Merge (Conflict-Aware)
 1. Verify PR is mergeable: `gh pr view --json mergeable,mergeStateStatus`

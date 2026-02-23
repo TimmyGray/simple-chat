@@ -59,16 +59,16 @@ If the issue is a process violation:
 1. Add a step to `.github/workflows/ci.yml`
 2. Or add a check to the `/validate` command
 
+#### 4d. Update Documentation
+If the issue reveals a gap in documentation:
+1. Update the relevant doc (`docs/CONVENTIONS.md`, `docs/SECURITY.md`, etc.)
+2. Add a pointer from `CLAUDE.md` if the doc is new
+
 #### 4e. Review Phase 9b Promotions
 If Phase 9b previously promoted a finding into a prompt addition (`.md` file update):
 1. Check if the same root cause category has recurred since the promotion
 2. If yes → the prompt-level fix was insufficient. Escalate to ESLint rule (`no-restricted-syntax`) or architecture test
 3. If no → the prompt-level fix is working. No action needed.
-
-#### 4d. Update Documentation
-If the issue reveals a gap in documentation:
-1. Update the relevant doc (`docs/CONVENTIONS.md`, `docs/SECURITY.md`, etc.)
-2. Add a pointer from `CLAUDE.md` if the doc is new
 
 ### 5. Apply Improvements
 For each approved improvement:
