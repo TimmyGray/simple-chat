@@ -7,73 +7,21 @@ import {
   useTheme,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import type { Conversation, ModelInfo } from '../types';
 import Sidebar from './Sidebar/Sidebar';
 import ChatArea from './Chat/ChatArea';
 
 const SIDEBAR_WIDTH = 280;
 
-interface LayoutProps {
-  conversations: Conversation[];
-  conversationsLoading: boolean;
-  models: ModelInfo[];
-  selectedConversation: Conversation | null;
-  selectedModel: string;
-  userEmail?: string;
-  tokenUsage?: number;
-  onSelectConversation: (id: string) => void;
-  onNewChat: () => void;
-  onDeleteConversation: (id: string) => void;
-  onModelChange: (model: string) => void;
-  onConversationUpdate: () => void;
-  onLogout?: () => void;
-}
-
-export default function Layout({
-  conversations,
-  conversationsLoading,
-  models,
-  selectedConversation,
-  selectedModel,
-  userEmail,
-  tokenUsage,
-  onSelectConversation,
-  onNewChat,
-  onDeleteConversation,
-  onModelChange,
-  onConversationUpdate,
-  onLogout,
-}: LayoutProps) {
+export default function Layout() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const handleSelectConversation = useCallback(
-    (id: string) => {
-      onSelectConversation(id);
-      if (isMobile) setMobileOpen(false);
-    },
-    [onSelectConversation, isMobile],
-  );
-
-  const handleNewChat = useCallback(() => {
-    onNewChat();
+  const closeMobileDrawer = useCallback(() => {
     if (isMobile) setMobileOpen(false);
-  }, [onNewChat, isMobile]);
+  }, [isMobile]);
 
-  const sidebarContent = (
-    <Sidebar
-      conversations={conversations}
-      loading={conversationsLoading}
-      selectedId={selectedConversation?._id || null}
-      userEmail={userEmail}
-      tokenUsage={tokenUsage}
-      onSelect={handleSelectConversation}
-      onNewChat={handleNewChat}
-      onDelete={onDeleteConversation}
-      onLogout={onLogout}
-    />
-  );
+  const sidebarContent = <Sidebar onMobileClose={closeMobileDrawer} />;
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
@@ -126,13 +74,7 @@ export default function Layout({
 
       {/* Chat area */}
       <Box sx={{ flex: 1, overflow: 'hidden' }}>
-        <ChatArea
-          conversation={selectedConversation}
-          models={models}
-          selectedModel={selectedModel}
-          onModelChange={onModelChange}
-          onConversationUpdate={onConversationUpdate}
-        />
+        <ChatArea />
       </Box>
     </Box>
   );

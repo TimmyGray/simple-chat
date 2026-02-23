@@ -3,10 +3,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from '../theme';
+import { ChatAppProvider } from '../contexts/ChatAppContext';
+import type { ChatAppContextValue } from '../contexts/ChatAppContext';
 import Sidebar from '../components/Sidebar/Sidebar';
-
-const renderWithTheme = (ui: React.ReactElement) =>
-  render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
 
 const mockConversations = [
   {
@@ -25,115 +24,80 @@ const mockConversations = [
   },
 ];
 
+const defaultContext: ChatAppContextValue = {
+  conversations: mockConversations,
+  conversationsLoading: false,
+  models: [],
+  selectedConversation: null,
+  selectedModel: 'openrouter/free',
+  userEmail: undefined,
+  tokenUsage: undefined,
+  selectConversation: vi.fn(),
+  newChat: vi.fn(),
+  deleteConversation: vi.fn(),
+  changeModel: vi.fn(),
+  onConversationUpdate: vi.fn(),
+  logout: vi.fn(),
+};
+
+function renderSidebar(overrides?: Partial<ChatAppContextValue>) {
+  const value = { ...defaultContext, ...overrides };
+  return render(
+    <ThemeProvider theme={theme}>
+      <ChatAppProvider value={value}>
+        <Sidebar />
+      </ChatAppProvider>
+    </ThemeProvider>,
+  );
+}
+
 describe('Sidebar', () => {
   it('renders conversation list', () => {
-    renderWithTheme(
-      <Sidebar
-        conversations={mockConversations}
-        loading={false}
-        selectedId={null}
-        onSelect={vi.fn()}
-        onNewChat={vi.fn()}
-        onDelete={vi.fn()}
-      />,
-    );
+    renderSidebar();
     expect(screen.getByText('First Chat')).toBeInTheDocument();
     expect(screen.getByText('Second Chat')).toBeInTheDocument();
   });
 
   it('shows loading spinner', () => {
-    renderWithTheme(
-      <Sidebar
-        conversations={[]}
-        loading={true}
-        selectedId={null}
-        onSelect={vi.fn()}
-        onNewChat={vi.fn()}
-        onDelete={vi.fn()}
-      />,
-    );
+    renderSidebar({ conversations: [], conversationsLoading: true });
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
   it('shows empty state message', () => {
-    renderWithTheme(
-      <Sidebar
-        conversations={[]}
-        loading={false}
-        selectedId={null}
-        onSelect={vi.fn()}
-        onNewChat={vi.fn()}
-        onDelete={vi.fn()}
-      />,
-    );
+    renderSidebar({ conversations: [] });
     expect(screen.getByText('No conversations yet')).toBeInTheDocument();
   });
 
-  it('calls onNewChat when New Chat button is clicked', async () => {
+  it('calls newChat when New Chat button is clicked', async () => {
     const user = userEvent.setup();
-    const onNewChat = vi.fn();
+    const newChat = vi.fn();
 
-    renderWithTheme(
-      <Sidebar
-        conversations={mockConversations}
-        loading={false}
-        selectedId={null}
-        onSelect={vi.fn()}
-        onNewChat={onNewChat}
-        onDelete={vi.fn()}
-      />,
-    );
+    renderSidebar({ newChat });
 
     await user.click(screen.getByText('New Chat'));
-    expect(onNewChat).toHaveBeenCalled();
+    expect(newChat).toHaveBeenCalled();
   });
 
-  it('calls onSelect when conversation is clicked', async () => {
+  it('calls selectConversation when conversation is clicked', async () => {
     const user = userEvent.setup();
-    const onSelect = vi.fn();
+    const selectConversation = vi.fn();
 
-    renderWithTheme(
-      <Sidebar
-        conversations={mockConversations}
-        loading={false}
-        selectedId={null}
-        onSelect={onSelect}
-        onNewChat={vi.fn()}
-        onDelete={vi.fn()}
-      />,
-    );
+    renderSidebar({ selectConversation });
 
     await user.click(screen.getByText('First Chat'));
-    expect(onSelect).toHaveBeenCalledWith('c1');
+    expect(selectConversation).toHaveBeenCalledWith('c1');
   });
 
   it('highlights selected conversation', () => {
-    renderWithTheme(
-      <Sidebar
-        conversations={mockConversations}
-        loading={false}
-        selectedId="c1"
-        onSelect={vi.fn()}
-        onNewChat={vi.fn()}
-        onDelete={vi.fn()}
-      />,
-    );
-    // Check that the title "First Chat" has fontWeight 600 (selected)
+    renderSidebar({
+      selectedConversation: mockConversations[0],
+    });
     const firstChat = screen.getByText('First Chat');
     expect(firstChat).toHaveStyle({ fontWeight: 600 });
   });
 
   it('renders the app title', () => {
-    renderWithTheme(
-      <Sidebar
-        conversations={[]}
-        loading={false}
-        selectedId={null}
-        onSelect={vi.fn()}
-        onNewChat={vi.fn()}
-        onDelete={vi.fn()}
-      />,
-    );
+    renderSidebar({ conversations: [] });
     expect(screen.getByText('Simple Chat')).toBeInTheDocument();
   });
 });

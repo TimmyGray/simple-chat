@@ -1,26 +1,21 @@
 import { useEffect, useCallback } from 'react';
 import { Box } from '@mui/material';
-import type { Conversation, ModelInfo, Attachment } from '../../types';
+import type { Attachment } from '../../types';
+import { useChatApp } from '../../contexts/ChatAppContext';
 import { useMessages } from '../../hooks/useMessages';
 import MessageList from './MessageList';
 import ChatInput from './ChatInput';
 import EmptyState from '../common/EmptyState';
 
-interface ChatAreaProps {
-  conversation: Conversation | null;
-  models: ModelInfo[];
-  selectedModel: string;
-  onModelChange: (model: string) => void;
-  onConversationUpdate?: () => void;
-}
+export default function ChatArea() {
+  const {
+    selectedConversation: conversation,
+    models,
+    selectedModel,
+    changeModel,
+    onConversationUpdate,
+  } = useChatApp();
 
-export default function ChatArea({
-  conversation,
-  models,
-  selectedModel,
-  onModelChange,
-  onConversationUpdate,
-}: ChatAreaProps) {
   const { messages, loading, streaming, streamingContent, fetchMessages, sendMessage, clear } =
     useMessages();
 
@@ -41,7 +36,7 @@ export default function ChatArea({
         selectedModel,
         attachments.length > 0 ? attachments : undefined,
       );
-      onConversationUpdate?.();
+      onConversationUpdate();
     },
     [conversation, selectedModel, sendMessage, onConversationUpdate],
   );
@@ -69,7 +64,7 @@ export default function ChatArea({
         key={conversation._id}
         models={models}
         selectedModel={selectedModel}
-        onModelChange={onModelChange}
+        onModelChange={changeModel}
         onSend={handleSend}
         disabled={streaming}
       />
