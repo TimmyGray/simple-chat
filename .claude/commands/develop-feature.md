@@ -136,7 +136,7 @@ Use the ports allocated in Phase 0. This ensures multiple agents can run dev ser
 
 ### Phase 7: Commit & PR
 1. Run `git status --short` one final time
-2. Stage each file explicitly by name (never `git add .` or `git add -A`)
+2. Stage each file explicitly by name (never `git add .` or `git add -A`). **Always use repo-root-relative paths** (e.g., `frontend/vite.config.ts`, not `src/../../vite.config.ts`). If unsure of the correct path, use `git status --short` output which always shows repo-root-relative paths.
 3. Cross-check: run `git diff --cached --name-only` and verify it includes all files created/modified in Phase 4
 4. If any file is missing from the staged set, stage it now
 5. Commit with a descriptive message focused on "why"
@@ -146,7 +146,7 @@ Use the ports allocated in Phase 0. This ensures multiple agents can run dev ser
    - Include link to execution plan if one was created
 
 ### Phase 8: CI Monitor & Fix Loop
-1. Run `gh pr checks --watch --interval 30` to wait for CI to complete
+1. **Wait for checks to register** before polling: GitHub Actions needs time to pick up a new push. Run `sleep 10` first, then use `gh pr checks <PR#> --watch --interval 30` to wait for CI. If `--watch` returns "no checks reported", retry with `sleep 15 && gh pr checks <PR#> --watch --interval 30` (max 2 retries). Do **not** fall back to manual `sleep N && gh pr checks` loops — always use `--watch`.
 2. **In parallel**: launch a `code-review-advisor` subagent to speculatively run the self-review while CI runs
 3. If CI passes → proceed to Phase 9
 4. If CI fails:
