@@ -55,6 +55,30 @@
 - Features: 8 todo, 2 done (FEAT-6 completed)
 - Total tracked: 65 (see `docs/exec-plans/tech-debt-tracker.md`)
 
+## Audit #7 Findings
+- Backend tests: 112, unchanged. Frontend tests: 48 -> 50 (+2 from ChatInput focus tests)
+- Total tests now 162 (target: 100+ sustained, comfortably exceeded)
+- F-M5 (offline detection), F-M6 (ARIA labels), F-M7 (semantic HTML), F-M8 (focus management), F-M9 (lazy markdown) completed since last audit
+- Backend bundle grew from 860 KB to 1.1 MB (backend/dist)
+- Frontend initial bundle reduced from 1.47 MB to 671 KB + 796 KB lazy chunk (F-M9)
+- New `useOnlineStatus` hook added, was missing from ARCHITECTURE.md hooks table (fixed)
+- `MarkdownRenderer` lazy-loaded component not documented in ARCHITECTURE.md (fixed)
+- ARCHITECTURE.md drift fixed: added useOnlineStatus hook, updated markdown rendering section for lazy loading
+- Medium tech debt count was incorrect in quality score (showed 11/19, actually 13/17) — corrected
+- No new lint, type, or build errors
+- No console.log/warn/error found in source (clean)
+- No dangerouslySetInnerHTML usage (clean)
+- No hardcoded secrets found in source files
+- No `any` types in non-test source files (clean)
+- i18n: all 4 locales in sync (48 keys each)
+- All cross-module imports follow approved patterns
+- No files exceed 300-line limit (chat.service.ts at 297, under limit)
+- Existing tracked violations confirmed still present:
+  - window.alert() in FileAttachment.tsx (tracked as F-M21, caught by ESLint)
+  - Hardcoded rgba/gradient colors: 22 occurrences across 7 files (tracked as F-M13, unchanged)
+  - 7 frontend functions exceed 50-line limit (tracked as F-L2, up from 5 — sendMessageStream and createTheme now counted)
+  - Frontend bundle 1.4 MB total, split via lazy loading (tracked as F-M17)
+
 ## Retrospective #3 Findings
 - PRs analyzed: 10 (PRs #30-#40), date range: 2026-02-21 to 2026-02-23
 - 10 features completed since last retrospective: B-M10, F-M1 through F-M9
@@ -176,7 +200,7 @@
 - 5 frontend functions exceed 50-line limit (React components/hooks, tracked as F-L2)
 
 ## Targets
-- Test count: 100+ (achieved — currently 162)
+- Test count: 100+ (achieved -- currently 162)
 - Coverage: 80%+ (currently 60%/50% thresholds)
 - Lint errors: 0 (achieved)
 - Type errors: 0 (achieved)

@@ -13,12 +13,14 @@ simple-chat/
 │   ├── src/
 │   │   ├── main.ts           # Bootstrap: filters, pipes, CORS, logger
 │   │   ├── app.module.ts     # Root module wiring
+│   │   ├── auth/             # Authentication: register, login, JWT, guards
 │   │   ├── config/           # Configuration + Joi env validation
 │   │   ├── database/         # MongoDB native driver (global module)
 │   │   ├── chat/             # Core: conversations, messages, LLM streaming
 │   │   ├── models/           # Hardcoded LLM model catalog
 │   │   ├── health/           # Health check with MongoDB indicator
 │   │   ├── uploads/          # Cron-based upload cleanup
+│   │   ├── types/            # Shared document interfaces (ConversationDoc, MessageDoc, UserDoc)
 │   │   └── common/           # Shared: exception filter, correlation ID middleware, pipes
 │   └── uploads/              # File upload storage (disk)
 └── frontend/                 # React 19 + Vite 7 + MUI 7
