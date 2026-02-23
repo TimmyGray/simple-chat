@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Conversation, Message, ModelInfo, Attachment, AuthResponse, User } from '../types';
+import type { Conversation, Message, ModelInfo, Attachment, AuthResponse, User, ConversationId, ModelId } from '../types';
 import { getErrorMessage, isAbortError } from '../utils/getErrorMessage';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
@@ -82,25 +82,25 @@ export async function getConversations(): Promise<Conversation[]> {
 }
 
 export async function createConversation(
-  body?: { title?: string; model?: string },
+  body?: { title?: string; model?: ModelId },
 ): Promise<Conversation> {
   const { data } = await api.post('/conversations', body || {});
   return data;
 }
 
 export async function updateConversation(
-  id: string,
-  body: { title?: string; model?: string },
+  id: ConversationId,
+  body: { title?: string; model?: ModelId },
 ): Promise<Conversation> {
   const { data } = await api.patch(`/conversations/${id}`, body);
   return data;
 }
 
-export async function deleteConversation(id: string): Promise<void> {
+export async function deleteConversation(id: ConversationId): Promise<void> {
   await api.delete(`/conversations/${id}`);
 }
 
-export async function getMessages(conversationId: string): Promise<Message[]> {
+export async function getMessages(conversationId: ConversationId): Promise<Message[]> {
   const { data } = await api.get(`/conversations/${conversationId}/messages`);
   return data;
 }
@@ -108,9 +108,9 @@ export async function getMessages(conversationId: string): Promise<Message[]> {
 const STREAM_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
 export async function sendMessageStream(
-  conversationId: string,
+  conversationId: ConversationId,
   content: string,
-  model?: string,
+  model?: ModelId,
   attachments?: Attachment[],
   onChunk?: (text: string) => void,
   onDone?: () => void,

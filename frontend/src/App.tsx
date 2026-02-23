@@ -13,7 +13,8 @@ import { ModelProvider } from './contexts/ModelContext';
 import Layout from './components/Layout';
 import AuthPage from './components/Auth/AuthPage';
 
-import type { User } from './types';
+import type { User, ConversationId, ModelId } from './types';
+import { asModelId } from './types';
 import type { ChatAppContextValue } from './contexts/ChatAppContext';
 import type { ModelContextValue } from './contexts/ModelContext';
 
@@ -29,8 +30,8 @@ function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps) {
   const { models, error: modelsError, clearError: clearModelsError } = useModels();
   const isOnline = useOnlineStatus();
 
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [selectedModel, setSelectedModel] = useState('openrouter/free');
+  const [selectedId, setSelectedId] = useState<ConversationId | null>(null);
+  const [selectedModel, setSelectedModel] = useState<ModelId>(asModelId('openrouter/free'));
   const [localError, setLocalError] = useState<string | null>(null);
 
   // Ref keeps handleNewChat stable when only selectedModel changes
@@ -62,7 +63,7 @@ function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps) {
   }, [create, t]);
 
   const handleDelete = useCallback(
-    async (id: string) => {
+    async (id: ConversationId) => {
       try {
         await remove(id);
         if (selectedId === id) {

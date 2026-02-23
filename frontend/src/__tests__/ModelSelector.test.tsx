@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from '../theme';
+import { asModelId } from '../types';
 import ModelSelector from '../components/Chat/ModelSelector';
 
 const renderWithTheme = (ui: React.ReactElement) =>
@@ -10,7 +11,7 @@ const renderWithTheme = (ui: React.ReactElement) =>
 
 const mockModels = [
   {
-    id: 'openrouter/free',
+    id: asModelId('openrouter/free'),
     name: 'Free Models Router',
     description: 'Fast and capable',
     free: true,
@@ -18,7 +19,7 @@ const mockModels = [
     supportsVision: true,
   },
   {
-    id: 'meta-llama/llama-3.3-70b-instruct:free',
+    id: asModelId('meta-llama/llama-3.3-70b-instruct:free'),
     name: 'Llama 3.3 70B',
     description: 'GPT-4 level',
     free: true,
@@ -26,7 +27,7 @@ const mockModels = [
     supportsVision: false,
   },
   {
-    id: 'openrouter/auto',
+    id: asModelId('openrouter/auto'),
     name: 'Auto (Smart Routing)',
     description: 'Picks best model',
     free: false,
@@ -40,7 +41,7 @@ describe('ModelSelector', () => {
     renderWithTheme(
       <ModelSelector
         models={mockModels}
-        value="openrouter/free"
+        value={asModelId('openrouter/free')}
         onChange={vi.fn()}
       />,
     );
@@ -53,7 +54,7 @@ describe('ModelSelector', () => {
     renderWithTheme(
       <ModelSelector
         models={mockModels}
-        value="openrouter/free"
+        value={asModelId('openrouter/free')}
         onChange={vi.fn()}
       />,
     );
@@ -72,7 +73,7 @@ describe('ModelSelector', () => {
     renderWithTheme(
       <ModelSelector
         models={mockModels}
-        value="openrouter/free"
+        value={asModelId('openrouter/free')}
         onChange={vi.fn()}
       />,
     );
@@ -90,7 +91,7 @@ describe('ModelSelector', () => {
     renderWithTheme(
       <ModelSelector
         models={mockModels}
-        value="openrouter/free"
+        value={asModelId('openrouter/free')}
         onChange={onChange}
       />,
     );

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Box, TextField, IconButton, Tooltip, Paper, Chip, Typography } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import SendIcon from '@mui/icons-material/Send';
-import type { ModelInfo, Attachment } from '../../types';
+import type { ModelInfo, Attachment, ModelId } from '../../types';
 import ModelSelector from './ModelSelector';
 import FileAttachment from './FileAttachment';
 import * as api from '../../api/client';
@@ -12,8 +12,8 @@ const MAX_MESSAGE_LENGTH = 10_000;
 
 interface ChatInputProps {
   models: ModelInfo[];
-  selectedModel: string;
-  onModelChange: (model: string) => void;
+  selectedModel: ModelId;
+  onModelChange: (model: ModelId) => void;
   onSend: (content: string, attachments: Attachment[]) => void;
   disabled?: boolean;
 }

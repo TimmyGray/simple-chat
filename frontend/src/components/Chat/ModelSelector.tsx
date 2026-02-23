@@ -2,12 +2,12 @@ import { useTranslation } from 'react-i18next';
 import { FormControl, Select, MenuItem, Chip } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import type { SelectChangeEvent } from '@mui/material';
-import type { ModelInfo } from '../../types';
+import type { ModelInfo, ModelId } from '../../types';
 
 interface ModelSelectorProps {
   models: ModelInfo[];
-  value: string;
-  onChange: (modelId: string) => void;
+  value: ModelId;
+  onChange: (modelId: ModelId) => void;
   size?: 'small' | 'medium';
 }
 
@@ -18,7 +18,7 @@ export default function ModelSelector({
   size = 'small',
 }: ModelSelectorProps) {
   const { t } = useTranslation();
-  const handleChange = (e: SelectChangeEvent) => onChange(e.target.value);
+  const handleChange = (e: SelectChangeEvent) => onChange(e.target.value as ModelId);
 
   return (
     <FormControl size={size} sx={{ minWidth: 140 }}>

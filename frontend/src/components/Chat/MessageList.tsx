@@ -2,6 +2,7 @@ import { useRef, useMemo, useEffect, useCallback } from 'react';
 import { Box, CircularProgress } from '@mui/material';
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 import type { Message } from '../../types';
+import { asMessageId, asConversationId } from '../../types';
 import MessageBubble from './MessageBubble';
 import TypingIndicator from './TypingIndicator';
 
@@ -28,8 +29,8 @@ export default function MessageList({
     return [
       ...messages,
       {
-        _id: 'streaming',
-        conversationId: '',
+        _id: asMessageId('streaming'),
+        conversationId: asConversationId(''),
         role: 'assistant' as const,
         content: streamingContent,
         attachments: [],

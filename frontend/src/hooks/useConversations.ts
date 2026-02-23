@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Conversation } from '../types';
+import type { Conversation, ConversationId, ModelId } from '../types';
 import * as api from '../api/client';
 import { useFocusRevalidation } from './useFocusRevalidation';
 import { getErrorMessage } from '../utils/getErrorMessage';
@@ -48,7 +48,7 @@ export function useConversations() {
   useFocusRevalidation(fetchConversations);
 
   const create = useCallback(
-    async (model?: string) => {
+    async (model?: ModelId) => {
       try {
         const conversation = await api.createConversation({ model });
         setConversations((prev) => [conversation, ...prev]);
@@ -63,7 +63,7 @@ export function useConversations() {
   );
 
   const update = useCallback(
-    async (id: string, body: { title?: string; model?: string }) => {
+    async (id: ConversationId, body: { title?: string; model?: ModelId }) => {
       try {
         const updated = await api.updateConversation(id, body);
         setConversations((prev) =>
@@ -79,7 +79,7 @@ export function useConversations() {
     [],
   );
 
-  const remove = useCallback(async (id: string) => {
+  const remove = useCallback(async (id: ConversationId) => {
     try {
       await api.deleteConversation(id);
       setConversations((prev) => prev.filter((c) => c._id !== id));

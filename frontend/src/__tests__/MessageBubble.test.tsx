@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from '../theme';
+import { asMessageId, asConversationId, asModelId } from '../types';
 // Pre-load lazy MarkdownRenderer so React.lazy resolves from module cache in tests
 import '../components/Chat/MarkdownRenderer';
 import MessageBubble from '../components/Chat/MessageBubble';
@@ -14,8 +15,8 @@ describe('MessageBubble', () => {
     renderWithTheme(
       <MessageBubble
         message={{
-          _id: '1',
-          conversationId: 'c1',
+          _id: asMessageId('1'),
+          conversationId: asConversationId('c1'),
           role: 'user',
           content: 'Hello AI!',
           attachments: [],
@@ -30,11 +31,11 @@ describe('MessageBubble', () => {
     renderWithTheme(
       <MessageBubble
         message={{
-          _id: '2',
-          conversationId: 'c1',
+          _id: asMessageId('2'),
+          conversationId: asConversationId('c1'),
           role: 'assistant',
           content: '**Bold text** and `inline code`',
-          model: 'openrouter/free',
+          model: asModelId('openrouter/free'),
           attachments: [],
           createdAt: new Date().toISOString(),
         }}
@@ -48,11 +49,11 @@ describe('MessageBubble', () => {
     renderWithTheme(
       <MessageBubble
         message={{
-          _id: '3',
-          conversationId: 'c1',
+          _id: asMessageId('3'),
+          conversationId: asConversationId('c1'),
           role: 'assistant',
           content: 'Response',
-          model: 'openrouter/free',
+          model: asModelId('openrouter/free'),
           attachments: [],
           createdAt: new Date().toISOString(),
         }}
@@ -66,8 +67,8 @@ describe('MessageBubble', () => {
     renderWithTheme(
       <MessageBubble
         message={{
-          _id: '4',
-          conversationId: 'c1',
+          _id: asMessageId('4'),
+          conversationId: asConversationId('c1'),
           role: 'user',
           content: 'Check this file',
           attachments: [

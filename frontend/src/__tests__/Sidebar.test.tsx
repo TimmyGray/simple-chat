@@ -3,22 +3,23 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from '../theme';
+import { asConversationId, asModelId } from '../types';
 import { ChatAppProvider } from '../contexts/ChatAppContext';
 import type { ChatAppContextValue } from '../contexts/ChatAppContext';
 import Sidebar from '../components/Sidebar/Sidebar';
 
 const mockConversations = [
   {
-    _id: 'c1',
+    _id: asConversationId('c1'),
     title: 'First Chat',
-    model: 'openrouter/free',
+    model: asModelId('openrouter/free'),
     createdAt: '2026-01-01T00:00:00Z',
     updatedAt: '2026-01-01T12:00:00Z',
   },
   {
-    _id: 'c2',
+    _id: asConversationId('c2'),
     title: 'Second Chat',
-    model: 'meta-llama/llama-3.3-70b-instruct:free',
+    model: asModelId('meta-llama/llama-3.3-70b-instruct:free'),
     createdAt: '2026-01-02T00:00:00Z',
     updatedAt: '2026-01-02T12:00:00Z',
   },

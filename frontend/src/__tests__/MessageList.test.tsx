@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from '../theme';
+import { asMessageId, asConversationId } from '../types';
 import MessageList from '../components/Chat/MessageList';
 
 // Mock Virtuoso to render all items directly (jsdom lacks layout measurements)
@@ -29,8 +30,8 @@ const renderWithTheme = (ui: React.ReactElement) =>
   render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
 
 const makeMessage = (overrides: Partial<Parameters<typeof MessageList>[0]['messages'][0]> = {}) => ({
-  _id: '1',
-  conversationId: 'c1',
+  _id: asMessageId('1'),
+  conversationId: asConversationId('c1'),
   role: 'user' as const,
   content: 'Hello',
   attachments: [],
@@ -49,8 +50,8 @@ describe('MessageList', () => {
 
   it('renders messages in virtualized list', () => {
     const messages = [
-      makeMessage({ _id: '1', content: 'Hello' }),
-      makeMessage({ _id: '2', role: 'assistant', content: 'Hi there!' }),
+      makeMessage({ _id: asMessageId('1'), content: 'Hello' }),
+      makeMessage({ _id: asMessageId('2'), role: 'assistant', content: 'Hi there!' }),
     ];
     renderWithTheme(
       <MessageList messages={messages} loading={false} streaming={false} streamingContent="" />,
