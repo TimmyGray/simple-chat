@@ -32,6 +32,7 @@ const defaultContext: ChatAppContextValue = {
   selectedModel: 'openrouter/free',
   userEmail: undefined,
   tokenUsage: undefined,
+  isOnline: true,
   selectConversation: vi.fn(),
   newChat: vi.fn(),
   deleteConversation: vi.fn(),

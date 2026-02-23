@@ -27,6 +27,7 @@ simple-chat/
         ├── App.tsx           # Root component (theme, error boundary, snackbar)
         ├── api/              # HTTP client (axios + fetch SSE)
         ├── components/       # UI components (Layout, Sidebar, Chat, common)
+        ├── contexts/         # React Context providers (ChatAppContext)
         ├── hooks/            # Custom state hooks
         ├── i18n/             # Internationalization (4 languages)
         ├── types/            # TypeScript interfaces
@@ -61,7 +62,8 @@ AppModule
 │   └── JwtAuthGuard (route protection)
 ├── ChatModule (imports AuthModule)
 │   ├── ChatController (REST + SSE endpoints, JWT-protected)
-│   └── ChatService (conversations CRUD, message streaming, userId-scoped)
+│   ├── ChatService (conversations CRUD, message streaming, userId-scoped)
+│   └── FileExtractionService (PDF/text/CSV file content extraction)
 ├── ModelsModule
 │   ├── ModelsController (GET /api/models)
 │   └── ModelsService (hardcoded model catalog)
@@ -245,6 +247,7 @@ Custom hooks with one React Context (`ChatAppContext`). No Redux, Zustand, or ot
 | `useConversations` | Fetch, create, update, delete conversations. Error state. Auto-fetch on mount. |
 | `useMessages`      | Fetch messages, send with SSE streaming, optimistic user message insertion, stop streaming. Manages `streaming`, `streamingContent`, abort controller. |
 | `useModels`        | Fetch available models on mount. Error state.                       |
+| `useFocusRevalidation` | Shared hook: refetches data on window focus/visibility change. Throttled (default 30s). Used by `useConversations` and `useModels`. |
 
 State coordination happens in `ChatApp` (within `App.tsx`), which assembles the `ChatAppContext` value from `useConversations`, `useModels`, and local state (`selectedId`, `selectedModel`). `Layout` is a pure layout component with no data props.
 

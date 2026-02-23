@@ -1,11 +1,13 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ThemeProvider, CssBaseline, Snackbar, Alert, Box, CircularProgress } from '@mui/material';
+import WifiOffIcon from '@mui/icons-material/WifiOff';
 import theme from './theme';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useAuth } from './hooks/useAuth';
 import { useConversations } from './hooks/useConversations';
 import { useModels } from './hooks/useModels';
+import { useOnlineStatus } from './hooks/useOnlineStatus';
 import { ChatAppProvider } from './contexts/ChatAppContext';
 import Layout from './components/Layout';
 import AuthPage from './components/Auth/AuthPage';
@@ -23,6 +25,7 @@ function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps) {
   const { t } = useTranslation();
   const { conversations, loading: convsLoading, error: convsError, clearError: clearConvsError, refresh, create, remove } = useConversations();
   const { models, error: modelsError, clearError: clearModelsError } = useModels();
+  const isOnline = useOnlineStatus();
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState('openrouter/free');
@@ -78,6 +81,7 @@ function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps) {
       selectedModel,
       userEmail: user.email,
       tokenUsage: user.totalTokensUsed,
+      isOnline,
       selectConversation: setSelectedId,
       newChat: handleNewChat,
       deleteConversation: handleDelete,
@@ -93,6 +97,7 @@ function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps) {
       selectedModel,
       user.email,
       user.totalTokensUsed,
+      isOnline,
       handleNewChat,
       handleDelete,
       handleConversationUpdate,
@@ -105,6 +110,14 @@ function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps) {
       <ChatAppProvider value={contextValue}>
         <Layout />
       </ChatAppProvider>
+      <Snackbar
+        open={!isOnline}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity="warning" icon={<WifiOffIcon fontSize="inherit" />} variant="filled">
+          {t('network.offline')}
+        </Alert>
+      </Snackbar>
       <Snackbar
         open={!!error}
         autoHideDuration={4000}
