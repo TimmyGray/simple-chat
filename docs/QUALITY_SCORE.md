@@ -53,7 +53,7 @@
 - Medium: 10 todo, 20 done, 1 wont-fix (F-M10, F-M13, F-M17 completed since last audit)
 - Low: 12 todo, 1 done
 - Features: 8 todo, 2 done (FEAT-6 completed)
-- Total tracked: 65 (see `docs/exec-plans/tech-debt-tracker.md`)
+- Total tracked: 66 (see `docs/exec-plans/tech-debt-tracker.md`)
 
 ## Sweep #7 Findings
 - All validation passing: lint 0 errors, typecheck 0 errors, build passing
@@ -77,8 +77,10 @@
 - No files exceed 300-line limit (chat.service.ts at 297, under limit)
 - Backend has 6 `instanceof Error ? err.message` patterns — no backend getErrorMessage utility exists yet (below 3+ threshold for promotion; backend uses NestJS Logger context which differs from frontend pattern)
 - Frontend useAuth.ts has 2 `instanceof Error && 'response' in err` patterns — different from message extraction pattern, used for status code inspection (tracked in retro #3, below threshold)
+- New finding: backend extractFileContent (61 lines) exceeds 50-line function limit (added as B-L8)
 - Existing tracked violations confirmed still present:
   - window.alert() in FileAttachment.tsx (tracked as F-M21, caught by ESLint)
+  - 1 backend function exceeds 50-line limit: extractFileContent at 61 lines (new, tracked as B-L8)
   - 16 frontend functions/components exceed 50-line limit (React components/hooks, tracked as F-L2) — component size is expected for React
   - Frontend bundle 1.4 MB total, split via manual chunks and lazy loading (tracked as F-M17, now done)
 
