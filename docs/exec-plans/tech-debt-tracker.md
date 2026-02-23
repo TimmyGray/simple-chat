@@ -82,6 +82,7 @@ Each task has:
 | B-L5 | Enable strict: true in backend tsconfig | backend | 0.5d | todo | Some strict flags missing |
 | B-L6 | Standardize SSE error format | backend | 0.25d | todo | Inconsistent error envelope |
 | B-L7 | Document CORS configuration | backend | 0.1d | todo | Allowed origins undocumented |
+| B-L8 | Refactor extractFileContent (61 lines, exceeds 50-line limit) | backend | 0.25d | todo | file-extraction.service.ts — extract helpers for text/PDF branches |
 | F-L1 | Extract magic numbers to constants/theme | frontend | 0.25d | todo | Hardcoded values in styles |
 | F-L2 | Split large component files (180+ lines) | frontend | 0.5d | todo | Some files too large |
 | F-L3 | Standardize error logging with utility | frontend | 0.25d | done | console.error removed in sweep |
