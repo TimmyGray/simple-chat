@@ -196,6 +196,7 @@ export default function ChatInput({
           <Tooltip title={t('chat.sendTooltip')}>
             <span>
               <IconButton
+                aria-label={t('chat.sendTooltip')}
                 onClick={handleSend}
                 disabled={disabled || !canSend}
                 sx={{

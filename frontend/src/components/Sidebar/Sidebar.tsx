@@ -126,7 +126,7 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
                 {userEmail}
               </Typography>
               <Tooltip title={t('auth.logout')}>
-                <IconButton size="small" onClick={logout}>
+                <IconButton size="small" aria-label={t('auth.logout')} onClick={logout}>
                   <LogoutIcon sx={{ fontSize: 18 }} />
                 </IconButton>
               </Tooltip>

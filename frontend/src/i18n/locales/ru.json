@@ -19,7 +19,8 @@
     "title": "Simple Chat",
     "newChat": "Новый чат",
     "noConversations": "Нет диалогов",
-    "tokensUsed": "Токенов использовано: {{tokens}}"
+    "tokensUsed": "Токенов использовано: {{tokens}}",
+    "openMenu": "Открыть меню"
   },
   "chat": {
     "placeholder": "Введите сообщение...",

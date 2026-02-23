@@ -19,7 +19,8 @@
     "title": "Simple Chat",
     "newChat": "New Chat",
     "noConversations": "No conversations yet",
-    "tokensUsed": "Tokens used: {{tokens}}"
+    "tokensUsed": "Tokens used: {{tokens}}",
+    "openMenu": "Open menu"
   },
   "chat": {
     "placeholder": "Type your message...",
