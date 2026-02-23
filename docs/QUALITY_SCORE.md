@@ -1,14 +1,14 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-23 (sweep #7)
+> Last updated: 2026-02-24 (sweep #8)
 
 ## Test Summary
 
 | Area | Test Files | Tests | Pass Rate |
 |------|-----------|-------|-----------|
 | Backend | 13 | 112 | 100% |
-| Frontend | 9 | 50 | 100% |
-| **Total** | **22** | **162** | **100%** |
+| Frontend | 10 | 75 | 100% |
+| **Total** | **23** | **187** | **100%** |
 
 ## Lint Status
 
@@ -50,10 +50,40 @@
 ## Tech Debt
 - Critical: 0 todo, 4 done (JWT authentication completed)
 - High: 0 todo, 7 done — all high-priority items completed
-- Medium: 10 todo, 20 done, 1 wont-fix (F-M10, F-M13, F-M17 completed since last audit)
-- Low: 12 todo, 1 done
+- Medium: 7 todo, 23 done, 1 wont-fix (F-M11, F-M12, F-M14 completed since sweep #7)
+- Low: 13 todo, 1 done
 - Features: 8 todo, 2 done (FEAT-6 completed)
 - Total tracked: 66 (see `docs/exec-plans/tech-debt-tracker.md`)
+
+## Sweep #8 Findings
+- All validation passing: lint 0 errors, typecheck 0 errors, build passing
+- Backend tests: 112 (13 files, unchanged)
+- Frontend tests: 50 -> 75 (+25 from getErrorMessage.test.ts expansion — isCorsLikeError + hasResponseStatus + isAbortError tests)
+- Total tests: 162 -> 187 (target: 100+ sustained, comfortably exceeded)
+- Fixed: tech debt medium count corrected (was 10/20, actually 7/23 — F-M11, F-M12, F-M14 done since sweep #7)
+- Fixed: tech debt low count corrected (was 12 todo, actually 13 todo — B-L8 was added in sweep #7 without updating the count)
+- Fixed: frontend test count in quality summary corrected (was 50 / 9 files, actually 75 / 10 files)
+- No auto-fixable code violations found (codebase is clean)
+- No console.log/warn/error in source (clean)
+- No dangerouslySetInnerHTML (clean)
+- No hardcoded secrets (clean)
+- No `any` types in non-test source files (clean)
+- No hardcoded user-facing strings (all use t())
+- i18n: all 4 locales in sync (48 keys each)
+- All cross-module imports follow approved patterns
+- No services importing Express types (clean)
+- No direct MongoDB collection access outside DatabaseService (clean)
+- No files exceed 300-line limit (chat.service.ts at 297, under limit)
+- No hardcoded colors outside theme.ts (F-M13 fix verified — all rgba/gradients now in theme.ts only)
+- Backend has 6 `instanceof Error ? err.message` patterns — no backend getErrorMessage utility (below promotion threshold; backend uses NestJS Logger context which differs from frontend pattern)
+- Frontend useAuth.ts unsafe cast patterns fully resolved (replaced by hasResponseStatus/isAbortError type guards from F-M12)
+- Frontend bundle: 314 KB index + 295 KB vendor-mui + 63 KB vendor-i18n + 796 KB lazy markdown = 1.4 MB total (unchanged)
+- Backend bundle: 860 KB (unchanged)
+- Existing tracked violations confirmed still present:
+  - window.alert() in FileAttachment.tsx (tracked as F-M21, caught by ESLint)
+  - 1 backend function exceeds 50-line limit: extractFileContent at 61 lines (tracked as B-L8)
+  - Multiple frontend functions/components exceed 50-line limit (React components/hooks, tracked as F-L2) — component size is expected for React
+  - Hidden `<input type="file">` in FileAttachment.tsx (no MUI equivalent, eslint-disable with explanation)
 
 ## Sweep #7 Findings
 - All validation passing: lint 0 errors, typecheck 0 errors, build passing
@@ -229,7 +259,7 @@
 - 5 frontend functions exceed 50-line limit (React components/hooks, tracked as F-L2)
 
 ## Targets
-- Test count: 100+ (achieved — currently 162)
+- Test count: 100+ (achieved — currently 187)
 - Coverage: 80%+ (currently 60%/50% thresholds)
 - Lint errors: 0 (achieved)
 - Type errors: 0 (achieved)
