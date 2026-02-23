@@ -57,7 +57,7 @@ Each task has:
 | F-M8 | Add focus management after message send | frontend | 0.25d | done | PR #39 merged. inputRef + useEffect auto-focus on send and streaming end. |
 | F-M9 | Lazy-load react-markdown + react-syntax-highlighter | frontend | 0.5d | done | PR #40 merged. React.lazy + Suspense, separate 796KB chunk. |
 | F-M10 | Prevent full page re-render on model change | frontend | 0.5d | done | PR #42. Split ModelContext from ChatAppContext. |
-| F-M11 | Strengthen TypeScript interfaces (branded types) | frontend | 0.5d | todo | Weak type definitions |
+| F-M11 | Strengthen TypeScript interfaces (branded types) | frontend | 0.5d | done | PR #45. Brand<T,B> utility + ConversationId/MessageId/ModelId across 16 files. |
 | F-M12 | Add type guards for caught errors | frontend | 0.25d | done | PR #44 merged. `hasResponseStatus` + `isAbortError` type guards. |
 | F-M13 | Use theme palette tokens instead of hardcoded gradients | frontend | 0.25d | done | PR #42. All rgba/gradients migrated to theme tokens. |
 | F-M14 | Add CORS error handling interceptor | frontend | 0.25d | todo | No special CORS error handling |
@@ -158,4 +158,5 @@ Each task has:
 | F-M10 | Prevent full page re-render on model change (PR #42) | 2026-02-23 |
 | F-M13 | Migrate rgba/gradient colors to theme tokens (PR #42) | 2026-02-23 |
 | F-M17 | Configure Vite manual chunks for bundle optimization (PR #42) | 2026-02-23 |
+| F-M11 | Strengthen TypeScript interfaces with branded types (PR #45) | 2026-02-23 |
 | F-M12 | Add type guards for caught errors (PR #44) | 2026-02-23 |
