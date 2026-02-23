@@ -76,7 +76,7 @@ export default function Layout() {
       )}
 
       {/* Chat area */}
-      <Box sx={{ flex: 1, overflow: 'hidden' }}>
+      <Box component="main" sx={{ flex: 1, overflow: 'hidden' }}>
         <ChatArea />
       </Box>
     </Box>

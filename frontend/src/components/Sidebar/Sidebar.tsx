@@ -55,6 +55,7 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
 
   return (
     <Box
+      component="nav"
       sx={{
         display: 'flex',
         flexDirection: 'column',
