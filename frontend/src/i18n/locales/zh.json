@@ -19,7 +19,8 @@
     "title": "Simple Chat",
     "newChat": "新建聊天",
     "noConversations": "暂无对话",
-    "tokensUsed": "已用令牌: {{tokens}}"
+    "tokensUsed": "已用令牌: {{tokens}}",
+    "openMenu": "打开菜单"
   },
   "chat": {
     "placeholder": "输入消息...",

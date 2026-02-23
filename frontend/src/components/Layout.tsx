@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Drawer,
@@ -13,6 +14,7 @@ import ChatArea from './Chat/ChatArea';
 const SIDEBAR_WIDTH = 280;
 
 export default function Layout() {
+  const { t } = useTranslation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -28,6 +30,7 @@ export default function Layout() {
       {/* Mobile menu button — hidden when drawer is open */}
       {isMobile && !mobileOpen && (
         <IconButton
+          aria-label={t('sidebar.openMenu')}
           onClick={() => setMobileOpen(true)}
           sx={{
             position: 'fixed',

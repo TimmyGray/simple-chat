@@ -92,6 +92,7 @@ export default function FileAttachment({
       <Tooltip title={t('chat.attachFiles')}>
         <IconButton
           size="small"
+          aria-label={t('chat.attachFiles')}
           onClick={() => inputRef.current?.click()}
           disabled={disabled}
           sx={{ color: 'text.secondary' }}

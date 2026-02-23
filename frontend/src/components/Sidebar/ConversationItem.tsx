@@ -23,7 +23,7 @@ export default function ConversationItem({
   onClick,
   onDelete,
 }: ConversationItemProps) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   return (
     <ListItemButton
       selected={selected}
@@ -56,6 +56,7 @@ export default function ConversationItem({
       <Box className="delete-btn" sx={{ transition: 'opacity 0.2s' }}>
         <IconButton
           size="small"
+          aria-label={t('common.delete')}
           onClick={(e) => {
             e.stopPropagation();
             onDelete();
