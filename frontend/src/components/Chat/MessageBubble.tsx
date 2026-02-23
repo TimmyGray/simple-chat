@@ -48,7 +48,6 @@ function MessageBubble({ message }: MessageBubbleProps) {
       sx={{
         display: 'flex',
         gap: 1.5,
-        mb: 2,
         flexDirection: isUser ? 'row-reverse' : 'row',
         alignItems: 'flex-start',
       }}

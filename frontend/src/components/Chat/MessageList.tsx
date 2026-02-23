@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useRef, useMemo, useEffect, useCallback } from 'react';
 import { Box, CircularProgress } from '@mui/material';
+import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 import type { Message } from '../../types';
 import MessageBubble from './MessageBubble';
 import TypingIndicator from './TypingIndicator';
@@ -17,11 +18,40 @@ export default function MessageList({
   streaming,
   streamingContent,
 }: MessageListProps) {
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
+  const isAtBottomRef = useRef(true);
 
+  const items = useMemo(() => {
+    if (!streaming || !streamingContent) return messages;
+    return [
+      ...messages,
+      {
+        _id: 'streaming',
+        conversationId: '',
+        role: 'assistant' as const,
+        content: streamingContent,
+        attachments: [],
+        createdAt: new Date().toISOString(),
+      },
+    ];
+  }, [messages, streaming, streamingContent]);
+
+  // Auto-scroll during streaming when content grows
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, streamingContent]);
+    if (isAtBottomRef.current && streaming && streamingContent && items.length > 0) {
+      requestAnimationFrame(() => {
+        virtuosoRef.current?.scrollToIndex({
+          index: items.length - 1,
+          align: 'end',
+          behavior: 'smooth',
+        });
+      });
+    }
+  }, [streamingContent, streaming, items.length]);
+
+  const handleAtBottomChange = useCallback((atBottom: boolean) => {
+    isAtBottomRef.current = atBottom;
+  }, []);
 
   if (loading) {
     return (
@@ -39,35 +69,31 @@ export default function MessageList({
   }
 
   return (
-    <Box
-      sx={{
-        flex: 1,
-        overflow: 'auto',
-        px: { xs: 2, md: 4 },
-        py: 2,
-      }}
-    >
-      {messages.map((msg) => (
-        <MessageBubble key={msg._id} message={msg} />
-      ))}
-
-      {/* Streaming message */}
-      {streaming && streamingContent && (
-        <MessageBubble
-          message={{
-            _id: 'streaming',
-            conversationId: '',
-            role: 'assistant',
-            content: streamingContent,
-            attachments: [],
-            createdAt: new Date().toISOString(),
-          }}
-        />
+    <Virtuoso
+      ref={virtuosoRef}
+      style={{ flex: 1 }}
+      data={items}
+      followOutput="smooth"
+      atBottomStateChange={handleAtBottomChange}
+      atBottomThreshold={100}
+      initialTopMostItemIndex={items.length > 0 ? items.length - 1 : 0}
+      increaseViewportBy={200}
+      itemContent={(_, message) => (
+        <Box sx={{ px: { xs: 2, md: 4 }, pb: 2 }}>
+          <MessageBubble message={message} />
+        </Box>
       )}
-
-      {streaming && !streamingContent && <TypingIndicator />}
-
-      <div ref={bottomRef} />
-    </Box>
+      components={{
+        Header: () => <Box sx={{ height: 16 }} />,
+        Footer: () =>
+          streaming && !streamingContent ? (
+            <Box sx={{ px: { xs: 2, md: 4 }, pb: 2 }}>
+              <TypingIndicator />
+            </Box>
+          ) : (
+            <Box sx={{ height: 16 }} />
+          ),
+      }}
+    />
   );
 }
