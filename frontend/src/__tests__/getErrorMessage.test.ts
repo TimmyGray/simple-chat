@@ -69,9 +69,24 @@ describe('isCorsLikeError', () => {
     expect(isCorsLikeError(err)).toBe(true);
   });
 
-  it('returns true for fetch TypeError when online', () => {
+  it('returns true for fetch TypeError "Failed to fetch" when online', () => {
     Object.defineProperty(navigator, 'onLine', { value: true, configurable: true });
     expect(isCorsLikeError(new TypeError('Failed to fetch'))).toBe(true);
+  });
+
+  it('returns true for Safari fetch TypeError "Load failed" when online', () => {
+    Object.defineProperty(navigator, 'onLine', { value: true, configurable: true });
+    expect(isCorsLikeError(new TypeError('Load failed'))).toBe(true);
+  });
+
+  it('returns true for Firefox fetch TypeError "NetworkError" when online', () => {
+    Object.defineProperty(navigator, 'onLine', { value: true, configurable: true });
+    expect(isCorsLikeError(new TypeError('NetworkError when attempting to fetch resource'))).toBe(true);
+  });
+
+  it('returns false for unrelated TypeError when online', () => {
+    Object.defineProperty(navigator, 'onLine', { value: true, configurable: true });
+    expect(isCorsLikeError(new TypeError('Cannot read properties of undefined'))).toBe(false);
   });
 
   it('returns false for Axios ERR_NETWORK when offline', () => {

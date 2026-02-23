@@ -21,9 +21,15 @@ export function isCorsLikeError(err: unknown): boolean {
     return true;
   }
 
-  // Fetch TypeError (CORS blocks surface as "Failed to fetch")
+  // Fetch TypeError — CORS blocks surface as "Failed to fetch" (Chrome),
+  // "Load failed" (Safari), or "NetworkError" (Firefox).
   if (err instanceof TypeError) {
-    return true;
+    const msg = err.message.toLowerCase();
+    return (
+      msg.includes('failed to fetch') ||
+      msg.includes('load failed') ||
+      msg.includes('networkerror')
+    );
   }
 
   return false;
