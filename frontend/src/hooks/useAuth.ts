@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { User } from '../types';
 import * as api from '../api/client';
-import { hasResponseStatus } from '../utils/getErrorMessage';
+import { hasResponseStatus, isCorsLikeError } from '../utils/getErrorMessage';
 
 export function useAuth() {
   const { t } = useTranslation();
@@ -53,6 +53,10 @@ export function useAuth() {
         setError(tRef.current('auth.invalidCredentials'));
         return;
       }
+      if (isCorsLikeError(err)) {
+        setError(tRef.current('errors.corsOrNetwork'));
+        return;
+      }
       setError(tRef.current('auth.loginFailed'));
     }
   }, []);
@@ -72,6 +76,10 @@ export function useAuth() {
     } catch (err) {
       if (hasResponseStatus(err) && err.response.status === 409) {
         setError(tRef.current('auth.emailTaken'));
+        return;
+      }
+      if (isCorsLikeError(err)) {
+        setError(tRef.current('errors.corsOrNetwork'));
         return;
       }
       setError(tRef.current('auth.registerFailed'));

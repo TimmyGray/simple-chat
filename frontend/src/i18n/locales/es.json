@@ -61,6 +61,7 @@
     "unsupportedType": "\"{{name}}\" tiene un tipo de archivo no compatible ({{type}}).",
     "fetchModels": "Error al obtener los modelos",
     "filesNotAttached": "Algunos archivos no se adjuntaron:",
-    "streamErrorPrefix": "Error: {{message}}"
+    "streamErrorPrefix": "Error: {{message}}",
+    "corsOrNetwork": "No se puede conectar al servidor. Verifica que el backend esté en ejecución y que CORS esté configurado correctamente."
   }
 }

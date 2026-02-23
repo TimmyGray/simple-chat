@@ -25,7 +25,7 @@ export function useMessages() {
       const data = await api.getMessages(conversationId);
       setMessages(data);
     } catch (err) {
-      const msg = getErrorMessage(err, tRef.current('errors.fetchMessages'));
+      const msg = getErrorMessage(err, tRef.current('errors.fetchMessages'), tRef.current('errors.corsOrNetwork'));
       setError(msg);
     } finally {
       setLoading(false);
@@ -103,7 +103,7 @@ export function useMessages() {
         );
       } catch (err) {
         if (!completed) {
-          const msg = getErrorMessage(err, tRef.current('errors.streamingFailed'));
+          const msg = getErrorMessage(err, tRef.current('errors.streamingFailed'), tRef.current('errors.corsOrNetwork'));
           setError(msg);
         }
       } finally {

@@ -61,6 +61,7 @@
     "unsupportedType": "\"{{name}}\" has an unsupported file type ({{type}}).",
     "fetchModels": "Failed to fetch models",
     "filesNotAttached": "Some files were not attached:",
-    "streamErrorPrefix": "Error: {{message}}"
+    "streamErrorPrefix": "Error: {{message}}",
+    "corsOrNetwork": "Cannot reach the server. Check that the backend is running and CORS is configured correctly."
   }
 }

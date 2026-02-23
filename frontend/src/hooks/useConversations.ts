@@ -32,7 +32,7 @@ export function useConversations() {
     } catch (err) {
       // Only surface errors when there's no stale data to show
       if (!initializedRef.current) {
-        const msg = getErrorMessage(err, tRef.current('errors.fetchConversations'));
+        const msg = getErrorMessage(err, tRef.current('errors.fetchConversations'), tRef.current('errors.corsOrNetwork'));
         setError(msg);
       }
     } finally {
@@ -54,7 +54,7 @@ export function useConversations() {
         setConversations((prev) => [conversation, ...prev]);
         return conversation;
       } catch (err) {
-        const msg = getErrorMessage(err, tRef.current('errors.createConversation'));
+        const msg = getErrorMessage(err, tRef.current('errors.createConversation'), tRef.current('errors.corsOrNetwork'));
         setError(msg);
         throw err;
       }
@@ -71,7 +71,7 @@ export function useConversations() {
         );
         return updated;
       } catch (err) {
-        const msg = getErrorMessage(err, tRef.current('errors.updateConversation'));
+        const msg = getErrorMessage(err, tRef.current('errors.updateConversation'), tRef.current('errors.corsOrNetwork'));
         setError(msg);
         throw err;
       }
@@ -84,7 +84,7 @@ export function useConversations() {
       await api.deleteConversation(id);
       setConversations((prev) => prev.filter((c) => c._id !== id));
     } catch (err) {
-      const msg = getErrorMessage(err, tRef.current('errors.deleteConversation'));
+      const msg = getErrorMessage(err, tRef.current('errors.deleteConversation'), tRef.current('errors.corsOrNetwork'));
       setError(msg);
       throw err;
     }
