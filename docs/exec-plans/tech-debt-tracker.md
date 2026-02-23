@@ -52,7 +52,7 @@ Each task has:
 | F-M3 | Replace 9-prop drill with React Context | frontend | 1d | done | PR #33 merged. ChatAppContext replaces 13 pass-through props on Layout. |
 | F-M4 | Add cache invalidation / SWR pattern | frontend | 0.5d | done | PR #34 merged. Focus revalidation + dedup + stale data preservation. |
 | F-M5 | Add offline/connectivity detection | frontend | 0.5d | done | PR #35 merged. useOnlineStatus hook, offline Snackbar, ChatInput disabled. |
-| F-M6 | Add ARIA labels to IconButtons | frontend | 0.25d | todo | Missing accessibility labels |
+| F-M6 | Add ARIA labels to IconButtons | frontend | 0.25d | done | PR #36 merged. aria-label on all 5 IconButtons + sidebar.openMenu i18n key. |
 | F-M7 | Use semantic HTML in message list | frontend | 0.25d | todo | Should use main, article |
 | F-M8 | Add focus management after message send | frontend | 0.25d | todo | Input not refocused |
 | F-M9 | Lazy-load react-markdown + react-syntax-highlighter | frontend | 0.5d | todo | Heavy libs loaded eagerly |
@@ -151,3 +151,4 @@ Each task has:
 | F-M3 | Replace prop drilling with ChatAppContext (PR #33) | 2026-02-23 |
 | F-M4 | Add SWR focus revalidation (PR #34) | 2026-02-23 |
 | F-M5 | Add offline/connectivity detection (PR #35) | 2026-02-23 |
+| F-M6 | Add ARIA labels to IconButtons (PR #36) | 2026-02-23 |
