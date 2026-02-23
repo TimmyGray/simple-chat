@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Conversation } from '../types';
 import * as api from '../api/client';
+import { useFocusRevalidation } from './useFocusRevalidation';
 
 export function useConversations() {
   const { t } = useTranslation();
@@ -11,23 +12,39 @@ export function useConversations() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const fetchingRef = useRef(false);
+  const initializedRef = useRef(false);
 
   const fetch = useCallback(async () => {
-    setError(null);
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
+
+    // Only show loading spinner on initial fetch, not revalidation
+    if (!initializedRef.current) {
+      setError(null);
+    }
+
     try {
       const data = await api.getConversations();
       setConversations(data);
+      initializedRef.current = true;
     } catch (err) {
-      const msg = err instanceof Error ? err.message : tRef.current('errors.fetchConversations');
-      setError(msg);
+      // Only surface errors when there's no stale data to show
+      if (!initializedRef.current) {
+        const msg = err instanceof Error ? err.message : tRef.current('errors.fetchConversations');
+        setError(msg);
+      }
     } finally {
       setLoading(false);
+      fetchingRef.current = false;
     }
   }, []);
 
   useEffect(() => {
     fetch();
   }, [fetch]);
+
+  useFocusRevalidation(fetch);
 
   const create = useCallback(
     async (model?: string) => {
