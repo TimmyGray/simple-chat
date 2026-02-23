@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from '../theme';
+// Pre-load lazy MarkdownRenderer so React.lazy resolves from module cache in tests
+import '../components/Chat/MarkdownRenderer';
 import MessageBubble from '../components/Chat/MessageBubble';
 
 const renderWithTheme = (ui: React.ReactElement) =>
@@ -24,7 +26,7 @@ describe('MessageBubble', () => {
     expect(screen.getByText('Hello AI!')).toBeInTheDocument();
   });
 
-  it('renders assistant message with markdown', () => {
+  it('renders assistant message with markdown', async () => {
     renderWithTheme(
       <MessageBubble
         message={{
@@ -38,11 +40,11 @@ describe('MessageBubble', () => {
         }}
       />,
     );
-    expect(screen.getByText('Bold text')).toBeInTheDocument();
+    expect(await screen.findByText('Bold text', {}, { timeout: 5000 })).toBeInTheDocument();
     expect(screen.getByText('inline code')).toBeInTheDocument();
   });
 
-  it('shows model name for assistant messages', () => {
+  it('shows model name for assistant messages', async () => {
     renderWithTheme(
       <MessageBubble
         message={{
@@ -56,6 +58,7 @@ describe('MessageBubble', () => {
         }}
       />,
     );
+    expect(await screen.findByText('Response', {}, { timeout: 5000 })).toBeInTheDocument();
     expect(screen.getByText('openrouter/free')).toBeInTheDocument();
   });
 
