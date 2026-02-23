@@ -49,7 +49,7 @@ Each task has:
 | B-M9 | Add coverage tool, target 80%+ | backend | 0.5d | done | @vitest/coverage-v8 configured, thresholds: 60%/50% |
 | F-M1 | Add list virtualization (react-window) | frontend | 1d | done | PR #31 merged. react-virtuoso (better for variable-height chat). |
 | F-M2 | Throttle scroll-to-bottom during streaming | frontend | 0.25d | done | PR #32 merged. 150ms ref-based throttle. |
-| F-M3 | Replace 9-prop drill with React Context | frontend | 1d | todo | Layout has too many props |
+| F-M3 | Replace 9-prop drill with React Context | frontend | 1d | done | PR #33 merged. ChatAppContext replaces 13 pass-through props on Layout. |
 | F-M4 | Add cache invalidation / SWR pattern | frontend | 0.5d | todo | No background refresh |
 | F-M5 | Add offline/connectivity detection | frontend | 0.5d | todo | No navigator.onLine checks |
 | F-M6 | Add ARIA labels to IconButtons | frontend | 0.25d | todo | Missing accessibility labels |
@@ -148,3 +148,4 @@ Each task has:
 | B-M10 | Split chat.service.ts — extract FileExtractionService (PR #30) | 2026-02-21 |
 | F-M1 | Add list virtualization with react-virtuoso (PR #31) | 2026-02-23 |
 | F-M2 | Throttle scroll-to-bottom during streaming (PR #32) | 2026-02-23 |
+| F-M3 | Replace prop drilling with ChatAppContext (PR #33) | 2026-02-23 |
