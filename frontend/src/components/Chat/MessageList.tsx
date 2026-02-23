@@ -5,6 +5,8 @@ import type { Message } from '../../types';
 import MessageBubble from './MessageBubble';
 import TypingIndicator from './TypingIndicator';
 
+const SCROLL_THROTTLE_MS = 150;
+
 interface MessageListProps {
   messages: Message[];
   loading: boolean;
@@ -36,18 +38,46 @@ export default function MessageList({
     ];
   }, [messages, streaming, streamingContent]);
 
-  // Auto-scroll during streaming when content grows
+  // Throttle scroll-to-bottom during streaming (F-M2)
+  const lastScrollRef = useRef(0);
+  const scrollTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  const scrollToBottom = useCallback(() => {
+    lastScrollRef.current = Date.now();
+    virtuosoRef.current?.scrollToIndex({
+      index: items.length - 1,
+      align: 'end',
+      behavior: 'smooth',
+    });
+  }, [items.length]);
+
   useEffect(() => {
-    if (isAtBottomRef.current && streaming && streamingContent && items.length > 0) {
-      requestAnimationFrame(() => {
-        virtuosoRef.current?.scrollToIndex({
-          index: items.length - 1,
-          align: 'end',
-          behavior: 'smooth',
-        });
-      });
+    if (!isAtBottomRef.current || !streaming || !streamingContent || items.length === 0) return;
+
+    const elapsed = Date.now() - lastScrollRef.current;
+    if (elapsed >= SCROLL_THROTTLE_MS) {
+      requestAnimationFrame(scrollToBottom);
+    } else if (!scrollTimerRef.current) {
+      scrollTimerRef.current = setTimeout(() => {
+        scrollTimerRef.current = null;
+        requestAnimationFrame(scrollToBottom);
+      }, SCROLL_THROTTLE_MS - elapsed);
     }
-  }, [streamingContent, streaming, items.length]);
+
+    return () => {
+      if (scrollTimerRef.current) {
+        clearTimeout(scrollTimerRef.current);
+        scrollTimerRef.current = null;
+      }
+    };
+  }, [streamingContent, streaming, items.length, scrollToBottom]);
+
+  // Deliver final scroll when streaming ends (pending timer would be cleared)
+  useEffect(() => {
+    if (!streaming && isAtBottomRef.current) {
+      requestAnimationFrame(scrollToBottom);
+    }
+  }, [streaming, scrollToBottom]);
 
   const handleAtBottomChange = useCallback((atBottom: boolean) => {
     isAtBottomRef.current = atBottom;
@@ -73,7 +103,7 @@ export default function MessageList({
       ref={virtuosoRef}
       style={{ flex: 1 }}
       data={items}
-      followOutput="smooth"
+      followOutput={(atBottom) => (atBottom && !streaming ? 'smooth' : false)}
       atBottomStateChange={handleAtBottomChange}
       atBottomThreshold={100}
       initialTopMostItemIndex={items.length > 0 ? items.length - 1 : 0}
