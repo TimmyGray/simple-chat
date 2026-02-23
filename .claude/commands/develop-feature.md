@@ -7,10 +7,35 @@ $ARGUMENTS — Optional task ID from `docs/exec-plans/tech-debt-tracker.md`. If 
 
 ## Workflow
 
+### Phase 0: Concurrency Setup
+
+Before task selection, set up for safe parallel execution with other agents.
+
+1. Read `docs/exec-plans/active-work.json`. If the file is missing or corrupt, create it with: `{"schema_version":1,"sessions":[]}`
+2. **Stale cleanup**: For each session entry:
+   - Check if PID is alive: `kill -0 <pid> 2>/dev/null`
+   - If the PID check fails (process dead) OR `started_at` is older than 24 hours → remove the entry
+3. Write the cleaned registry back to `docs/exec-plans/active-work.json`
+4. **Port allocation**: Find the lowest available slot number (0, 1, 2, ...) not used by any remaining session:
+   - Slot 0: backend port 3001, frontend port 5173
+   - Slot 1: backend port 3002, frontend port 5174
+   - Slot 2: backend port 3003, frontend port 5175
+   - General formula: backend = 3001 + slot, frontend = 5173 + slot
+5. Note the list of currently active `task_id`s — these are off-limits for task selection
+6. Store the allocated ports and slot number for use in later phases
+
 ### Phase 1: Task Selection
 1. Read `docs/exec-plans/tech-debt-tracker.md`
 2. If task ID provided, find that task. Otherwise, select the next task with status `todo` and highest priority (critical > high > medium > low)
-3. Display the selected task and confirm understanding
+3. **Skip active tasks**: When selecting the next `todo` task, skip any task whose ID appears in the active-work registry (from Phase 0 step 5). If a specific task ID was provided via `$ARGUMENTS` and it's already active in the registry, **warn and stop** — do not compete with another agent
+4. Display the selected task and confirm understanding
+5. **Register in active-work registry**: Add a session entry to `docs/exec-plans/active-work.json` with:
+   - `task_id`: the selected task ID
+   - `branch`: the branch name to be created (e.g., `feat/<kebab-case-task-name>`)
+   - `started_at`: current ISO 8601 timestamp
+   - `pid`: current process ID (`$$` in bash)
+   - `ports`: `{"backend": <allocated_backend_port>, "frontend": <allocated_frontend_port>}`
+6. Write the updated registry back to the file
 
 ### Phase 2: Context Gathering
 1. Read `ARCHITECTURE.md` for system overview
@@ -59,20 +84,23 @@ $ARGUMENTS — Optional task ID from `docs/exec-plans/tech-debt-tracker.md`. If 
    - After staging any new files, re-run `npm run typecheck` and `npm run build` to confirm clean state
 3. This step prevents CI failures caused by files that exist on disk but aren't committed
 
-### Phase 6: Playwright Deep Validation
-1. Start dev servers in background:
-   - `npm run dev:backend` (background)
-   - `npm run dev:frontend` (background)
+### Phase 6: Playwright Deep Validation (Port-Aware)
+
+Use the ports allocated in Phase 0. This ensures multiple agents can run dev servers simultaneously.
+
+1. Start dev servers in background using allocated ports:
+   - `PORT=<allocated_backend_port> npm run dev:backend &`
+   - `cd frontend && npx vite --port <allocated_frontend_port> &`
 2. Wait for servers to be ready:
-   - Poll `http://localhost:3001/api/health` until it responds (max 30s)
-   - Poll `http://localhost:5173` until it responds (max 30s)
+   - Poll `http://localhost:<allocated_backend_port>/api/health` until it responds (max 30s)
+   - Poll `http://localhost:<allocated_frontend_port>` until it responds (max 30s)
 
 3. **Observability: Capture backend logs**
    - Before testing, note the backend process output (Pino logs)
    - After testing, check logs for: ERROR level entries, unhandled exceptions, slow operations
 
 4. **Deep browser validation** (not just "page loads"):
-   - Use `browser_navigate` → `http://localhost:5173`
+   - Use `browser_navigate` → `http://localhost:<allocated_frontend_port>`
    - Use `browser_snapshot` to capture full accessibility tree
    - **Navigate the specific user flow** affected by this feature:
      - For auth changes → test login/register flow
@@ -92,7 +120,9 @@ $ARGUMENTS — Optional task ID from `docs/exec-plans/tech-debt-tracker.md`. If 
    - Flag any ERROR or WARN level log entries that occurred during the test
    - If backend errors found, treat as a validation failure
 
-6. Kill dev servers: `pkill -f "nest start" || true` and `pkill -f "vite" || true`
+6. Kill dev servers precisely (won't interfere with other agents' servers):
+   - `lsof -ti:<allocated_backend_port> | xargs kill 2>/dev/null || true`
+   - `lsof -ti:<allocated_frontend_port> | xargs kill 2>/dev/null || true`
 7. If smoke test reveals critical issues (JS errors, broken UI, failed API calls, backend errors):
    - Fix the code
    - Return to Phase 5 (max 3 retry cycles across Phases 5-6)
@@ -132,9 +162,13 @@ $ARGUMENTS — Optional task ID from `docs/exec-plans/tech-debt-tracker.md`. If 
    - Max 2 review-fix cycles
 5. If still REQUEST_CHANGES after 2 cycles, stop and report remaining issues
 
-### Phase 10: Auto-Merge
+### Phase 10: Auto-Merge (Conflict-Aware)
 1. Verify PR is mergeable: `gh pr view --json mergeable,mergeStateStatus`
-2. If not mergeable (e.g., conflicts), attempt to resolve or stop and report
+2. If not mergeable (e.g., conflicts):
+   - Attempt rebase onto main: `git fetch origin main && git rebase origin/main`
+   - If rebase succeeds, force-push the rebased branch: `git push --force-with-lease`
+   - If rebase fails due to conflicts, attempt to resolve them, then continue rebase
+   - Retry the merge check. If still not mergeable after one rebase attempt, stop and report
 3. Merge: `gh pr merge --squash --delete-branch`
 4. Switch to main: `git checkout main && git pull origin main`
 
@@ -143,12 +177,13 @@ $ARGUMENTS — Optional task ID from `docs/exec-plans/tech-debt-tracker.md`. If 
 2. If an exec plan was created, move it to `docs/exec-plans/completed/`
 3. Stage bookkeeping files explicitly by name
 4. Commit bookkeeping changes directly to main and push
+5. **Unregister from active-work registry**: Read `docs/exec-plans/active-work.json`, remove own session entry (matching own PID or task_id), write the updated registry back. No need to commit — it's gitignored.
 
 ### Phase 12: Maintenance Cadence Check
 
 After bookkeeping, check if any maintenance tasks are due and launch them automatically.
 
-> This phase assumes sequential execution — do not run multiple `/develop-feature` instances concurrently.
+> **Concurrency note**: Multiple agents may increment counters concurrently. Slight over-counting is acceptable and self-correcting (maintenance runs slightly more often, which is harmless).
 
 1. Read `docs/exec-plans/maintenance-cadence.json`
    - If the file does not exist, create it with: `schema_version: 1`, all counters at 0, thresholds `{sweep: 3, audit: 5, retrospective: 10}`, empty `pending_runs: []`, today's date for all `last_runs`, and `last_updated` set to today
@@ -167,14 +202,15 @@ After bookkeeping, check if any maintenance tasks are due and launch them automa
 7. Write the list of due tasks to `pending_runs` (e.g., `["sweep", "audit", "retrospective"]`)
 8. Write the updated JSON back to `docs/exec-plans/maintenance-cadence.json`
 9. Stage, commit, and push the state file to main: `"chore: update maintenance cadence counters"`
-10. **If any maintenance tasks are due** (or recovered from `pending_runs`), report which ones and launch them as **parallel background Task subagents**:
+10. **Double-check before launching**: Re-read `pending_runs` from `docs/exec-plans/maintenance-cadence.json`. If another agent has already cleared `pending_runs` to `[]` since step 7, skip launching — the other agent already handled it.
+11. **If any maintenance tasks are due** (or recovered from `pending_runs`), report which ones and launch them as **parallel background Task subagents**:
     - Use `run_in_background: true` for all subagents — do NOT wait for them to complete
     - **Sweep subagent** (`general-purpose`): "Read `.claude/commands/sweep.md` and execute all instructions in that file against this codebase. You are running as an automated maintenance task triggered by the develop-feature workflow."
     - **Audit + Doc-garden subagent** (`general-purpose`): "Read `.claude/commands/audit-service.md` and execute all instructions. When the audit is complete, read `.claude/commands/doc-garden.md` and execute those instructions too. You are running as an automated maintenance task triggered by the develop-feature workflow."
     - **Retrospective subagent** (`general-purpose`): "Read `.claude/commands/retrospective.md` and execute all instructions in that file. You are running as an automated maintenance task triggered by the develop-feature workflow."
     - Note: doc-garden is bundled with audit (sequential within one subagent) because doc-garden checks for staleness that audit may have just updated
-11. After subagents are launched, clear `pending_runs` to `[]`, write the JSON, stage, commit, and push: `"chore: clear maintenance pending_runs"`
-12. **If no maintenance tasks are due**, report the countdown:
+12. After subagents are launched, clear `pending_runs` to `[]`, write the JSON, stage, commit, and push: `"chore: clear maintenance pending_runs"`
+13. **If no maintenance tasks are due**, report the countdown:
     - "No maintenance tasks due. Next: sweep in N features, audit in N features, retrospective in N features (last run: DATE)."
     - Calculate N as `threshold - current_counter` for each task
 
@@ -184,7 +220,7 @@ After bookkeeping, check if any maintenance tasks are due and launch them automa
 - If a task seems too large (touches > 15 files), break it into subtasks first
 - If tests fail and you can't fix them after 3 attempts, stop and report the issue
 - Always check that i18n strings are complete in all 4 locale files (en, ru, zh, es)
-- Always kill dev servers (Phase 6) before proceeding — leftover processes cause port conflicts
+- Always kill dev servers (Phase 6) using port-specific `lsof` commands — never `pkill -f` which may kill other agents' servers
 - The staged-file completeness check (Phase 5) is critical — it prevents the #1 cause of CI failures
 - Max retry limits are hard limits: do not exceed them. Report blockers instead.
 - Execution plans are living documents: update them as you make decisions during implementation
