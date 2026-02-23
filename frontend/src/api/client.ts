@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { Conversation, Message, ModelInfo, Attachment, AuthResponse, User } from '../types';
+import { getErrorMessage } from '../utils/getErrorMessage';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -198,7 +199,7 @@ export async function sendMessageStream(
     if (err instanceof DOMException && err.name === 'AbortError') {
       onError?.(abortSignal?.aborted ? 'Generation stopped' : 'Stream timeout');
     } else {
-      onError?.(err instanceof Error ? err.message : 'Stream failed');
+      onError?.(getErrorMessage(err, 'Stream failed'));
     }
   } finally {
     clearTimeout(timeout);

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { ModelInfo } from '../types';
 import * as api from '../api/client';
 import { useFocusRevalidation } from './useFocusRevalidation';
+import { getErrorMessage } from '../utils/getErrorMessage';
 
 export function useModels() {
   const { t } = useTranslation();
@@ -29,7 +30,7 @@ export function useModels() {
       initializedRef.current = true;
     } catch (err) {
       if (!initializedRef.current) {
-        const msg = err instanceof Error ? err.message : tRef.current('errors.fetchModels');
+        const msg = getErrorMessage(err, tRef.current('errors.fetchModels'));
         setError(msg);
       }
     } finally {

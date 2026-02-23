@@ -2,6 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Message, Attachment } from '../types';
 import * as api from '../api/client';
+import { getErrorMessage } from '../utils/getErrorMessage';
 
 export function useMessages() {
   const { t } = useTranslation();
@@ -23,7 +24,7 @@ export function useMessages() {
       const data = await api.getMessages(conversationId);
       setMessages(data);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : tRef.current('errors.fetchMessages');
+      const msg = getErrorMessage(err, tRef.current('errors.fetchMessages'));
       setError(msg);
     } finally {
       setLoading(false);
@@ -101,7 +102,7 @@ export function useMessages() {
         );
       } catch (err) {
         if (!completed) {
-          const msg = err instanceof Error ? err.message : tRef.current('errors.streamingFailed');
+          const msg = getErrorMessage(err, tRef.current('errors.streamingFailed'));
           setError(msg);
         }
       } finally {

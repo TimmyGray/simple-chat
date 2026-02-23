@@ -40,6 +40,7 @@ These rules are enforced by ESLint custom rules with remediation messages and st
 5. **Dependency direction:** Controllers → Services → Database. Never the reverse.
 6. **No window.alert():** Use MUI `Snackbar` + `Alert` for user notifications. ESLint catches both `window.alert()` and bare `alert()`.
 7. **No hardcoded user-facing strings:** All strings must use `t()` from react-i18next. Error messages, prefixes, and labels included.
+8. **No inline `instanceof Error` checks:** Use `getErrorMessage(err, fallback)` from `utils/getErrorMessage` for consistent error extraction in catch blocks.
 
 ## Environment
 

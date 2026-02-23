@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { Conversation } from '../types';
 import * as api from '../api/client';
 import { useFocusRevalidation } from './useFocusRevalidation';
+import { getErrorMessage } from '../utils/getErrorMessage';
 
 export function useConversations() {
   const { t } = useTranslation();
@@ -31,7 +32,7 @@ export function useConversations() {
     } catch (err) {
       // Only surface errors when there's no stale data to show
       if (!initializedRef.current) {
-        const msg = err instanceof Error ? err.message : tRef.current('errors.fetchConversations');
+        const msg = getErrorMessage(err, tRef.current('errors.fetchConversations'));
         setError(msg);
       }
     } finally {
@@ -53,7 +54,7 @@ export function useConversations() {
         setConversations((prev) => [conversation, ...prev]);
         return conversation;
       } catch (err) {
-        const msg = err instanceof Error ? err.message : tRef.current('errors.createConversation');
+        const msg = getErrorMessage(err, tRef.current('errors.createConversation'));
         setError(msg);
         throw err;
       }
@@ -70,7 +71,7 @@ export function useConversations() {
         );
         return updated;
       } catch (err) {
-        const msg = err instanceof Error ? err.message : tRef.current('errors.updateConversation');
+        const msg = getErrorMessage(err, tRef.current('errors.updateConversation'));
         setError(msg);
         throw err;
       }
@@ -83,7 +84,7 @@ export function useConversations() {
       await api.deleteConversation(id);
       setConversations((prev) => prev.filter((c) => c._id !== id));
     } catch (err) {
-      const msg = err instanceof Error ? err.message : tRef.current('errors.deleteConversation');
+      const msg = getErrorMessage(err, tRef.current('errors.deleteConversation'));
       setError(msg);
       throw err;
     }
