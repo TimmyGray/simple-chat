@@ -31,6 +31,7 @@ simple-chat/
         ├── hooks/            # Custom state hooks
         ├── i18n/             # Internationalization (4 languages)
         ├── types/            # TypeScript interfaces
+        ├── utils/            # Shared utilities (getErrorMessage)
         └── theme.ts          # MUI dark theme
 ```
 
@@ -226,7 +227,7 @@ App (useAuth hook)
 │       │   │       └── ChatArea (reads from ChatAppContext)
 │       │   │           ├── ModelSelector (dropdown)
 │       │   │           ├── MessageList
-│       │   │           │   ├── MessageBubble[] (markdown rendering)
+│       │   │           │   ├── MessageBubble[] (lazy-loads MarkdownRenderer)
 │       │   │           │   └── TypingIndicator (during streaming)
 │       │   │           ├── EmptyState (no conversation selected)
 │       │   │           └── ChatInput
@@ -248,6 +249,7 @@ Custom hooks with one React Context (`ChatAppContext`). No Redux, Zustand, or ot
 | `useMessages`      | Fetch messages, send with SSE streaming, optimistic user message insertion, stop streaming. Manages `streaming`, `streamingContent`, abort controller. |
 | `useModels`        | Fetch available models on mount. Error state.                       |
 | `useFocusRevalidation` | Shared hook: refetches data on window focus/visibility change. Throttled (default 30s). Used by `useConversations` and `useModels`. |
+| `useOnlineStatus`  | Detects browser online/offline state. Returns `isOnline` boolean. Drives offline Snackbar and ChatInput disabled state. |
 
 State coordination happens in `ChatApp` (within `App.tsx`), which assembles the `ChatAppContext` value from `useConversations`, `useModels`, and local state (`selectedId`, `selectedModel`). `Layout` is a pure layout component with no data props.
 
@@ -261,11 +263,13 @@ Located in `src/api/client.ts`:
 
 ### Markdown Rendering
 
-`MessageBubble` renders assistant messages as Markdown using:
+`MessageBubble` lazy-loads a `MarkdownRenderer` component (via `React.lazy`) to render assistant messages as Markdown using:
 - `react-markdown` for parsing
 - `remark-gfm` for GitHub Flavored Markdown (tables, strikethrough, etc.)
 - `rehype-sanitize` for XSS protection
 - `react-syntax-highlighter` for code block syntax highlighting
+
+The lazy import splits `react-markdown` and `react-syntax-highlighter` into a separate ~796KB chunk, reducing initial bundle load.
 
 ### i18n
 

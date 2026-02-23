@@ -47,12 +47,49 @@ export default defineConfig([
           selector: 'CallExpression[callee.object.name="window"][callee.property.name="alert"]',
           message: 'window.alert() is a UX anti-pattern. Use MUI Snackbar or a dialog component instead. Import { Snackbar, Alert } from "@mui/material". See tracked task F-M21.',
         },
+        {
+          selector: 'ConditionalExpression[test.type="BinaryExpression"][test.operator="instanceof"][test.right.name="Error"]',
+          message: 'Use getErrorMessage(err, fallback) from utils/getErrorMessage instead of inline instanceof checks. Import { getErrorMessage } from "../utils/getErrorMessage".',
+        },
       ],
       'no-restricted-globals': [
         'error',
         {
           name: 'alert',
           message: 'window.alert() is a UX anti-pattern. Use MUI Snackbar or a dialog component instead. Import { Snackbar, Alert } from "@mui/material". See tracked task F-M21.',
+        },
+      ],
+    },
+  },
+  {
+    // getErrorMessage.ts is the canonical implementation — exempt it from the instanceof Error rule
+    files: ['src/utils/getErrorMessage.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'JSXOpeningElement[name.name="button"]',
+          message: 'Use MUI <Button> instead of raw <button>.',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="input"]',
+          message: 'Use MUI <TextField> or <Input> instead of raw <input>.',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="select"]',
+          message: 'Use MUI <Select> instead of raw <select>.',
+        },
+        {
+          selector: 'JSXOpeningElement[name.name="textarea"]',
+          message: 'Use MUI <TextField multiline> instead of raw <textarea>.',
+        },
+        {
+          selector: 'Literal[value=/^#[0-9a-fA-F]{3,8}$/]',
+          message: 'Hardcoded hex color detected. Use MUI theme tokens instead.',
+        },
+        {
+          selector: 'CallExpression[callee.object.name="window"][callee.property.name="alert"]',
+          message: 'window.alert() is a UX anti-pattern. Use MUI Snackbar instead.',
         },
       ],
     },

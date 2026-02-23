@@ -378,6 +378,10 @@ frontend/src/
     useConversations.ts            # Conversations CRUD state
     useMessages.ts                 # Messages + streaming state
     useModels.ts                   # Available models state
+    useFocusRevalidation.ts        # SWR-style focus revalidation primitive
+    useOnlineStatus.ts             # Browser online/offline detection
+  utils/
+    getErrorMessage.ts             # Safe error message extraction from unknown errors
   i18n/
     index.ts                       # i18next configuration
     locales/
@@ -396,6 +400,7 @@ frontend/src/
       ChatArea.tsx                 # Chat container, manages useMessages
       MessageList.tsx              # Scrollable message list
       MessageBubble.tsx            # Individual message with markdown
+      MarkdownRenderer.tsx         # Lazy-loaded markdown + syntax highlighting
       ChatInput.tsx                # Multiline input + toolbar
       ModelSelector.tsx            # LLM model dropdown
       FileAttachment.tsx           # File upload button + validation
@@ -407,10 +412,12 @@ frontend/src/
   __tests__/
     ChatInput.test.tsx
     MessageBubble.test.tsx
+    MessageList.test.tsx
     ModelSelector.test.tsx
     Sidebar.test.tsx
     EmptyState.test.tsx
     ConfirmDialog.test.tsx
+    useFocusRevalidation.test.ts
 ```
 
 ---
