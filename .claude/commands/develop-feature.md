@@ -67,7 +67,7 @@ Before task selection, set up for safe parallel execution with other agents.
 ### Phase 4: Implementation
 1. Implement the changes following project patterns
 2. Write tests for new functionality
-3. Ensure i18n compliance: all user-facing strings use `t()` from react-i18next
+3. Ensure i18n compliance: all user-facing strings use `t()` from react-i18next. **In plain `.ts` modules without React hook access** (utilities, API clients), do NOT hardcode user-facing strings — accept i18n strings as parameters from the calling hook/component.
 4. Follow patterns from `docs/references/` if applicable
 5. **Update execution plan** after each significant decision:
    - Log architectural choices: "Chose X over Y because Z"
@@ -136,12 +136,13 @@ Use the ports allocated in Phase 0. This ensures multiple agents can run dev ser
 
 ### Phase 7: Commit & PR
 1. Run `git status --short` one final time
-2. Stage each file explicitly by name (never `git add .` or `git add -A`). **Always use repo-root-relative paths** (e.g., `frontend/vite.config.ts`, not `src/../../vite.config.ts`). If unsure of the correct path, use `git status --short` output which always shows repo-root-relative paths.
-3. Cross-check: run `git diff --cached --name-only` and verify it includes all files created/modified in Phase 4
-4. If any file is missing from the staged set, stage it now
-5. Commit with a descriptive message focused on "why"
-6. Push: `git push -u origin feat/<branch-name>`
-7. Create PR via `gh pr create` using the project's PR template format
+2. **Working directory assertion**: Before any git commands, run `git rev-parse --show-toplevel` and confirm you're at the repo root. If you `cd`'d into a subdirectory during implementation, `cd` back to the repo root first.
+3. Stage each file explicitly by name (never `git add .` or `git add -A`). **Always use repo-root-relative paths** (e.g., `frontend/vite.config.ts`, not `src/../../vite.config.ts`). If unsure of the correct path, use `git status --short` output which always shows repo-root-relative paths.
+4. Cross-check: run `git diff --cached --name-only` and verify it includes all files created/modified in Phase 4
+5. If any file is missing from the staged set, stage it now
+6. Commit with a descriptive message focused on "why"
+7. Push: `git push -u origin feat/<branch-name>`
+8. Create PR via `gh pr create` using the project's PR template format
    - Include Playwright smoke test screenshot in the PR body if captured
    - Include link to execution plan if one was created
 
@@ -168,6 +169,34 @@ Use the ports allocated in Phase 0. This ensures multiple agents can run dev ser
    - Return to Phase 8 step 1 (CI must pass again after fixes)
    - Max 2 review-fix cycles
 5. If still REQUEST_CHANGES after 2 cycles, stop and report remaining issues
+
+### Phase 9b: Root Cause Analysis & Immediate Learning
+
+**Activation**: Only when Phase 9 had `REQUEST_CHANGES` (skip entirely if Phase 9 was `APPROVE` on first pass).
+
+**Time budget**: 3-5 minutes (analysis only, no functional code changes).
+
+1. **Collect findings**: Gather all critical/warning findings from the Phase 9 review(s)
+2. **Classify each by root cause category**:
+   - `CONV` — Convention gap (rule exists but context made it hard to apply)
+   - `OVER` — Overgeneralization (correct in narrow context, wrong when exported broadly)
+   - `RAIL` — Missing guard rail (no lint rule/test prevents this)
+   - `PROC` — Workflow/process bug (wrong directory, wrong paths, stale state)
+   - `MODEL` — Incomplete mental model (didn't consider all callers/contexts)
+   - `COPY` — Copy-paste drift (adapted from similar code without verifying assumptions)
+3. **Write structured entries** to `pitfalls.md` (in the Claude Code auto-memory directory) under a `## Per-Feature Learning:` section with:
+   - Finding (what was caught)
+   - Category (from above)
+   - Root cause analysis (why it happened)
+   - Prevention (what would have caught it earlier)
+   - Promotion candidacy (is this promotable to a lint rule/test/prompt?)
+4. **Check promotion threshold**: Count same-category occurrences in `pitfalls.md`. If **2+ occurrences** of the same category, promote immediately:
+   - `CONV` → Update `docs/CONVENTIONS.md` + `review-pr.md` agent prompt
+   - `OVER` / `MODEL` / `COPY` → Update `review-pr.md` agent prompt with a new check
+   - `RAIL` → Add ESLint rule (`no-restricted-syntax`) or architecture test
+   - `PROC` → Add safeguard to `develop-feature.md`
+5. **If promotion applied**: Stage the changed `.md`/config files, commit with message `"chore: phase 9b promotion — <category>"`, and push to the feature branch
+6. **Append root cause summary** to the PR description: `gh pr edit --add-body "## Root Cause Analysis\n<summary>"`
 
 ### Phase 10: Auto-Merge (Conflict-Aware)
 1. Verify PR is mergeable: `gh pr view --json mergeable,mergeStateStatus`

@@ -20,6 +20,7 @@ Look for:
 - **Validation failures:** Common lint/type/test errors that could be prevented
 - **Command effectiveness:** Are the develop-feature/validate/review steps catching issues?
 - **Sweep findings:** Were the same violations found by `/sweep` repeatedly?
+- **Phase 9b entries:** Read `pitfalls.md` for `## Per-Feature Learning:` entries. Count by root cause category (`CONV`, `OVER`, `RAIL`, `PROC`, `MODEL`, `COPY`). Any category at 3+ that hasn't been promoted → escalate to ESLint rule or architecture test
 
 ### 3. Identify Improvements
 For each pattern found, propose a concrete improvement:
@@ -57,6 +58,12 @@ If the issue is an architectural violation:
 If the issue is a process violation:
 1. Add a step to `.github/workflows/ci.yml`
 2. Or add a check to the `/validate` command
+
+#### 4e. Review Phase 9b Promotions
+If Phase 9b previously promoted a finding into a prompt addition (`.md` file update):
+1. Check if the same root cause category has recurred since the promotion
+2. If yes → the prompt-level fix was insufficient. Escalate to ESLint rule (`no-restricted-syntax`) or architecture test
+3. If no → the prompt-level fix is working. No action needed.
 
 #### 4d. Update Documentation
 If the issue reveals a gap in documentation:

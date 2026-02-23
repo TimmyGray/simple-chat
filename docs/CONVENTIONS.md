@@ -15,6 +15,7 @@
 - **Styling:** Theme tokens from `theme.ts` — no hardcoded colors (hex, rgb, hsl)
 - **State:** Custom hooks (`useAuth`, `useConversations`, `useMessages`, `useModels`)
 - **i18n:** All user-facing strings use `t()` from react-i18next. 4 locales: en, ru, zh, es
+- **i18n in non-React modules:** In plain `.ts` files (utilities, API clients) without React hook access, user-facing strings must be accepted as parameters — not hardcoded. Only hooks/components with `t()` access should produce i18n strings.
 
 ### Shared
 - **TypeScript:** No `any` types in production code (allowed in test files)
