@@ -86,7 +86,7 @@ export default function ChatInput({
           borderRadius: 3,
           border: '1px solid',
           borderColor: focused ? 'primary.main' : 'divider',
-          backgroundColor: 'rgba(255, 255, 255, 0.03)',
+          backgroundColor: (theme) => alpha(theme.palette.common.white, 0.03),
           transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
           boxShadow: (theme) =>
             focused
@@ -185,7 +185,7 @@ export default function ChatInput({
             px: 1,
             py: 0.75,
             borderTop: '1px solid',
-            borderColor: 'rgba(255, 255, 255, 0.04)',
+            borderColor: (theme) => alpha(theme.palette.common.white, 0.04),
           }}
         >
           {/* Left: model selector + attach button */}

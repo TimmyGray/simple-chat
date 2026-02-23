@@ -72,7 +72,7 @@ export default function AuthPage({
             width: 56,
             height: 56,
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, #7c4dff 0%, #448aff 100%)',
+            background: (theme) => theme.palette.gradients.primary,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -138,9 +138,9 @@ export default function AuthPage({
             disabled={submitting || !email.trim() || !password}
             sx={{
               py: 1.2,
-              background: 'linear-gradient(135deg, #7c4dff 0%, #448aff 100%)',
+              background: (theme) => theme.palette.gradients.primary,
               '&:hover': {
-                background: 'linear-gradient(135deg, #651fff 0%, #2979ff 100%)',
+                background: (theme) => theme.palette.gradients.primaryHover,
               },
             }}
           >
