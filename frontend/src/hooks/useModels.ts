@@ -19,6 +19,10 @@ export function useModels() {
     if (fetchingRef.current) return;
     fetchingRef.current = true;
 
+    if (!initializedRef.current) {
+      setError(null);
+    }
+
     try {
       const data = await api.getModels();
       setModels(data);

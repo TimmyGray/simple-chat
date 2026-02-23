@@ -15,7 +15,7 @@ export function useConversations() {
   const fetchingRef = useRef(false);
   const initializedRef = useRef(false);
 
-  const fetch = useCallback(async () => {
+  const fetchConversations = useCallback(async () => {
     if (fetchingRef.current) return;
     fetchingRef.current = true;
 
@@ -41,10 +41,10 @@ export function useConversations() {
   }, []);
 
   useEffect(() => {
-    fetch();
-  }, [fetch]);
+    fetchConversations();
+  }, [fetchConversations]);
 
-  useFocusRevalidation(fetch);
+  useFocusRevalidation(fetchConversations);
 
   const create = useCallback(
     async (model?: string) => {
@@ -91,5 +91,5 @@ export function useConversations() {
 
   const clearError = useCallback(() => setError(null), []);
 
-  return { conversations, loading, error, clearError, refresh: fetch, create, update, remove };
+  return { conversations, loading, error, clearError, refresh: fetchConversations, create, update, remove };
 }
