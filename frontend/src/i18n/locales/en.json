@@ -40,6 +40,9 @@
     "tryAgain": "Try Again",
     "reloadPage": "Reload Page"
   },
+  "network": {
+    "offline": "You are offline. Check your internet connection."
+  },
   "models": {
     "free": "Free"
   },

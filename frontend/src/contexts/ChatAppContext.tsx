@@ -10,6 +10,7 @@ export interface ChatAppContextValue {
   selectedModel: string;
   userEmail: string | undefined;
   tokenUsage: number | undefined;
+  isOnline: boolean;
   selectConversation: (id: string) => void;
   newChat: () => void;
   deleteConversation: (id: string) => void;

@@ -40,6 +40,9 @@
     "tryAgain": "重试",
     "reloadPage": "重新加载页面"
   },
+  "network": {
+    "offline": "您已离线，请检查网络连接。"
+  },
   "models": {
     "free": "免费"
   },

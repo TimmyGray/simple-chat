@@ -40,6 +40,9 @@
     "tryAgain": "Intentar de nuevo",
     "reloadPage": "Recargar página"
   },
+  "network": {
+    "offline": "No hay conexión a internet. Verifica tu conexión."
+  },
   "models": {
     "free": "Gratis"
   },

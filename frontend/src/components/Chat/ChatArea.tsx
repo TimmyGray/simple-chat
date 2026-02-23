@@ -12,6 +12,7 @@ export default function ChatArea() {
     selectedConversation: conversation,
     models,
     selectedModel,
+    isOnline,
     changeModel,
     onConversationUpdate,
   } = useChatApp();
@@ -66,7 +67,7 @@ export default function ChatArea() {
         selectedModel={selectedModel}
         onModelChange={changeModel}
         onSend={handleSend}
-        disabled={streaming}
+        disabled={streaming || !isOnline}
       />
     </Box>
   );
