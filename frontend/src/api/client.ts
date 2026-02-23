@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type { Conversation, Message, ModelInfo, Attachment, AuthResponse, User, ConversationId, ModelId } from '../types';
-import { getErrorMessage, isAbortError } from '../utils/getErrorMessage';
+import { getErrorMessage, isAbortError, isCorsLikeError } from '../utils/getErrorMessage';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -198,6 +198,8 @@ export async function sendMessageStream(
   } catch (err) {
     if (isAbortError(err)) {
       onError?.(abortSignal?.aborted ? 'Generation stopped' : 'Stream timeout');
+    } else if (isCorsLikeError(err)) {
+      onError?.('Server unreachable — possible CORS misconfiguration');
     } else {
       onError?.(getErrorMessage(err, 'Stream failed'));
     }

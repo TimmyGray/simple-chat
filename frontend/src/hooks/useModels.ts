@@ -30,7 +30,7 @@ export function useModels() {
       initializedRef.current = true;
     } catch (err) {
       if (!initializedRef.current) {
-        const msg = getErrorMessage(err, tRef.current('errors.fetchModels'));
+        const msg = getErrorMessage(err, tRef.current('errors.fetchModels'), tRef.current('errors.corsOrNetwork'));
         setError(msg);
       }
     } finally {
