@@ -55,6 +55,7 @@
 - Features: 8 todo, 2 done (FEAT-6 completed)
 - Total tracked: 65 (see `docs/exec-plans/tech-debt-tracker.md`)
 
+<<<<<<< HEAD
 ## Audit #7 Findings
 - Backend tests: 112, unchanged. Frontend tests: 48 -> 50 (+2 from ChatInput focus tests)
 - Total tests now 162 (target: 100+ sustained, comfortably exceeded)
@@ -79,6 +80,8 @@
   - 7 frontend functions exceed 50-line limit (tracked as F-L2, up from 5 — sendMessageStream and createTheme now counted)
   - Frontend bundle 1.4 MB total, split via lazy loading (tracked as F-M17)
 
+=======
+>>>>>>> a977789 (chore: retrospective #3 — promote error handling pattern to ESLint rule)
 ## Retrospective #3 Findings
 - PRs analyzed: 10 (PRs #30-#40), date range: 2026-02-21 to 2026-02-23
 - 10 features completed since last retrospective: B-M10, F-M1 through F-M9
@@ -200,7 +203,11 @@
 - 5 frontend functions exceed 50-line limit (React components/hooks, tracked as F-L2)
 
 ## Targets
+<<<<<<< HEAD
 - Test count: 100+ (achieved -- currently 162)
+=======
+- Test count: 100+ (achieved — currently 162)
+>>>>>>> a977789 (chore: retrospective #3 — promote error handling pattern to ESLint rule)
 - Coverage: 80%+ (currently 60%/50% thresholds)
 - Lint errors: 0 (achieved)
 - Type errors: 0 (achieved)
