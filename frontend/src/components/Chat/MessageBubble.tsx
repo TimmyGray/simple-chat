@@ -45,6 +45,7 @@ function MessageBubble({ message }: MessageBubbleProps) {
 
   return (
     <Box
+      component="article"
       sx={{
         display: 'flex',
         gap: 1.5,
