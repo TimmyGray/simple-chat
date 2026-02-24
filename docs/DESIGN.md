@@ -402,8 +402,10 @@ Copy-paste reference for common values:
 'linear-gradient(135deg, #00e5ff 0%, #1de9b6 100%)'   // assistant accent
 
 // Sizing
-SIDEBAR_WIDTH = 280               // pixels
-MESSAGE_MAX_WIDTH = '75%'
+SIDEBAR_WIDTH = 280               // desktop (lg+)
+SIDEBAR_WIDTH_TABLET = 240        // tablet (md–lg)
+MESSAGE_MAX_WIDTH = '75%'         // desktop (lg+)
+MESSAGE_MAX_WIDTH_TABLET = '85%'  // tablet/mobile (xs–lg)
 AVATAR_SIZE = 34                  // pixels
 SEND_BUTTON_SIZE = 36             // pixels
 ```
