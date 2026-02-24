@@ -65,16 +65,16 @@ describe('useModels — error scenarios', () => {
     );
   });
 
-  it('preserves stale model data on revalidation failure', async () => {
+  it('loads models successfully on initial fetch', async () => {
     vi.mocked(api.getModels).mockResolvedValueOnce(mockModels);
 
     const { result } = renderHook(() => useModels());
 
-    // Wait for initial success
     await act(async () => {});
 
     expect(result.current.models).toEqual(mockModels);
     expect(result.current.error).toBeNull();
+    expect(result.current.loading).toBe(false);
   });
 
   it('clears error via clearError callback', async () => {

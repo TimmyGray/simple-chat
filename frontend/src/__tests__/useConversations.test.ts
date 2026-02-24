@@ -262,18 +262,16 @@ describe('useConversations — error scenarios', () => {
 
     const { result } = renderHook(() => useConversations());
 
-    // First fetch is in progress (from useEffect). Call refresh — should be ignored
-    const refreshPromise = act(async () => {
-      await result.current.refresh();
-    });
+    // Call refresh while the useEffect fetch is still pending
+    // The fetchingRef guard should skip this call
+    void result.current.refresh();
 
-    // Resolve the first fetch
+    // Resolve the first (useEffect) fetch and flush all pending state
     await act(async () => {
       resolveFirst([mockConversation]);
-      await refreshPromise;
     });
 
-    // Only one API call should have been made (the second was skipped)
+    // Only one API call should have been made (the refresh was skipped)
     expect(api.getConversations).toHaveBeenCalledTimes(1);
   });
 });

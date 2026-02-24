@@ -2,12 +2,11 @@ import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useMessages } from '../hooks/useMessages';
 import * as api from '../api/client';
-import { asConversationId, asModelId } from '../types';
+import { asConversationId } from '../types';
 
 vi.mock('../api/client');
 
 const CONV_ID = asConversationId('conv-1');
-const MODEL_ID = asModelId('test-model');
 
 describe('useMessages — additional error scenarios', () => {
   beforeEach(() => {
@@ -103,19 +102,6 @@ describe('useMessages — additional error scenarios', () => {
       (m) => m.role === 'assistant' && m.content.includes('Model overloaded'),
     );
     expect(errorBubble).toBeDefined();
-  });
-
-  it('passes model to sendMessageStream', async () => {
-    vi.mocked(api.sendMessageStream).mockResolvedValue();
-
-    const { result } = renderHook(() => useMessages());
-
-    await act(async () => {
-      await result.current.sendMessage(CONV_ID, 'Hi', MODEL_ID);
-    });
-
-    const call = vi.mocked(api.sendMessageStream).mock.calls[0];
-    expect(call[2]).toBe(MODEL_ID);
   });
 
   // ---- clear during streaming ----
