@@ -8,5 +8,9 @@ dist
 
 .claude/settings.local.json
 
+# Playwright smoke test artifacts
+playwright-smoke-*.png
+.playwright-mcp/
+
 # Parallel agent runtime state
 docs/exec-plans/active-work.json
