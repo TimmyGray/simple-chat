@@ -76,7 +76,7 @@ Each task has:
 | ID | Task | Area | Effort | Status | Notes |
 |----|------|------|--------|--------|-------|
 | B-L1 | Use PartialType for duplicate DTOs | backend | 0.1d | done | PR #60 merged. PartialType for conversation DTOs, BaseAuthDto for auth DTOs. |
-| B-L2 | Replace synchronous mkdirSync with async | backend | 0.1d | todo | Sync call at startup |
+| B-L2 | Replace synchronous mkdirSync with async | backend | 0.1d | done | PR #61 merged. async mkdir from fs/promises. |
 | B-L3 | Load model list from config or OpenRouter API | backend | 0.5d | todo | Hardcoded model list |
 | B-L4 | Add uploads/ to .gitignore | backend | 0.1d | done | Already present in root .gitignore as `/uploads` |
 | B-L5 | Enable strict: true in backend tsconfig | backend | 0.5d | todo | Some strict flags missing |
@@ -177,3 +177,4 @@ Each task has:
 | B-L4 | Add uploads/ to .gitignore (already present, discovered in audit #9) | 2026-02-24 |
 | B-L7 | Document CORS configuration (in ARCHITECTURE.md + SECURITY.md) | 2026-02-24 |
 | B-L1 | Use PartialType for duplicate DTOs (PR #60) | 2026-02-24 |
+| B-L2 | Replace synchronous mkdirSync with async (PR #61) | 2026-02-24 |
