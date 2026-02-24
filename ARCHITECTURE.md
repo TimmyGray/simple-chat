@@ -21,7 +21,7 @@ simple-chat/
 │   │   ├── health/           # Health check with MongoDB indicator
 │   │   ├── uploads/          # Cron-based upload cleanup
 │   │   ├── types/            # Shared document interfaces (ConversationDoc, MessageDoc, UserDoc)
-│   │   └── common/           # Shared: exception filter, correlation ID middleware, pipes
+│   │   └── common/           # Shared: exception filter, correlation ID middleware, pipes, utils (getErrorMessage)
 │   └── uploads/              # File upload storage (disk)
 └── frontend/                 # React 19 + Vite 7 + MUI 7
     └── src/

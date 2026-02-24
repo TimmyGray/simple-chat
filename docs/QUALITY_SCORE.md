@@ -1,14 +1,14 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-24 (sweep #12)
+> Last updated: 2026-02-24 (audit #11)
 
 ## Test Summary
 
 | Area | Test Files | Tests | Pass Rate |
 |------|-----------|-------|-----------|
-| Backend | 13 | 128 | 100% |
+| Backend | 14 | 134 | 100% |
 | Frontend | 16 | 151 | 100% |
-| **Total** | **29** | **279** | **100%** |
+| **Total** | **30** | **285** | **100%** |
 
 ## Lint Status
 
@@ -44,16 +44,51 @@
 | Frontend | ~20 | 8 (3 patch, 2 minor, 3 major) | 11 (1 moderate, 10 high — all in eslint/minimatch transitive deps) |
 
 ## Bundle Size
-- Backend: 880 KB (dist/)
+- Backend: 1.2 MB (dist/)
 - Frontend: 1.4 MB (dist/) — initial load 315 KB + 299 KB vendor-mui + 63 KB vendor-i18n + 796 KB lazy markdown chunk
 
 ## Tech Debt
 - Critical: 0 todo, 4 done (JWT authentication completed)
 - High: 0 todo, 7 done — all high-priority items completed
 - Medium: 0 todo, 30 done, 1 wont-fix — all medium items done
-- Low: 6 todo, 9 done (B-L8 completed in PR #70, B-L5 in PR #68 since last accurate count)
+- Low: 5 todo, 10 done (B-L9 completed in PR #71)
 - Features: 12 todo, 2 done (FEAT-5 subtasks expanded)
 - Total tracked: 71 (see `docs/exec-plans/tech-debt-tracker.md`)
+
+## Audit #11 Findings
+- All validation passing: lint 0 errors, typecheck 0 errors, 285 tests passing, build passing
+- Backend tests: 128 -> 134 (+6, 14 files — new get-error-message.spec.ts from B-L9)
+- Frontend tests: 151 (16 files, unchanged)
+- Total tests: 279 -> 285 (target: 100+ sustained, comfortably exceeded)
+- B-L9 (backend getErrorMessage utility) completed since last audit (PR #71)
+- Backend `instanceof Error` pattern: RESOLVED — 0 inline occurrences (was 11 across 8 files)
+  - New canonical utilities: `getErrorMessage(err)` and `getErrorStack(err)` in `common/utils/get-error-message.ts`
+  - ESLint enforcement: `no-restricted-syntax` rule catches both ternary and if-statement patterns
+  - Exemption for the utility file itself (same pattern as frontend)
+- B-M11 (worktree isolation) completed since last sweep (PR #69)
+- No console.log/warn/error in source (clean)
+- No dangerouslySetInnerHTML (clean)
+- No hardcoded secrets (clean)
+- No `any` types in non-test source files (clean)
+- No hardcoded user-facing strings (all use t())
+- No TODO/FIXME/HACK comments in source (clean)
+- i18n: all 4 locales in sync (55 leaf keys each, unchanged)
+- All cross-module imports follow approved patterns (chat->auth for guards/decorators only)
+- No services importing Express types (clean)
+- No direct MongoDB collection access outside DatabaseService (clean)
+- No files exceed 300-line limit (chat.service.ts at 300, at limit but not over)
+- All hex/rgba/gradient colors in theme.ts only (exempt per convention)
+- No window.alert() in source (clean)
+- No hardcoded hex colors outside theme.ts (clean)
+- Frontend bundle: 315 KB index + 299 KB vendor-mui + 63 KB vendor-i18n + 796 KB lazy markdown (1.4 MB total, unchanged)
+- Backend bundle: 1.2 MB (up from 880 KB — includes new utils, accumulated growth)
+- Dependencies: 0 vulnerabilities at root; backend 35, frontend 11 (all transitive, unchanged)
+- Backend outdated: 14 (7 patch, 4 minor, 3 major). Frontend outdated: 8 (3 patch, 2 minor, 3 major)
+- DB schema: no drift detected (interfaces match db-schema.md)
+- Existing tracked violations confirmed still present:
+  - 1 backend function borderline over 50-line limit: refreshModels at 52 lines (not tracked separately, only 2 lines over)
+  - Frontend components/hooks exceed 50-line limit: MessageBubble (161), ChatInput (243), App.tsx (200), AuthPage (178), Sidebar (163) — React components, tracked as F-L2
+- Low tech debt: 5 todo (F-L1, F-L2, F-L4, F-L5, F-L6), 10 done
 
 ## Sweep #12 Findings
 - All validation passing: lint 0 errors, typecheck 0 errors, 279 tests passing, build passing
@@ -479,7 +514,7 @@
 - 5 frontend functions exceed 50-line limit (React components/hooks, tracked as F-L2)
 
 ## Targets
-- Test count: 100+ (achieved — currently 279)
+- Test count: 100+ (achieved — currently 285)
 - Coverage: 80%+ (currently 60%/50% thresholds)
 - Lint errors: 0 (achieved)
 - Type errors: 0 (achieved)
