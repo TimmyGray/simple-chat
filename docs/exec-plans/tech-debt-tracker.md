@@ -62,7 +62,7 @@ Each task has:
 | F-M13 | Use theme palette tokens instead of hardcoded gradients | frontend | 0.25d | done | PR #42. All rgba/gradients migrated to theme tokens. |
 | F-M14 | Add CORS error handling interceptor | frontend | 0.25d | done | PR #46 merged. isCorsLikeError type guard + i18n errors.corsOrNetwork in all hooks. |
 | F-M15 | Add stricter ESLint rules (no-floating-promises) | frontend | 0.25d | done | PR #49 merged. projectService + no-floating-promises rule, 6 violations fixed with void operator. |
-| F-M16 | Create frontend .env.example | frontend | 0.1d | todo | VITE_API_URL undocumented |
+| F-M16 | Create frontend .env.example | frontend | 0.1d | done | PR #52 merged. VITE_API_URL documented. |
 | F-M17 | Configure Vite code splitting (manualChunks) | frontend | 0.5d | done | PR #42. vendor-mui + vendor-i18n chunks, index 671→312KB. |
 | F-M18 | Add hook tests (useMessages streaming) | frontend | 1d | todo | Only component tests exist |
 | F-M19 | Add error scenario tests | frontend | 1d | todo | No failure path tests |
@@ -163,3 +163,4 @@ Each task has:
 | F-M12 | Add type guards for caught errors (PR #44) | 2026-02-23 |
 | F-M14 | Add CORS error handling interceptor (PR #46) | 2026-02-24 |
 | F-M15 | Add no-floating-promises ESLint rule (PR #49) | 2026-02-24 |
+| F-M16 | Create frontend .env.example (PR #52) | 2026-02-24 |
