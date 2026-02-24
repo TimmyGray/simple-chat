@@ -364,14 +364,15 @@ cd frontend && npx vitest src/__tests__/ChatInput.test.tsx
 
 ```
 frontend/src/
-  App.tsx                          # Root component, state orchestration
+  App.tsx                          # Root component, auth routing
   main.tsx                         # Entry point, renders App
   theme.ts                         # MUI dark theme configuration
   setupTests.ts                    # Vitest setup (i18n init)
   types/
     index.ts                       # Conversation, Message, Attachment, ModelInfo
   api/
-    client.ts                      # REST + SSE API functions
+    client.ts                      # REST API functions (axios)
+    stream.ts                      # SSE streaming (native fetch)
   contexts/
     ChatAppContext.tsx              # Shared app state context (conversations, models, selection)
   hooks/
@@ -390,6 +391,7 @@ frontend/src/
       zh.json                      # Chinese strings
       es.json                      # Spanish strings
   components/
+    ChatApp.tsx                    # App state orchestration (contexts, providers)
     ErrorBoundary.tsx              # Class component error boundary
     Layout.tsx                     # Responsive sidebar/chat split
     Sidebar/
@@ -401,7 +403,8 @@ frontend/src/
       MessageList.tsx              # Scrollable message list
       MessageBubble.tsx            # Individual message with markdown
       MarkdownRenderer.tsx         # Lazy-loaded markdown + syntax highlighting
-      ChatInput.tsx                # Multiline input + toolbar
+      ChatInput.tsx                # Multiline input + attachments
+      ChatInputToolbar.tsx         # Model selector + file attach + send button
       ModelSelector.tsx            # LLM model dropdown
       FileAttachment.tsx           # File upload button + validation
       TypingIndicator.tsx          # Bouncing dots animation

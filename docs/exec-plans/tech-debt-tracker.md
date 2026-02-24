@@ -86,7 +86,7 @@ Each task has:
 | B-L8 | Refactor extractFileContent (61 lines, exceeds 50-line limit) | backend | 0.25d | done | PR #70 merged. Extracted resolveUploadPath, isTextFile, isPdfFile, readPdfContent. |
 | B-L9 | Create backend getErrorMessage utility for `instanceof Error` pattern | backend | 0.5d | done | PR #71 merged. getErrorMessage + getErrorStack in common/utils/, ESLint enforcement rule. |
 | F-L1 | Extract magic numbers to constants/theme | frontend | 0.25d | done | PR #74 merged. 50+ constants in frontend/src/constants.ts across 11 components. |
-| F-L2 | Split large component files (180+ lines) | frontend | 0.5d | todo | Some files too large |
+| F-L2 | Split large component files (180+ lines) | frontend | 0.5d | done | PR #75 merged. ChatApp, stream.ts, ChatInputToolbar extracted. |
 | F-L3 | Standardize error logging with utility | frontend | 0.25d | done | console.error removed in sweep |
 | F-L4 | Add return type annotations to hooks | frontend | 0.25d | todo | Missing explicit types |
 | F-L5 | Optimize tablet layout (md-lg breakpoints) | frontend | 0.5d | todo | Not tested on tablets |
@@ -185,3 +185,4 @@ Each task has:
 | B-L8 | Refactor extractFileContent — extract 4 helpers (PR #70) | 2026-02-24 |
 | B-L9 | Backend getErrorMessage/getErrorStack utility (PR #71) | 2026-02-24 |
 | F-L1 | Extract frontend magic numbers to constants (PR #74) | 2026-02-24 |
+| F-L2 | Split large frontend files into focused modules (PR #75) | 2026-02-24 |
