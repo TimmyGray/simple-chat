@@ -13,9 +13,8 @@ Before task selection, set up for safe parallel execution with other agents. **P
 
 1. Read `docs/exec-plans/active-work.json`. If the file is missing or corrupt, back up the corrupt file (`cp active-work.json active-work.json.bak 2>/dev/null || true`), then create a fresh file with: `{"schema_version":1,"sessions":[]}`
 2. **Stale cleanup**: For each session entry:
-   - Check if PID is alive: `kill -0 <pid> 2>/dev/null`
-   - If `kill -0` succeeds, verify it's a Claude/node process: `ps -p <pid> -o command=` should contain "claude" or "node". If the process exists but is unrelated, treat the entry as stale.
-   - If the PID check fails (process dead), the process is unrelated, OR `started_at` is older than 24 hours → remove the entry
+   - If `started_at` is older than 24 hours → remove the entry (safety net for crashed sessions)
+   - Otherwise, treat the entry as **active** — do not remove it. Entries are only removed by Phase 11 (post-merge bookkeeping) or by this 24-hour timeout.
 3. Write the cleaned registry using atomic rename: write to `active-work.json.tmp`, then `mv active-work.json.tmp active-work.json`
 4. **Port allocation**: Find the lowest available slot number (0, 1, 2, ...) not used by any remaining session. Base ports match `backend/.env.example` (PORT=3001) and frontend default `VITE_API_URL` (localhost:3001):
    - Slot 0: backend port 3001, frontend port 5173
@@ -34,12 +33,11 @@ Before task selection, set up for safe parallel execution with other agents. **P
    - `task_id`: the selected task ID
    - `branch`: the branch name to be created (e.g., `feat/<kebab-case-task-name>`)
    - `started_at`: current ISO 8601 timestamp
-   - `pid`: parent process ID (`$PPID` in bash — this is the Claude Code process, which persists across subshell invocations unlike `$$`)
    - `ports`: `{"backend": <allocated_backend_port>, "frontend": <allocated_frontend_port>}`
 6. Write the updated registry using atomic rename (write to `.tmp`, then `mv`)
 7. **Post-write verification**: Re-read `active-work.json` and confirm that:
    - Own entry is present
-   - No other entry has the same slot number or task_id
+   - No other entry has the same slot or task_id
    - If a conflict is detected (another agent registered simultaneously), pick a new slot/task and retry from step 1 (max 3 retries)
 
 ### Phase 1.5: Worktree Isolation
