@@ -8,6 +8,7 @@ import NewChatButton from './NewChatButton';
 import ConversationItem from './ConversationItem';
 import ConfirmDialog from '../common/ConfirmDialog';
 import LanguageSwitcher from '../common/LanguageSwitcher';
+import ThemeToggle from '../common/ThemeToggle';
 import { ICON_SIZE_SM, LOADING_SPINNER_SM } from '../../constants';
 
 function formatTokenCount(tokens: number): string {
@@ -101,6 +102,8 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
         )}
       </Box>
 
+      <Divider sx={{ my: 1 }} />
+      <ThemeToggle />
       <Divider sx={{ my: 1 }} />
       <LanguageSwitcher />
 

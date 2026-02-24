@@ -71,7 +71,7 @@ function MessageBubble({ message }: MessageBubbleProps) {
           backgroundColor: (theme) =>
             isUser
               ? alpha(theme.palette.primary.main, 0.12)
-              : alpha(theme.palette.common.white, 0.05),
+              : alpha(theme.palette.text.primary, 0.05),
           border: '1px solid',
           borderColor: (theme) =>
             isUser
@@ -108,7 +108,7 @@ function MessageBubble({ message }: MessageBubbleProps) {
                 fontSize: CODE_FONT_SIZE,
               },
               '& p code': {
-                backgroundColor: (theme) => alpha(theme.palette.common.white, 0.1),
+                backgroundColor: (theme) => alpha(theme.palette.text.primary, 0.1),
                 px: 0.5,
                 borderRadius: 0.5,
               },
@@ -120,17 +120,17 @@ function MessageBubble({ message }: MessageBubbleProps) {
                 fontSize: CODE_FONT_SIZE,
               },
               '& th, & td': {
-                border: (theme) => `1px solid ${alpha(theme.palette.common.white, 0.15)}`,
+                border: (theme) => `1px solid ${alpha(theme.palette.text.primary, 0.15)}`,
                 px: 1.5,
                 py: 0.75,
                 textAlign: 'left',
               },
               '& th': {
-                backgroundColor: (theme) => alpha(theme.palette.common.white, 0.08),
+                backgroundColor: (theme) => alpha(theme.palette.text.primary, 0.08),
                 fontWeight: 600,
               },
               '& tr:nth-of-type(even)': {
-                backgroundColor: (theme) => alpha(theme.palette.common.white, 0.03),
+                backgroundColor: (theme) => alpha(theme.palette.text.primary, 0.03),
               },
               '& ul, & ol': { pl: 2, mb: 1 },
               '& blockquote': {

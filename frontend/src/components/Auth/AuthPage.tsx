@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import LanguageSwitcher from '../common/LanguageSwitcher';
+import ThemeToggle from '../common/ThemeToggle';
 import {
   AUTH_LOGO_SIZE,
   AUTH_LOGO_ICON_SIZE,
@@ -177,7 +178,8 @@ export default function AuthPage({
         </Typography>
       </Card>
 
-      <Box sx={{ mt: 3 }}>
+      <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+        <ThemeToggle />
         <LanguageSwitcher />
       </Box>
     </Box>

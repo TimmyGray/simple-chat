@@ -46,6 +46,12 @@
   "network": {
     "offline": "您已离线，请检查网络连接。"
   },
+  "theme": {
+    "label": "主题",
+    "light": "浅色",
+    "dark": "深色",
+    "system": "跟随系统"
+  },
   "models": {
     "free": "免费",
     "selectModel": "选择模型"

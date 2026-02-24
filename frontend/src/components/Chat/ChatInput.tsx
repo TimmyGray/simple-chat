@@ -93,7 +93,7 @@ export default function ChatInput({
           borderRadius: 3,
           border: '1px solid',
           borderColor: focused ? 'primary.main' : 'divider',
-          backgroundColor: (theme) => alpha(theme.palette.common.white, 0.03),
+          backgroundColor: (theme) => alpha(theme.palette.text.primary, 0.03),
           transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
           boxShadow: (theme) =>
             focused

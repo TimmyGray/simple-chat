@@ -7,6 +7,7 @@ import { asConversationId, asMessageId, asModelId } from '../types';
 import type { Message, ModelInfo, Conversation } from '../types';
 import { ChatAppProvider } from '../contexts/ChatAppContext';
 import type { ChatAppContextValue } from '../contexts/ChatAppContext';
+import { ThemeModeProvider } from '../contexts/ThemeContext';
 import AuthPage from '../components/Auth/AuthPage';
 import ChatInput from '../components/Chat/ChatInput';
 import MessageBubble from '../components/Chat/MessageBubble';
@@ -74,8 +75,16 @@ const defaultChatContext: ChatAppContextValue = {
 
 // --- Helpers ---
 
+const mockThemeModeValue = { mode: 'dark' as const, setMode: vi.fn() };
+
 function renderWithTheme(ui: React.ReactElement) {
-  return render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
+  return render(
+    <ThemeProvider theme={theme}>
+      <ThemeModeProvider value={mockThemeModeValue}>
+        {ui}
+      </ThemeModeProvider>
+    </ThemeProvider>,
+  );
 }
 
 function renderWithChatContext(
@@ -85,7 +94,9 @@ function renderWithChatContext(
   const value = { ...defaultChatContext, ...overrides };
   return render(
     <ThemeProvider theme={theme}>
-      <ChatAppProvider value={value}>{ui}</ChatAppProvider>
+      <ThemeModeProvider value={mockThemeModeValue}>
+        <ChatAppProvider value={value}>{ui}</ChatAppProvider>
+      </ThemeModeProvider>
     </ThemeProvider>,
   );
 }

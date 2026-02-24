@@ -46,6 +46,12 @@
   "network": {
     "offline": "You are offline. Check your internet connection."
   },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
   "models": {
     "free": "Free",
     "selectModel": "Select model"
