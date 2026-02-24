@@ -21,7 +21,7 @@ export default function ChatArea() {
 
   useEffect(() => {
     if (conversation) {
-      fetchMessages(conversation._id);
+      void fetchMessages(conversation._id);
     } else {
       clear();
     }

@@ -40,7 +40,7 @@ export function useModels() {
   }, []);
 
   useEffect(() => {
-    fetchModels();
+    void fetchModels();
   }, [fetchModels]);
 
   useFocusRevalidation(fetchModels);
