@@ -85,7 +85,7 @@ Each task has:
 | B-L7 | Document CORS configuration | backend | 0.1d | done | Documented in ARCHITECTURE.md env vars table and SECURITY.md |
 | B-L8 | Refactor extractFileContent (61 lines, exceeds 50-line limit) | backend | 0.25d | done | PR #70 merged. Extracted resolveUploadPath, isTextFile, isPdfFile, readPdfContent. |
 | B-L9 | Create backend getErrorMessage utility for `instanceof Error` pattern | backend | 0.5d | done | PR #71 merged. getErrorMessage + getErrorStack in common/utils/, ESLint enforcement rule. |
-| F-L1 | Extract magic numbers to constants/theme | frontend | 0.25d | todo | Hardcoded values in styles |
+| F-L1 | Extract magic numbers to constants/theme | frontend | 0.25d | done | PR #74 merged. 50+ constants in frontend/src/constants.ts across 11 components. |
 | F-L2 | Split large component files (180+ lines) | frontend | 0.5d | todo | Some files too large |
 | F-L3 | Standardize error logging with utility | frontend | 0.25d | done | console.error removed in sweep |
 | F-L4 | Add return type annotations to hooks | frontend | 0.25d | todo | Missing explicit types |
@@ -184,3 +184,4 @@ Each task has:
 | B-L5 | Enable strict: true in backend tsconfig (PR #68) | 2026-02-24 |
 | B-L8 | Refactor extractFileContent — extract 4 helpers (PR #70) | 2026-02-24 |
 | B-L9 | Backend getErrorMessage/getErrorStack utility (PR #71) | 2026-02-24 |
+| F-L1 | Extract frontend magic numbers to constants (PR #74) | 2026-02-24 |
