@@ -4,6 +4,16 @@ import { alpha } from '@mui/material/styles';
 import PersonIcon from '@mui/icons-material/Person';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import type { Message } from '../../types';
+import {
+  AVATAR_SIZE,
+  AVATAR_ICON_SIZE,
+  MESSAGE_MAX_WIDTH,
+  USER_BUBBLE_RADIUS,
+  ASSISTANT_BUBBLE_RADIUS,
+  MODEL_TAG_OPACITY,
+  BLOCKQUOTE_OPACITY,
+  CODE_FONT_SIZE,
+} from '../../constants';
 
 const LazyMarkdownRenderer = lazy(() => import('./MarkdownRenderer'));
 
@@ -27,8 +37,8 @@ function MessageBubble({ message }: MessageBubbleProps) {
       {/* Avatar */}
       <Box
         sx={{
-          width: 34,
-          height: 34,
+          width: AVATAR_SIZE,
+          height: AVATAR_SIZE,
           borderRadius: '50%',
           display: 'flex',
           alignItems: 'center',
@@ -41,9 +51,9 @@ function MessageBubble({ message }: MessageBubbleProps) {
         }}
       >
         {isUser ? (
-          <PersonIcon sx={{ fontSize: 18, color: 'common.white' }} />
+          <PersonIcon sx={{ fontSize: AVATAR_ICON_SIZE, color: 'common.white' }} />
         ) : (
-          <SmartToyIcon sx={{ fontSize: 18, color: 'common.black' }} />
+          <SmartToyIcon sx={{ fontSize: AVATAR_ICON_SIZE, color: 'common.black' }} />
         )}
       </Box>
 
@@ -53,10 +63,10 @@ function MessageBubble({ message }: MessageBubbleProps) {
         sx={{
           px: 2,
           py: 1.5,
-          maxWidth: '75%',
+          maxWidth: MESSAGE_MAX_WIDTH,
           borderRadius: isUser
-            ? '16px 16px 4px 16px'
-            : '16px 16px 16px 4px',
+            ? USER_BUBBLE_RADIUS
+            : ASSISTANT_BUBBLE_RADIUS,
           backgroundColor: (theme) =>
             isUser
               ? alpha(theme.palette.primary.main, 0.12)
@@ -94,7 +104,7 @@ function MessageBubble({ message }: MessageBubbleProps) {
               '& pre': { m: 0, mb: 1 },
               '& code': {
                 fontFamily: '"Fira Code", "Consolas", monospace',
-                fontSize: '0.85rem',
+                fontSize: CODE_FONT_SIZE,
               },
               '& p code': {
                 backgroundColor: (theme) => alpha(theme.palette.common.white, 0.1),
@@ -106,7 +116,7 @@ function MessageBubble({ message }: MessageBubbleProps) {
                 borderCollapse: 'collapse',
                 width: '100%',
                 mb: 1,
-                fontSize: '0.85rem',
+                fontSize: CODE_FONT_SIZE,
               },
               '& th, & td': {
                 border: (theme) => `1px solid ${alpha(theme.palette.common.white, 0.15)}`,
@@ -127,7 +137,7 @@ function MessageBubble({ message }: MessageBubbleProps) {
                 borderColor: 'primary.main',
                 pl: 1.5,
                 ml: 0,
-                opacity: 0.8,
+                opacity: BLOCKQUOTE_OPACITY,
               },
             }}
           >
@@ -148,7 +158,7 @@ function MessageBubble({ message }: MessageBubbleProps) {
           <Typography
             variant="caption"
             color="text.secondary"
-            sx={{ display: 'block', mt: 0.5, opacity: 0.6 }}
+            sx={{ display: 'block', mt: 0.5, opacity: MODEL_TAG_OPACITY }}
           >
             {message.model}
           </Typography>

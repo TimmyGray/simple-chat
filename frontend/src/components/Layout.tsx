@@ -10,8 +10,7 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import Sidebar from './Sidebar/Sidebar';
 import ChatArea from './Chat/ChatArea';
-
-const SIDEBAR_WIDTH = 280;
+import { SIDEBAR_WIDTH, MOBILE_MENU_OFFSET } from '../constants';
 
 export default function Layout() {
   const { t } = useTranslation();
@@ -34,8 +33,8 @@ export default function Layout() {
           onClick={() => setMobileOpen(true)}
           sx={{
             position: 'fixed',
-            top: 12,
-            left: 12,
+            top: MOBILE_MENU_OFFSET,
+            left: MOBILE_MENU_OFFSET,
             zIndex: (theme) => theme.zIndex.modal + 1,
             backgroundColor: 'background.paper',
             border: '1px solid',

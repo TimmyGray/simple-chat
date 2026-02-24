@@ -7,6 +7,7 @@ import type { ModelInfo, Attachment, ModelId } from '../../types';
 import ModelSelector from './ModelSelector';
 import FileAttachment from './FileAttachment';
 import * as api from '../../api/client';
+import { SEND_BUTTON_SIZE, ATTACHMENT_CHIP_MAX_WIDTH, SNACKBAR_AUTO_HIDE_MS } from '../../constants';
 
 const MAX_MESSAGE_LENGTH = 10_000;
 
@@ -156,7 +157,7 @@ export default function ChatInput({
                 label={att.fileName}
                 size="small"
                 onDelete={() => handleRemoveAttachment(i)}
-                sx={{ maxWidth: 180 }}
+                sx={{ maxWidth: ATTACHMENT_CHIP_MAX_WIDTH }}
               />
             ))}
           </Box>
@@ -218,8 +219,8 @@ export default function ChatInput({
                     bgcolor: 'action.disabledBackground',
                     color: 'action.disabled',
                   },
-                  width: 36,
-                  height: 36,
+                  width: SEND_BUTTON_SIZE,
+                  height: SEND_BUTTON_SIZE,
                 }}
               >
                 <SendIcon fontSize="small" />
@@ -230,7 +231,7 @@ export default function ChatInput({
       </Paper>
       <Snackbar
         open={!!uploadError}
-        autoHideDuration={6000}
+        autoHideDuration={SNACKBAR_AUTO_HIDE_MS}
         onClose={clearUploadError}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >

@@ -8,6 +8,7 @@ import NewChatButton from './NewChatButton';
 import ConversationItem from './ConversationItem';
 import ConfirmDialog from '../common/ConfirmDialog';
 import LanguageSwitcher from '../common/LanguageSwitcher';
+import { AVATAR_ICON_SIZE, LOADING_SPINNER_SM } from '../../constants';
 
 function formatTokenCount(tokens: number): string {
   if (tokens >= 1_000_000) {
@@ -75,7 +76,7 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
       <Box sx={{ flex: 1, overflow: 'auto' }}>
         {conversationsLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', pt: 4 }}>
-            <CircularProgress size={24} aria-label={t('sidebar.loading')} />
+            <CircularProgress size={LOADING_SPINNER_SM} aria-label={t('sidebar.loading')} />
           </Box>
         ) : conversations.length === 0 ? (
           <Typography
@@ -129,7 +130,7 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
               </Typography>
               <Tooltip title={t('auth.logout')}>
                 <IconButton size="small" aria-label={t('auth.logout')} onClick={logout}>
-                  <LogoutIcon sx={{ fontSize: 18 }} />
+                  <LogoutIcon sx={{ fontSize: AVATAR_ICON_SIZE }} />
                 </IconButton>
               </Tooltip>
             </Box>

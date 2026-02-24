@@ -3,6 +3,7 @@ import { FormControl, Select, MenuItem, Chip } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import type { SelectChangeEvent } from '@mui/material';
 import type { ModelInfo, ModelId } from '../../types';
+import { MODEL_SELECTOR_MIN_WIDTH, FREE_CHIP_HEIGHT, CODE_FONT_SIZE } from '../../constants';
 
 interface ModelSelectorProps {
   models: ModelInfo[];
@@ -21,7 +22,7 @@ export default function ModelSelector({
   const handleChange = (e: SelectChangeEvent) => onChange(e.target.value as ModelId);
 
   return (
-    <FormControl size={size} sx={{ minWidth: 140 }}>
+    <FormControl size={size} sx={{ minWidth: MODEL_SELECTOR_MIN_WIDTH }}>
       <Select
         value={value}
         onChange={handleChange}
@@ -47,14 +48,14 @@ export default function ModelSelector({
         }}
       >
         {models.map((model) => (
-          <MenuItem key={model.id} value={model.id} sx={{ fontSize: '0.85rem' }}>
+          <MenuItem key={model.id} value={model.id} sx={{ fontSize: CODE_FONT_SIZE }}>
             {model.name}
             {model.free && (
               <Chip
                 label={t('models.free')}
                 size="small"
                 color="success"
-                sx={{ ml: 1, height: 18, fontSize: '0.65rem' }}
+                sx={{ ml: 1, height: FREE_CHIP_HEIGHT, fontSize: '0.65rem' }}
               />
             )}
           </MenuItem>

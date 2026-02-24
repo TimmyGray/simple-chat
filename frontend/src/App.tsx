@@ -12,6 +12,7 @@ import { ChatAppProvider } from './contexts/ChatAppContext';
 import { ModelProvider } from './contexts/ModelContext';
 import Layout from './components/Layout';
 import AuthPage from './components/Auth/AuthPage';
+import { ERROR_SNACKBAR_AUTO_HIDE_MS } from './constants';
 
 import type { User, ConversationId, ModelId } from './types';
 import { asModelId } from './types';
@@ -135,7 +136,7 @@ function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps) {
       </Snackbar>
       <Snackbar
         open={!!error}
-        autoHideDuration={4000}
+        autoHideDuration={ERROR_SNACKBAR_AUTO_HIDE_MS}
         onClose={clearError}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >

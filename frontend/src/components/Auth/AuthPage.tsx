@@ -12,6 +12,12 @@ import {
 } from '@mui/material';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import LanguageSwitcher from '../common/LanguageSwitcher';
+import {
+  AUTH_LOGO_SIZE,
+  AUTH_LOGO_ICON_SIZE,
+  AUTH_CARD_MAX_WIDTH,
+  AUTH_SUBMIT_SPINNER_SIZE,
+} from '../../constants';
 
 interface AuthPageProps {
   mode: 'login' | 'register';
@@ -69,8 +75,8 @@ export default function AuthPage({
       <Box sx={{ mb: 4, textAlign: 'center' }}>
         <Box
           sx={{
-            width: 56,
-            height: 56,
+            width: AUTH_LOGO_SIZE,
+            height: AUTH_LOGO_SIZE,
             borderRadius: '50%',
             background: (theme) => theme.palette.gradients.primary,
             display: 'flex',
@@ -80,7 +86,7 @@ export default function AuthPage({
             mb: 2,
           }}
         >
-          <ChatBubbleOutlineIcon sx={{ color: 'common.white', fontSize: 28 }} />
+          <ChatBubbleOutlineIcon sx={{ color: 'common.white', fontSize: AUTH_LOGO_ICON_SIZE }} />
         </Box>
         <Typography variant="h6" sx={{ fontWeight: 600 }}>
           {t('sidebar.title')}
@@ -90,7 +96,7 @@ export default function AuthPage({
       <Card
         sx={{
           width: '100%',
-          maxWidth: 400,
+          maxWidth: AUTH_CARD_MAX_WIDTH,
           p: 4,
           backgroundColor: 'background.paper',
           border: '1px solid',
@@ -145,7 +151,7 @@ export default function AuthPage({
             }}
           >
             {submitting ? (
-              <CircularProgress size={22} sx={{ color: 'common.white' }} />
+              <CircularProgress size={AUTH_SUBMIT_SPINNER_SIZE} sx={{ color: 'common.white' }} />
             ) : (
               submitLabel
             )}
