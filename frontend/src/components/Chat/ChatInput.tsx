@@ -1,13 +1,11 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, TextField, IconButton, Tooltip, Paper, Chip, Typography, Snackbar, Alert } from '@mui/material';
+import { Box, TextField, Paper, Chip, Typography, Snackbar, Alert } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import SendIcon from '@mui/icons-material/Send';
 import type { ModelInfo, Attachment, ModelId } from '../../types';
-import ModelSelector from './ModelSelector';
-import FileAttachment from './FileAttachment';
+import ChatInputToolbar from './ChatInputToolbar';
 import * as api from '../../api/client';
-import { SEND_BUTTON_SIZE, ATTACHMENT_CHIP_MAX_WIDTH, SNACKBAR_AUTO_HIDE_MS, INPUT_FONT_SIZE } from '../../constants';
+import { ATTACHMENT_CHIP_MAX_WIDTH, SNACKBAR_AUTO_HIDE_MS, INPUT_FONT_SIZE } from '../../constants';
 
 const MAX_MESSAGE_LENGTH = 10_000;
 
@@ -179,55 +177,17 @@ export default function ChatInput({
         )}
 
         {/* Toolbar row */}
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            px: 1,
-            py: 0.75,
-            borderTop: '1px solid',
-            borderColor: (theme) => alpha(theme.palette.common.white, 0.04),
-          }}
-        >
-          {/* Left: model selector + attach button */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <ModelSelector
-              models={models}
-              value={selectedModel}
-              onChange={onModelChange}
-            />
-            <FileAttachment
-              onAttach={handleAttach}
-              onError={handleFileError}
-              disabled={disabled || uploading}
-            />
-          </Box>
-
-          {/* Right: send button */}
-          <Tooltip title={t('chat.sendTooltip')}>
-            <span>
-              <IconButton
-                aria-label={t('chat.sendTooltip')}
-                onClick={handleSend}
-                disabled={disabled || !canSend}
-                sx={{
-                  bgcolor: 'primary.main',
-                  color: 'white',
-                  '&:hover': { bgcolor: 'primary.dark' },
-                  '&.Mui-disabled': {
-                    bgcolor: 'action.disabledBackground',
-                    color: 'action.disabled',
-                  },
-                  width: SEND_BUTTON_SIZE,
-                  height: SEND_BUTTON_SIZE,
-                }}
-              >
-                <SendIcon fontSize="small" />
-              </IconButton>
-            </span>
-          </Tooltip>
-        </Box>
+        <ChatInputToolbar
+          models={models}
+          selectedModel={selectedModel}
+          onModelChange={onModelChange}
+          onAttach={handleAttach}
+          onAttachError={handleFileError}
+          onSend={handleSend}
+          disabled={disabled}
+          uploading={uploading}
+          canSend={canSend}
+        />
       </Paper>
       <Snackbar
         open={!!uploadError}
