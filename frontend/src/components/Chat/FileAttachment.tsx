@@ -18,11 +18,13 @@ const ALLOWED_TYPES = [
 
 interface FileAttachmentProps {
   onAttach: (files: File[]) => void;
+  onError: (message: string) => void;
   disabled?: boolean;
 }
 
 export default function FileAttachment({
   onAttach,
+  onError,
   disabled,
 }: FileAttachmentProps) {
   const { t } = useTranslation();
@@ -38,8 +40,7 @@ export default function FileAttachment({
 
     // Validate file count
     if (selected.length > MAX_FILE_COUNT) {
-      // eslint-disable-next-line no-restricted-syntax -- F-M21: Replace with MUI Snackbar
-      window.alert(t('errors.maxFileCount', { count: MAX_FILE_COUNT }));
+      onError(t('errors.maxFileCount', { count: MAX_FILE_COUNT }));
       if (inputRef.current) inputRef.current.value = '';
       return;
     }
@@ -66,8 +67,7 @@ export default function FileAttachment({
     }
 
     if (errors.length > 0) {
-      // eslint-disable-next-line no-restricted-syntax -- F-M21: Replace with MUI Snackbar
-      window.alert(`${t('errors.filesNotAttached')}\n\n${errors.join('\n')}`);
+      onError(`${t('errors.filesNotAttached')} ${errors.join('. ')}`);
     }
 
     if (validFiles.length > 0) {

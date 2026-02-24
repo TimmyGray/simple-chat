@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, TextField, IconButton, Tooltip, Paper, Chip, Typography } from '@mui/material';
+import { Box, TextField, IconButton, Tooltip, Paper, Chip, Typography, Snackbar, Alert } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import SendIcon from '@mui/icons-material/Send';
 import type { ModelInfo, Attachment, ModelId } from '../../types';
@@ -57,6 +57,14 @@ export default function ChatInput({
       handleSend();
     }
   };
+
+  const handleFileError = useCallback((message: string) => {
+    setUploadError(message);
+  }, []);
+
+  const clearUploadError = useCallback(() => {
+    setUploadError(null);
+  }, []);
 
   const handleAttach = async (files: File[]) => {
     setUploading(true);
@@ -154,13 +162,6 @@ export default function ChatInput({
           </Box>
         )}
 
-        {/* Upload error */}
-        {uploadError && (
-          <Typography variant="caption" color="error" sx={{ px: 2, pb: 0.5 }}>
-            {uploadError}
-          </Typography>
-        )}
-
         {/* Character counter */}
         {showCounter && (
           <Typography
@@ -197,6 +198,7 @@ export default function ChatInput({
             />
             <FileAttachment
               onAttach={handleAttach}
+              onError={handleFileError}
               disabled={disabled || uploading}
             />
           </Box>
@@ -226,6 +228,16 @@ export default function ChatInput({
           </Tooltip>
         </Box>
       </Paper>
+      <Snackbar
+        open={!!uploadError}
+        autoHideDuration={6000}
+        onClose={clearUploadError}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="error" onClose={clearUploadError}>
+          {uploadError}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
