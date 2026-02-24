@@ -48,6 +48,15 @@ const sampleVisionModel = {
   architecture: { modality: 'text+image->text' },
 };
 
+const anotherWhitelistedFreeModel = {
+  id: 'nvidia/nemotron-nano-9b-v2:free',
+  name: 'Nemotron Nano 9B',
+  description: 'NVIDIA lightweight model',
+  pricing: { prompt: '0', completion: '0' },
+  context_length: 128000,
+  architecture: { modality: 'text->text' },
+};
+
 describe('ModelsService', () => {
   let service: ModelsService;
 
@@ -60,6 +69,7 @@ describe('ModelsService', () => {
       vi.spyOn(global, 'fetch').mockResolvedValue(
         makeOpenRouterResponse([
           sampleOpenRouterModel,
+          anotherWhitelistedFreeModel,
           sampleVisionModel,
         ]) as unknown as Response,
       );
@@ -67,9 +77,10 @@ describe('ModelsService', () => {
       await service.onModuleInit();
     });
 
-    it('should load models from OpenRouter', () => {
+    it('should load only free whitelisted models from OpenRouter', () => {
       const models = service.getModels();
       expect(models).toHaveLength(2);
+      expect(models.every((m) => m.free)).toBe(true);
     });
 
     it('should map model fields correctly', () => {
@@ -82,22 +93,16 @@ describe('ModelsService', () => {
       expect(model!.supportsVision).toBe(false);
     });
 
-    it('should detect paid models from pricing', () => {
+    it('should exclude paid models', () => {
       const model = service.getModelById('test/vision-model');
-      expect(model).toBeDefined();
-      expect(model!.free).toBe(false);
+      expect(model).toBeUndefined();
     });
 
-    it('should detect vision support from modality', () => {
-      const model = service.getModelById('test/vision-model');
-      expect(model).toBeDefined();
-      expect(model!.supportsVision).toBe(true);
-    });
-
-    it('should sort free models first', () => {
+    it('should sort models by name', () => {
       const models = service.getModels();
-      expect(models[0].free).toBe(true);
-      expect(models[1].free).toBe(false);
+      expect(models[0].name.localeCompare(models[1].name)).toBeLessThanOrEqual(
+        0,
+      );
     });
 
     it('should have required fields on each model', () => {
@@ -201,7 +206,7 @@ describe('ModelsService', () => {
       vi.spyOn(global, 'fetch').mockResolvedValue(
         makeOpenRouterResponse([
           sampleOpenRouterModel,
-          sampleVisionModel,
+          anotherWhitelistedFreeModel,
         ]) as unknown as Response,
       );
       await service.refreshModels();
@@ -243,16 +248,17 @@ describe('ModelsService', () => {
       expect(service.getModels()).toHaveLength(0);
     });
 
-    it('should always include paid models regardless of whitelist', async () => {
+    it('should exclude paid models', async () => {
       vi.spyOn(global, 'fetch').mockResolvedValue(
         makeOpenRouterResponse([sampleVisionModel]) as unknown as Response,
       );
       service = new ModelsService(createConfigService());
       await service.onModuleInit();
-      expect(service.getModelById('test/vision-model')).toBeDefined();
+      expect(service.getModelById('test/vision-model')).toBeUndefined();
+      expect(service.getModels()).toHaveLength(0);
     });
 
-    it('should keep whitelisted free and paid, drop non-whitelisted free', async () => {
+    it('should keep whitelisted free, drop non-whitelisted free and paid', async () => {
       vi.spyOn(global, 'fetch').mockResolvedValue(
         makeOpenRouterResponse([
           sampleOpenRouterModel,
@@ -263,9 +269,9 @@ describe('ModelsService', () => {
       service = new ModelsService(createConfigService());
       await service.onModuleInit();
       const models = service.getModels();
-      expect(models).toHaveLength(2);
+      expect(models).toHaveLength(1);
       expect(service.getModelById('google/gemma-3n-e2b-it:free')).toBeDefined();
-      expect(service.getModelById('test/vision-model')).toBeDefined();
+      expect(service.getModelById('test/vision-model')).toBeUndefined();
       expect(
         service.getModelById('unknown-provider/random-model:free'),
       ).toBeUndefined();

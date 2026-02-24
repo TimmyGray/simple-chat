@@ -24,21 +24,24 @@ const REFRESH_INTERVAL_MS = 3_600_000; // 1 hour
 
 /**
  * Curated list of free model IDs known to work reliably on OpenRouter.
- * Free models NOT in this set are filtered out to avoid 429 rate-limit errors.
- * Paid models are never filtered. Last verified: 2026-02-24.
+ * Only models in this set are shown — paid models are excluded.
+ * Last verified: 2026-02-24.
  */
 const FREE_MODEL_WHITELIST: ReadonlySet<string> = new Set([
-  'deepseek/deepseek-r1-0528:free',
-  'google/gemma-3-27b-it:free',
+  'arcee-ai/trinity-large-preview:free',
+  'arcee-ai/trinity-mini:free',
+  'google/gemma-3-12b-it:free',
+  'google/gemma-3-4b-it:free',
   'google/gemma-3n-e2b-it:free',
-  'meta-llama/llama-3.3-70b-instruct:free',
-  'mistralai/mistral-small-3.1-24b-instruct:free',
-  'nousresearch/hermes-3-llama-3.1-405b:free',
+  'google/gemma-3n-e4b-it:free',
+  'liquid/lfm-2.5-1.2b-instruct:free',
+  'liquid/lfm-2.5-1.2b-thinking:free',
   'nvidia/nemotron-3-nano-30b-a3b:free',
-  'nvidia/nemotron-nano-12b-v2-vl:free',
-  'openai/gpt-oss-120b:free',
+  'nvidia/nemotron-nano-9b-v2:free',
   'openrouter/free',
   'stepfun/step-3.5-flash:free',
+  'upstage/solar-pro-3:free',
+  'z-ai/glm-4.5-air:free',
 ]);
 
 const FALLBACK_MODELS: ModelInfo[] = [
@@ -51,22 +54,6 @@ const FALLBACK_MODELS: ModelInfo[] = [
     supportsVision: true,
   },
   {
-    id: 'deepseek/deepseek-r1-0528:free',
-    name: 'DeepSeek R1',
-    description: 'DeepSeek reasoning model',
-    free: true,
-    contextLength: 128000,
-    supportsVision: false,
-  },
-  {
-    id: 'meta-llama/llama-3.3-70b-instruct:free',
-    name: 'Llama 3.3 70B',
-    description: 'Meta Llama 3.3 instruct model',
-    free: true,
-    contextLength: 128000,
-    supportsVision: false,
-  },
-  {
     id: 'google/gemma-3n-e2b-it:free',
     name: 'Gemma 3n 2B',
     description: 'Lightweight Google model',
@@ -75,20 +62,28 @@ const FALLBACK_MODELS: ModelInfo[] = [
     supportsVision: false,
   },
   {
-    id: 'nvidia/nemotron-nano-12b-v2-vl:free',
-    name: 'Nemotron Nano 12B VL',
-    description: 'NVIDIA vision-language model',
+    id: 'nvidia/nemotron-3-nano-30b-a3b:free',
+    name: 'Nemotron 3 Nano 30B',
+    description: 'NVIDIA Nemotron model',
     free: true,
     contextLength: 32768,
-    supportsVision: true,
+    supportsVision: false,
   },
   {
-    id: 'openrouter/auto',
-    name: 'Auto (Smart Routing)',
-    description: 'Picks the best model (may cost credits)',
-    free: false,
+    id: 'nvidia/nemotron-nano-9b-v2:free',
+    name: 'Nemotron Nano 9B',
+    description: 'NVIDIA lightweight model',
+    free: true,
     contextLength: 128000,
-    supportsVision: true,
+    supportsVision: false,
+  },
+  {
+    id: 'stepfun/step-3.5-flash:free',
+    name: 'Step 3.5 Flash',
+    description: 'StepFun fast model',
+    free: true,
+    contextLength: 128000,
+    supportsVision: false,
   },
 ];
 
@@ -148,15 +143,15 @@ export class ModelsService implements OnModuleInit {
       const all = body.data.map(mapToModelInfo);
       const models = all.filter(isAllowedModel).sort(compareModels);
 
-      if (all.some((m) => m.free) && !models.some((m) => m.free)) {
+      if (models.length === 0) {
         this.logger.warn(
-          'No free models matched whitelist — whitelist may be stale',
+          'No models matched whitelist — whitelist may be stale',
         );
       }
 
       this.cachedModels = models;
       this.logger.log(
-        `Loaded ${models.length} models from OpenRouter (${all.length} total)`,
+        `Loaded ${models.length} free models from OpenRouter (${all.length} total, ${all.filter((m) => m.free).length} free)`,
       );
     } catch (err: unknown) {
       this.logger.warn(
@@ -181,9 +176,9 @@ function mapToModelInfo(m: OpenRouterModel): ModelInfo {
   };
 }
 
-/** Paid models always pass; free models must be in the curated whitelist. */
+/** Only whitelisted free models are shown; paid models excluded for now. */
 function isAllowedModel(m: ModelInfo): boolean {
-  return !m.free || FREE_MODEL_WHITELIST.has(m.id);
+  return m.free && FREE_MODEL_WHITELIST.has(m.id);
 }
 
 function compareModels(a: ModelInfo, b: ModelInfo): number {
