@@ -360,6 +360,30 @@ cd frontend && npx vitest src/__tests__/ChatInput.test.tsx
 
 ---
 
+## Build Configuration
+
+### Source Maps
+
+Production builds generate **hidden source maps** (`build.sourcemap: 'hidden'` in `vite.config.ts`). This means:
+
+- `.map` files are generated in `dist/assets/` alongside JS bundles
+- No `//# sourceMappingURL` comment is added to output files, so browsers won't request them
+- Maps can be uploaded to error tracking services (Sentry, Datadog, etc.) for stack trace deobfuscation
+
+**Deployment note:** Ensure your web server or CDN does not serve `.map` files to the public. Either strip them from the deployment artifact after uploading to your error tracking service, or configure your web server to deny requests for `*.map` files.
+
+To disable source maps (e.g., to reduce build time), remove or change the `sourcemap` option in `vite.config.ts`.
+
+### Chunk Strategy
+
+Manual chunks are configured in `vite.config.ts` to optimize caching:
+
+- `vendor-mui` — MUI + Emotion (changes rarely)
+- `vendor-i18n` — i18next (changes rarely)
+- Application code splits naturally via `React.lazy` (e.g., `MarkdownRenderer`)
+
+---
+
 ## File Structure
 
 ```
