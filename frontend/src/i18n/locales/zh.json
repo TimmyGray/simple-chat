@@ -20,7 +20,8 @@
     "newChat": "新建聊天",
     "noConversations": "暂无对话",
     "tokensUsed": "已用令牌: {{tokens}}",
-    "openMenu": "打开菜单"
+    "openMenu": "打开菜单",
+    "loading": "加载中"
   },
   "chat": {
     "placeholder": "输入消息...",
@@ -45,7 +46,8 @@
     "offline": "您已离线，请检查网络连接。"
   },
   "models": {
-    "free": "免费"
+    "free": "免费",
+    "selectModel": "选择模型"
   },
   "errors": {
     "createConversation": "创建对话失败",

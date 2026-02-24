@@ -20,7 +20,8 @@
     "newChat": "New Chat",
     "noConversations": "No conversations yet",
     "tokensUsed": "Tokens used: {{tokens}}",
-    "openMenu": "Open menu"
+    "openMenu": "Open menu",
+    "loading": "Loading"
   },
   "chat": {
     "placeholder": "Type your message...",
@@ -45,7 +46,8 @@
     "offline": "You are offline. Check your internet connection."
   },
   "models": {
-    "free": "Free"
+    "free": "Free",
+    "selectModel": "Select model"
   },
   "errors": {
     "createConversation": "Failed to create conversation",
