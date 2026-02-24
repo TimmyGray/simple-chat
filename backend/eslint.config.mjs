@@ -36,6 +36,10 @@ export default tseslint.config(
           selector: 'ConditionalExpression[test.type="BinaryExpression"][test.operator="instanceof"][test.right.name="Error"]',
           message: 'Use getErrorMessage(err) or getErrorStack(err) from common/utils/get-error-message instead of inline instanceof Error checks.',
         },
+        {
+          selector: 'IfStatement[test.type="BinaryExpression"][test.operator="instanceof"][test.right.name="Error"]',
+          message: 'Use getErrorMessage(err) or getErrorStack(err) from common/utils/get-error-message instead of inline instanceof Error checks.',
+        },
       ],
       'no-restricted-imports': ['error', {
         patterns: [
