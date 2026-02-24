@@ -12,7 +12,10 @@ import type { TokenUsage } from '../types/documents';
 import { FileExtractionService } from './file-extraction.service';
 import { ConversationDoc } from './interfaces/conversation.interface';
 import { MessageDoc } from './interfaces/message.interface';
-import { StreamEvent } from './interfaces/stream-event.interface';
+import {
+  SSE_ERROR_CODE,
+  type StreamEvent,
+} from './interfaces/stream-event.interface';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { SendMessageDto } from './dto/send-message.dto';
@@ -64,7 +67,6 @@ export class ChatService {
       .find({ userId })
       .sort({ updatedAt: -1 })
       .toArray();
-    this.logger.debug(`Fetched ${conversations.length} conversations`);
     return conversations;
   }
 
@@ -123,18 +125,12 @@ export class ChatService {
     conversationId: string,
     userId: ObjectId,
   ): Promise<MessageDoc[]> {
-    // Verify conversation ownership before returning messages
     await this.getConversation(conversationId, userId);
-
-    const messages = await this.databaseService
+    return this.databaseService
       .messages()
       .find({ conversationId: new ObjectId(conversationId) })
       .sort({ createdAt: 1 })
       .toArray();
-    this.logger.debug(
-      `Fetched ${messages.length} messages for conversation ${conversationId}`,
-    );
-    return messages;
   }
 
   async *sendMessageAndStream(
@@ -291,7 +287,11 @@ export class ChatService {
         `LLM stream failed for conversation ${conversationId}: ${errorMessage}`,
         error instanceof Error ? error.stack : undefined,
       );
-      yield { type: 'error', message: errorMessage };
+      yield {
+        type: 'error',
+        code: SSE_ERROR_CODE.LLM_FAILURE,
+        message: errorMessage,
+      };
     }
   }
 }

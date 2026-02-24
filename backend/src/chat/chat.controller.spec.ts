@@ -260,7 +260,11 @@ describe('ChatController', () => {
       } as any;
 
       async function* errorGenerator() {
-        yield { type: 'error' as const, message: 'LLM failed' };
+        yield {
+          type: 'error' as const,
+          code: 'LLM_FAILURE' as const,
+          message: 'LLM failed',
+        };
       }
       chatService.sendMessageAndStream = vi
         .fn()
@@ -274,7 +278,9 @@ describe('ChatController', () => {
         mockRes,
       );
 
-      expect(written).toContain('data: {"error":"LLM failed"}\n\n');
+      expect(written).toContain(
+        'data: {"error":"LLM failed","code":"LLM_FAILURE"}\n\n',
+      );
     });
 
     it('should extract Idempotency-Key header and pass to service', async () => {

@@ -104,6 +104,47 @@ describe('useMessages — additional error scenarios', () => {
     expect(errorBubble).toBeDefined();
   });
 
+  // ---- onError with SSE error code ----
+
+  it('uses raw message as fallback when i18n key is not found for SSE code', async () => {
+    vi.mocked(api.sendMessageStream).mockImplementation(
+      async (_convId, _content, _model, _attachments, _onChunk, _onDone, onError) => {
+        onError?.('The AI model failed to generate a response.', 'LLM_FAILURE');
+      },
+    );
+
+    const { result } = renderHook(() => useMessages());
+
+    await act(async () => {
+      await result.current.sendMessage(CONV_ID, 'Hi');
+    });
+
+    // In test env, t() returns the key itself, so fallback uses raw message
+    const errorBubble = result.current.messages.find(
+      (m) => m.role === 'assistant' && m.content.includes('The AI model failed'),
+    );
+    expect(errorBubble).toBeDefined();
+  });
+
+  it('uses raw message when no SSE error code is provided', async () => {
+    vi.mocked(api.sendMessageStream).mockImplementation(
+      async (_convId, _content, _model, _attachments, _onChunk, _onDone, onError) => {
+        onError?.('Unknown server error');
+      },
+    );
+
+    const { result } = renderHook(() => useMessages());
+
+    await act(async () => {
+      await result.current.sendMessage(CONV_ID, 'Hi');
+    });
+
+    const errorBubble = result.current.messages.find(
+      (m) => m.role === 'assistant' && m.content.includes('Unknown server error'),
+    );
+    expect(errorBubble).toBeDefined();
+  });
+
   // ---- clear during streaming ----
 
   it('clears error state along with messages', async () => {

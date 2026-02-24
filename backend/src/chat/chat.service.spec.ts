@@ -461,7 +461,11 @@ describe('ChatService', () => {
       const events = await collectEvents(gen);
 
       expect(events).toEqual([
-        { type: 'error', message: 'API rate limit exceeded' },
+        {
+          type: 'error',
+          code: 'LLM_FAILURE',
+          message: 'API rate limit exceeded',
+        },
       ]);
     });
 

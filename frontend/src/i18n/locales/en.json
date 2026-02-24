@@ -65,6 +65,11 @@
     "fetchModels": "Failed to fetch models",
     "filesNotAttached": "Some files were not attached:",
     "streamErrorPrefix": "Error: {{message}}",
-    "corsOrNetwork": "Cannot reach the server. Check that the backend is running and CORS is configured correctly."
+    "corsOrNetwork": "Cannot reach the server. Check that the backend is running and CORS is configured correctly.",
+    "sse": {
+      "STREAM_TIMEOUT": "The response took too long and timed out.",
+      "LLM_FAILURE": "The AI model failed to generate a response.",
+      "INTERNAL_ERROR": "An internal server error occurred."
+    }
   }
 }
