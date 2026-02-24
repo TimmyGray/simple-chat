@@ -5,6 +5,12 @@ import type { Message } from '../../types';
 import { asMessageId, asConversationId } from '../../types';
 import MessageBubble from './MessageBubble';
 import TypingIndicator from './TypingIndicator';
+import {
+  VIRTUOSO_AT_BOTTOM_THRESHOLD,
+  VIRTUOSO_VIEWPORT_INCREASE,
+  LIST_SPACER_HEIGHT,
+  LOADING_SPINNER_LG,
+} from '../../constants';
 
 const SCROLL_THROTTLE_MS = 150;
 
@@ -94,7 +100,7 @@ export default function MessageList({
           flex: 1,
         }}
       >
-        <CircularProgress size={32} />
+        <CircularProgress size={LOADING_SPINNER_LG} />
       </Box>
     );
   }
@@ -106,23 +112,23 @@ export default function MessageList({
       data={items}
       followOutput={(atBottom) => (atBottom && !streaming ? 'smooth' : false)}
       atBottomStateChange={handleAtBottomChange}
-      atBottomThreshold={100}
+      atBottomThreshold={VIRTUOSO_AT_BOTTOM_THRESHOLD}
       initialTopMostItemIndex={items.length > 0 ? items.length - 1 : 0}
-      increaseViewportBy={200}
+      increaseViewportBy={VIRTUOSO_VIEWPORT_INCREASE}
       itemContent={(_, message) => (
         <Box sx={{ px: { xs: 2, md: 4 }, pb: 2 }}>
           <MessageBubble message={message} />
         </Box>
       )}
       components={{
-        Header: () => <Box sx={{ height: 16 }} />,
+        Header: () => <Box sx={{ height: LIST_SPACER_HEIGHT }} />,
         Footer: () =>
           streaming && !streamingContent ? (
             <Box sx={{ px: { xs: 2, md: 4 }, pb: 2 }}>
               <TypingIndicator />
             </Box>
           ) : (
-            <Box sx={{ height: 16 }} />
+            <Box sx={{ height: LIST_SPACER_HEIGHT }} />
           ),
       }}
     />
