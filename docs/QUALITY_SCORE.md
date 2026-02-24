@@ -1,6 +1,6 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-24 (sweep #11)
+> Last updated: 2026-02-24 (sweep #12)
 
 ## Test Summary
 
@@ -51,9 +51,40 @@
 - Critical: 0 todo, 4 done (JWT authentication completed)
 - High: 0 todo, 7 done — all high-priority items completed
 - Medium: 0 todo, 30 done, 1 wont-fix — all medium items done
-- Low: 8 todo, 7 done (B-L6 completed since last sweep)
+- Low: 6 todo, 9 done (B-L8 completed in PR #70, B-L5 in PR #68 since last accurate count)
 - Features: 12 todo, 2 done (FEAT-5 subtasks expanded)
 - Total tracked: 71 (see `docs/exec-plans/tech-debt-tracker.md`)
+
+## Sweep #12 Findings
+- All validation passing: lint 0 errors, typecheck 0 errors, 279 tests passing, build passing
+- Backend tests: 128 (13 files, unchanged)
+- Frontend tests: 151 (16 files, unchanged)
+- Total tests: 279 (target: 100+ sustained, comfortably exceeded)
+- Completed since last sweep: B-L8 (extractFileContent refactor, PR #70), B-M11 (worktree isolation, PR #69)
+- Fixed: Low tech debt count was stale (was 8 todo/7 done, actually 6 todo/9 done — B-L8 and B-L5 completed)
+- No auto-fixable code violations found (codebase is clean)
+- No console.log/warn/error in source (clean)
+- No dangerouslySetInnerHTML (clean)
+- No hardcoded secrets (clean)
+- No `any` types in non-test source files (clean)
+- No hardcoded user-facing strings (all use t())
+- No TODO/FIXME/HACK comments in source (clean)
+- i18n: all 4 locales in sync (55 leaf keys each, unchanged)
+- All cross-module imports follow approved patterns (chat->auth for guards/decorators only)
+- No services importing Express types (clean — Express types only in controller, middleware, exception filter per NestJS convention)
+- No direct MongoDB collection access outside DatabaseService (clean)
+- No files exceed 300-line limit (chat.service.ts at 297, under limit)
+- All hex/rgba/gradient colors in theme.ts only (exempt per convention)
+- No window.alert() in source (clean)
+- Backend `instanceof Error` pattern: 11 occurrences across 8 files (unchanged, tracked as B-L9, needs design)
+- extractFileContent now 25 lines (down from 61 — B-L8 refactored in PR #70, no longer a violation)
+- refreshModels at 52 lines, borderline 50-line limit (unchanged, 2 lines over, not worth separate task)
+- Frontend bundle: 315 KB index + 299 KB vendor-mui + 63 KB vendor-i18n + 796 KB lazy markdown (1.4 MB total, unchanged)
+- Backend bundle: 880 KB (unchanged)
+- Existing tracked violations confirmed still present:
+  - 1 backend function borderline over 50-line limit: refreshModels at 52 lines (not tracked separately, only 2 lines over)
+  - Frontend components/hooks exceed 50-line limit: MessageBubble (161 lines), ChatInput (243 lines), App.tsx (200 lines), AuthPage (178 lines), Sidebar (163 lines) — React components, tracked as F-L2
+  - B-L9 (backend getErrorMessage utility) still todo — 11 instanceof Error occurrences across 8 backend files
 
 ## Sweep #11 Findings
 - All validation passing: lint 0 errors, typecheck 0 errors, 279 tests passing, build passing
