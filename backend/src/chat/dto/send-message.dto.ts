@@ -11,23 +11,23 @@ import {
 
 export class AttachmentDto {
   @IsString()
-  fileName: string;
+  fileName!: string;
 
   @IsString()
-  fileType: string;
+  fileType!: string;
 
   @IsString()
-  filePath: string;
+  filePath!: string;
 
   @IsNumber()
-  fileSize: number;
+  fileSize!: number;
 }
 
 export class SendMessageDto {
   @IsString()
   @MinLength(1)
   @MaxLength(10000)
-  content: string;
+  content!: string;
 
   @IsOptional()
   @IsString()
