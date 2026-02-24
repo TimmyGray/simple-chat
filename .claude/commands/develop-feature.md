@@ -11,6 +11,8 @@ $ARGUMENTS — Optional task ID from `docs/exec-plans/tech-debt-tracker.md`. If 
 
 Before task selection, set up for safe parallel execution with other agents. **Phases 0–1 must run in the main repo** (before entering a worktree) because `active-work.json` is gitignored and only exists in the main working tree.
 
+> **Sandbox note**: When the agent starts inside a worktree, the sandbox's `.` scope covers only the worktree directory. All writes to `active-work.json` in the main repo (and `git fetch` which writes `FETCH_HEAD`) require `dangerouslyDisableSandbox: true` on Bash calls. This applies to Phases 0, 1 (registry write), 1.5 (git fetch), and 11 (unregister).
+
 1. Read `docs/exec-plans/active-work.json`. If the file is missing or corrupt, back up the corrupt file (`cp active-work.json active-work.json.bak 2>/dev/null || true`), then create a fresh file with: `{"schema_version":1,"sessions":[]}`
 2. **Stale cleanup**: For each session entry:
    - If `started_at` is older than 24 hours → remove the entry (safety net for crashed sessions)
