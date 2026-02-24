@@ -77,8 +77,8 @@ function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps) {
   );
 
   const handleConversationUpdate = useCallback(() => {
-    refresh();
-    onRefreshUser();
+    void refresh();
+    void onRefreshUser();
   }, [refresh, onRefreshUser]);
 
   const chatContextValue = useMemo<ChatAppContextValue>(

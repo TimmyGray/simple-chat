@@ -7,7 +7,7 @@ import ru from './locales/ru.json';
 import zh from './locales/zh.json';
 import es from './locales/es.json';
 
-i18n
+void i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({

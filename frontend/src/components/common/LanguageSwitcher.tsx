@@ -17,7 +17,7 @@ export default function LanguageSwitcher() {
       value={i18n.language}
       exclusive
       onChange={(_, lang) => {
-        if (lang) i18n.changeLanguage(lang);
+        if (lang) void i18n.changeLanguage(lang);
       }}
       size="small"
       sx={{

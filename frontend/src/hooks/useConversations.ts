@@ -42,7 +42,7 @@ export function useConversations() {
   }, []);
 
   useEffect(() => {
-    fetchConversations();
+    void fetchConversations();
   }, [fetchConversations]);
 
   useFocusRevalidation(fetchConversations);
