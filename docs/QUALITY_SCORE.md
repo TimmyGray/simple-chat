@@ -1,14 +1,14 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-24 (sweep #10)
+> Last updated: 2026-02-24 (audit #10)
 
 ## Test Summary
 
 | Area | Test Files | Tests | Pass Rate |
 |------|-----------|-------|-----------|
-| Backend | 13 | 112 | 100% |
+| Backend | 13 | 125 | 100% |
 | Frontend | 16 | 149 | 100% |
-| **Total** | **29** | **261** | **100%** |
+| **Total** | **29** | **274** | **100%** |
 
 ## Lint Status
 
@@ -44,16 +44,45 @@
 | Frontend | ~20 | 8 (3 patch, 2 minor, 3 major) | 11 (1 moderate, 10 high — all in eslint/minimatch transitive deps) |
 
 ## Bundle Size
-- Backend: 872 KB (dist/)
+- Backend: 876 KB (dist/)
 - Frontend: 1.4 MB (dist/) — initial load 314 KB + 299 KB vendor-mui + 63 KB vendor-i18n + 796 KB lazy markdown chunk
 
 ## Tech Debt
 - Critical: 0 todo, 4 done (JWT authentication completed)
 - High: 0 todo, 7 done — all high-priority items completed
-- Medium: 0 todo, 30 done, 1 wont-fix (F-M22 completed since last sweep — all medium items done)
-- Low: 10 todo, 5 done (B-L1, B-L2 completed since last sweep)
+- Medium: 0 todo, 30 done, 1 wont-fix — all medium items done
+- Low: 9 todo, 6 done (B-L3 completed since last sweep)
 - Features: 8 todo, 2 done (FEAT-6 completed)
 - Total tracked: 71 (see `docs/exec-plans/tech-debt-tracker.md`)
+
+## Audit #10 Findings
+- Backend tests: 112 -> 125 (+13 from models.service.spec.ts, added with B-L3 dynamic model list)
+- Frontend tests: 149 (16 files, unchanged)
+- Total tests: 274 (target: 100+ sustained, comfortably exceeded)
+- B-L3 (dynamic model list from OpenRouter) completed since last audit (PR #62)
+- All validation passing: lint 0 errors/0 warnings, typecheck 0 errors, build passing
+- No new lint, type, or build errors
+- No console.log/warn/error found in source (clean)
+- No dangerouslySetInnerHTML usage (clean)
+- No hardcoded secrets found in source files
+- No `any` types in non-test source files (clean)
+- No TODO/FIXME/HACK comments in source (clean)
+- i18n: all 4 locales in sync (52 leaf keys each, unchanged)
+- All cross-module imports follow approved patterns (chat->auth for guards/decorators only)
+- No services importing Express types (clean)
+- No direct MongoDB collection access outside DatabaseService (clean)
+- No files exceed 300-line limit (chat.service.ts at 297, under limit)
+- All hex/rgba/gradient colors in theme.ts only (exempt per convention)
+- No window.alert() in source (clean)
+- Backend `instanceof Error` pattern: 11 occurrences across 8 files (up from 10/7 — new one in models.service.ts, tracked as B-L9)
+- Frontend bundle: 314 KB index + 299 KB vendor-mui + 63 KB vendor-i18n + 796 KB lazy markdown (1.4 MB total, unchanged)
+- Backend bundle: 876 KB (up from 872 KB — models service addition)
+- Dependencies: 0 vulnerabilities at root; backend 35, frontend 11 (all transitive, unchanged)
+- Backend outdated: 14 (7 patch, 4 minor, 3 major). Frontend outdated: 8 (3 patch, 2 minor, 3 major)
+- Existing tracked violations confirmed still present:
+  - 1 backend function exceeds 50-line limit: extractFileContent at 61 lines (tracked as B-L8)
+  - Frontend components/hooks exceed 50-line limit: MessageBubble (161 lines), ChatInput (243 lines), App.tsx (200 lines) — React components, tracked as F-L2
+  - B-L9 (backend getErrorMessage utility) still todo — 11 instanceof Error occurrences across 8 backend files (grew by 1 from models.service.ts)
 
 ## Sweep #10 Findings
 - All validation passing: lint 0 errors, typecheck 0 errors, 261 tests passing, build passing
@@ -389,7 +418,7 @@
 - 5 frontend functions exceed 50-line limit (React components/hooks, tracked as F-L2)
 
 ## Targets
-- Test count: 100+ (achieved — currently 261)
+- Test count: 100+ (achieved — currently 274)
 - Coverage: 80%+ (currently 60%/50% thresholds)
 - Lint errors: 0 (achieved)
 - Type errors: 0 (achieved)
