@@ -1,13 +1,7 @@
-import { IsEmail, IsString, MaxLength } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { IsString, MaxLength } from 'class-validator';
+import { BaseAuthDto } from './base-auth.dto';
 
-export class LoginDto {
-  @Transform(({ value }: { value: unknown }) =>
-    typeof value === 'string' ? value.toLowerCase().trim() : value,
-  )
-  @IsEmail()
-  email: string;
-
+export class LoginDto extends BaseAuthDto {
   @IsString()
   @MaxLength(128)
   password: string;
