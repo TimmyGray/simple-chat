@@ -78,10 +78,10 @@ Each task has:
 | B-L1 | Use PartialType for duplicate DTOs | backend | 0.1d | todo | Create/Update DTOs duplicated |
 | B-L2 | Replace synchronous mkdirSync with async | backend | 0.1d | todo | Sync call at startup |
 | B-L3 | Load model list from config or OpenRouter API | backend | 0.5d | todo | Hardcoded model list |
-| B-L4 | Add uploads/ to .gitignore | backend | 0.1d | todo | Missing gitignore entry |
+| B-L4 | Add uploads/ to .gitignore | backend | 0.1d | done | Already present in root .gitignore as `/uploads` |
 | B-L5 | Enable strict: true in backend tsconfig | backend | 0.5d | todo | Some strict flags missing |
 | B-L6 | Standardize SSE error format | backend | 0.25d | todo | Inconsistent error envelope |
-| B-L7 | Document CORS configuration | backend | 0.1d | todo | Allowed origins undocumented |
+| B-L7 | Document CORS configuration | backend | 0.1d | done | Documented in ARCHITECTURE.md env vars table and SECURITY.md |
 | B-L8 | Refactor extractFileContent (61 lines, exceeds 50-line limit) | backend | 0.25d | todo | file-extraction.service.ts — extract helpers for text/PDF branches |
 | B-L9 | Create backend getErrorMessage utility for `instanceof Error` pattern | backend | 0.5d | todo | 10 occurrences across 7 files, above 3+ threshold. Needs design: backend uses NestJS Logger with stack traces, different from frontend pattern. |
 | F-L1 | Extract magic numbers to constants/theme | frontend | 0.25d | todo | Hardcoded values in styles |
@@ -173,3 +173,5 @@ Each task has:
 | F-M19 | Add error scenario tests (PR #55) | 2026-02-24 |
 | F-M20 | Add accessibility tests with axe-core (PR #56) | 2026-02-24 |
 | F-M21 | Replace window.alert() with Snackbar in FileAttachment (PR #57) | 2026-02-24 |
+| B-L4 | Add uploads/ to .gitignore (already present, discovered in audit #9) | 2026-02-24 |
+| B-L7 | Document CORS configuration (in ARCHITECTURE.md + SECURITY.md) | 2026-02-24 |

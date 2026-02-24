@@ -1,14 +1,14 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-24 (sweep #8)
+> Last updated: 2026-02-24 (sweep #9)
 
 ## Test Summary
 
 | Area | Test Files | Tests | Pass Rate |
 |------|-----------|-------|-----------|
 | Backend | 13 | 112 | 100% |
-| Frontend | 11 | 92 | 100% |
-| **Total** | **24** | **204** | **100%** |
+| Frontend | 16 | 148 | 100% |
+| **Total** | **29** | **260** | **100%** |
 
 ## Lint Status
 
@@ -40,20 +40,96 @@
 | Area | Total | Outdated | Vulnerabilities |
 |------|-------|----------|----------------|
 | Root | 3 | 0 | 0 |
-| Backend | ~25 | 14 (6 patch, 5 minor, 3 major) | 35 (5 moderate, 30 high — all in jest/babel transitive deps) |
-| Frontend | ~20 | 8 (4 patch, 1 minor, 3 major) | 11 (1 moderate, 10 high — all in eslint/minimatch transitive deps) |
+| Backend | ~25 | 14 (7 patch, 4 minor, 3 major) | 35 (5 moderate, 30 high — all in jest/babel transitive deps) |
+| Frontend | ~20 | 8 (3 patch, 2 minor, 3 major) | 11 (1 moderate, 10 high — all in eslint/minimatch transitive deps) |
 
 ## Bundle Size
-- Backend: 860 KB (dist/)
-- Frontend: 1.4 MB (dist/) — initial load 314 KB + 295 KB vendor-mui + 63 KB vendor-i18n + 796 KB lazy markdown chunk
+- Backend: 1.1 MB (dist/)
+- Frontend: 1.4 MB (dist/) — initial load 314 KB + 299 KB vendor-mui + 63 KB vendor-i18n + 796 KB lazy markdown chunk
 
 ## Tech Debt
 - Critical: 0 todo, 4 done (JWT authentication completed)
 - High: 0 todo, 7 done — all high-priority items completed
-- Medium: 4 todo, 26 done, 1 wont-fix (F-M16, F-M18 completed since last audit)
-- Low: 14 todo, 1 done (B-L9 added: backend getErrorMessage utility)
+- Medium: 1 todo, 29 done, 1 wont-fix (F-M19, F-M20, F-M21 completed since last sweep)
+- Low: 12 todo, 3 done (B-L4, B-L7 discovered already-done in audit #9)
 - Features: 8 todo, 2 done (FEAT-6 completed)
-- Total tracked: 67 (see `docs/exec-plans/tech-debt-tracker.md`)
+- Total tracked: 71 (see `docs/exec-plans/tech-debt-tracker.md`)
+
+## Sweep #9 Findings
+- All validation passing: lint 0 errors, typecheck 0 errors, 260 tests passing, build passing
+- Backend tests: 112 (13 files, unchanged)
+- Frontend tests: 148 (16 files, unchanged since retrospective #4)
+- Total tests: 260 (target: 100+ sustained, comfortably exceeded)
+- No auto-fixable code violations found (codebase is clean)
+- No console.log/warn/error in source (clean)
+- No dangerouslySetInnerHTML (clean)
+- No hardcoded secrets (clean)
+- No `any` types in non-test source files (clean)
+- No hardcoded user-facing strings (all use t())
+- No TODO/FIXME/HACK comments in source (clean)
+- i18n: all 4 locales in sync (51 keys each, up from 49 — new file error keys from F-M21)
+- All cross-module imports follow approved patterns (chat->auth for guards/decorators only)
+- No services importing Express types (clean — Express types only in controller, middleware, exception filter per NestJS convention)
+- No direct MongoDB collection access outside DatabaseService (clean)
+- No files exceed 300-line limit (chat.service.ts at 297, under limit)
+- All hex/rgba/gradient colors in theme.ts only (exempt per convention)
+- No window.alert() in source (F-M21 completed in PR #57 — long-standing violation now resolved)
+- Backend `instanceof Error` pattern: 10 occurrences across 7 files (unchanged from sweep #8, tracked as B-L9, needs design)
+- Frontend bundle: 314 KB index + 299 KB vendor-mui + 63 KB vendor-i18n + 796 KB lazy markdown (1.4 MB total, unchanged)
+- Backend bundle: 1.1 MB (dist/, unchanged)
+- Existing tracked violations confirmed still present:
+  - 1 backend function exceeds 50-line limit: extractFileContent at 61 lines (tracked as B-L8)
+  - Frontend components/hooks exceed 50-line limit: MessageBubble (146 lines), ChatApp (122 lines) — React components, tracked as F-L2
+  - F-M22 (aria-live on TypingIndicator) still todo — missing role="status" aria-live="polite"
+  - B-L9 (backend getErrorMessage utility) still todo — 10 instanceof Error occurrences across 7 backend files
+
+## Audit #9 Findings
+- Backend tests: 112 (13 files, unchanged). Frontend tests: 148 (16 files, unchanged since retrospective #4).
+- Total tests: 260 (target: 100+ sustained, comfortably exceeded)
+- F-M21 (window.alert replacement with Snackbar) completed since last audit (PR #57)
+- All validation passing: lint 0 errors/0 warnings, typecheck 0 errors, build passing
+- No new lint, type, or build errors
+- No console.log/warn/error found in source (clean)
+- No dangerouslySetInnerHTML usage (clean)
+- No hardcoded secrets found in source files
+- No `any` types in non-test source files (clean)
+- No TODO/FIXME/HACK comments in source (clean)
+- i18n: all 4 locales in sync (51 keys each, up from 49 — new file error i18n keys from F-M21)
+- All cross-module imports follow approved patterns (chat->auth for guards/decorators only)
+- No services importing Express types (clean)
+- No direct MongoDB collection access outside DatabaseService (clean)
+- No files exceed 300-line limit (chat.service.ts at 297, under limit)
+- All rgba/gradient usages reference theme tokens (theme.ts exempt per convention)
+- Frontend bundle: 314 KB index + 299 KB vendor-mui + 63 KB vendor-i18n + 796 KB lazy markdown (1.4 MB total, unchanged)
+- Backend bundle: 1.1 MB (dist/, up from 860 KB — growth from accumulated features)
+- Dependencies: 0 vulnerabilities at root; backend 35, frontend 11 (all transitive, unchanged)
+- Backend outdated: 14 (7 patch, 4 minor, 3 major). Frontend outdated: 8 (3 patch, 2 minor, 3 major)
+- Backend `instanceof Error` pattern: 10 occurrences across 7 files (unchanged, tracked as B-L9)
+- window.alert() in FileAttachment.tsx: RESOLVED (F-M21 completed, PR #57)
+- Existing tracked violations confirmed still present:
+  - 1 backend function exceeds 50-line limit: extractFileContent at 61 lines (tracked as B-L8)
+  - Frontend components/hooks exceed 50-line limit (React components, tracked as F-L2) — component size is expected for React
+  - Frontend bundle 1.4 MB total, split via manual chunks and lazy loading (tracked as F-M17, done)
+  - F-M22 (aria-live on TypingIndicator) still todo
+
+## Retrospective #4 Findings
+- PRs analyzed: 10 (PRs #48-#57), date range: 2026-02-23 to 2026-02-24
+- 7 features completed since last retrospective: F-M15, F-M16, F-M18, F-M19, F-M20, F-M21, Phase 9b workflow enhancement
+- All PRs well-scoped: avg 5 files changed, max 12 (PR #55 error scenario tests, 4 new test files)
+- Backend tests: 112 (13 files, stable)
+- Frontend tests: 75 -> 148 (+73 tests, 10 -> 16 test files — massive test coverage improvement)
+- Total tests: 187 -> 260 (39% increase, target 100+ comfortably exceeded)
+- Frontend test coverage is now the strongest area — hooks have comprehensive happy-path + error scenario tests
+- No review comments on any PR (no external reviewer activity)
+- No Phase 9b per-feature learning entries in pitfalls.md (Phase 9b was just added, no triggers yet)
+- Fixed: stale eslint-disable directive in vitest-axe.d.ts (unused `@typescript-eslint/no-empty-object-type` suppression)
+- Fixed: quality score test counts were stale (92/11 -> 148/16 frontend, 204/24 -> 260/29 total)
+- Fixed: medium tech debt count corrected (was 4/26, actually 1/29 — F-M19, F-M20, F-M21 completed)
+- Pattern identified: Backend `instanceof Error` at 10 occurrences across 7 files (tracked as B-L9, above 3+ threshold but requires design — backend uses NestJS Logger with stack traces, different semantics from frontend getErrorMessage)
+- Pattern identified: `tRef` (useRef for t()) in all 4 data hooks — stable pattern, not yet worth extracting
+- Pattern identified: `err as { response }` unsafe casts consolidated into getErrorMessage.ts utility — no longer spread across hooks
+- No new ESLint rules promoted this cycle (backend instanceof Error needs design work first, not a simple AST selector ban)
+- Existing promoted rules (no-console, hex colors, no-restricted-imports, window.alert, instanceof Error ternary, no-floating-promises) all working — zero violations in source
 
 ## Sweep #8 Findings
 - All validation passing: lint 0 errors, typecheck 0 errors, build passing
@@ -284,7 +360,7 @@
 - 5 frontend functions exceed 50-line limit (React components/hooks, tracked as F-L2)
 
 ## Targets
-- Test count: 100+ (achieved — currently 204)
+- Test count: 100+ (achieved — currently 260)
 - Coverage: 80%+ (currently 60%/50% thresholds)
 - Lint errors: 0 (achieved)
 - Type errors: 0 (achieved)

@@ -1,6 +1,6 @@
 # Database Schema
 
-> Auto-generated from MongoDB collection interfaces. Last updated: 2026-02-23.
+> Auto-generated from MongoDB collection interfaces. Last updated: 2026-02-24.
 
 ## Database: simple-chat
 
