@@ -8,7 +8,7 @@ import NewChatButton from './NewChatButton';
 import ConversationItem from './ConversationItem';
 import ConfirmDialog from '../common/ConfirmDialog';
 import LanguageSwitcher from '../common/LanguageSwitcher';
-import { AVATAR_ICON_SIZE, LOADING_SPINNER_SM } from '../../constants';
+import { ICON_SIZE_SM, LOADING_SPINNER_SM } from '../../constants';
 
 function formatTokenCount(tokens: number): string {
   if (tokens >= 1_000_000) {
@@ -130,7 +130,7 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
               </Typography>
               <Tooltip title={t('auth.logout')}>
                 <IconButton size="small" aria-label={t('auth.logout')} onClick={logout}>
-                  <LogoutIcon sx={{ fontSize: AVATAR_ICON_SIZE }} />
+                  <LogoutIcon sx={{ fontSize: ICON_SIZE_SM }} />
                 </IconButton>
               </Tooltip>
             </Box>

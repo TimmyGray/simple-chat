@@ -5,8 +5,8 @@ import PersonIcon from '@mui/icons-material/Person';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import type { Message } from '../../types';
 import {
+  ICON_SIZE_SM,
   AVATAR_SIZE,
-  AVATAR_ICON_SIZE,
   MESSAGE_MAX_WIDTH,
   USER_BUBBLE_RADIUS,
   ASSISTANT_BUBBLE_RADIUS,
@@ -51,9 +51,9 @@ function MessageBubble({ message }: MessageBubbleProps) {
         }}
       >
         {isUser ? (
-          <PersonIcon sx={{ fontSize: AVATAR_ICON_SIZE, color: 'common.white' }} />
+          <PersonIcon sx={{ fontSize: ICON_SIZE_SM, color: 'common.white' }} />
         ) : (
-          <SmartToyIcon sx={{ fontSize: AVATAR_ICON_SIZE, color: 'common.black' }} />
+          <SmartToyIcon sx={{ fontSize: ICON_SIZE_SM, color: 'common.black' }} />
         )}
       </Box>
 

@@ -7,7 +7,7 @@ import type { ModelInfo, Attachment, ModelId } from '../../types';
 import ModelSelector from './ModelSelector';
 import FileAttachment from './FileAttachment';
 import * as api from '../../api/client';
-import { SEND_BUTTON_SIZE, ATTACHMENT_CHIP_MAX_WIDTH, SNACKBAR_AUTO_HIDE_MS } from '../../constants';
+import { SEND_BUTTON_SIZE, ATTACHMENT_CHIP_MAX_WIDTH, SNACKBAR_AUTO_HIDE_MS, INPUT_FONT_SIZE } from '../../constants';
 
 const MAX_MESSAGE_LENGTH = 10_000;
 
@@ -128,7 +128,7 @@ export default function ChatInput({
                 px: 2,
                 pt: 1.5,
                 pb: 0.5,
-                fontSize: '0.95rem',
+                fontSize: INPUT_FONT_SIZE,
                 lineHeight: 1.5,
               },
             },

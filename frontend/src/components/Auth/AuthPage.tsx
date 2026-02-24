@@ -17,6 +17,7 @@ import {
   AUTH_LOGO_ICON_SIZE,
   AUTH_CARD_MAX_WIDTH,
   AUTH_SUBMIT_SPINNER_SIZE,
+  MIN_PASSWORD_LENGTH,
 } from '../../constants';
 
 interface AuthPageProps {
@@ -133,7 +134,7 @@ export default function AuthPage({
             onChange={(e) => setPassword(e.target.value)}
             autoComplete={isLogin ? 'current-password' : 'new-password'}
             required
-            slotProps={{ htmlInput: { minLength: isLogin ? undefined : 8 } }}
+            slotProps={{ htmlInput: { minLength: isLogin ? undefined : MIN_PASSWORD_LENGTH } }}
             helperText={!isLogin ? t('auth.passwordHint') : undefined}
             sx={{ mb: 3 }}
           />
