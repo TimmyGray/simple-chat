@@ -278,6 +278,27 @@ describe('ModelsService', () => {
     });
   });
 
+  describe('zero-pricing models without :free suffix', () => {
+    it('should include whitelisted zero-pricing models without :free suffix', async () => {
+      const qwenModel = {
+        id: 'qwen/qwen3-235b-a22b-thinking-2507',
+        name: 'Qwen3 235B A22B Thinking',
+        description: 'Large Qwen model',
+        pricing: { prompt: '0', completion: '0' },
+        context_length: 131072,
+        architecture: { modality: 'text->text' },
+      };
+      vi.spyOn(global, 'fetch').mockResolvedValue(
+        makeOpenRouterResponse([qwenModel]) as unknown as Response,
+      );
+      service = new ModelsService(createConfigService());
+      await service.onModuleInit();
+      const model = service.getModelById('qwen/qwen3-235b-a22b-thinking-2507');
+      expect(model).toBeDefined();
+      expect(model!.free).toBe(true);
+    });
+  });
+
   describe('edge cases in mapping', () => {
     it('should handle null context_length', async () => {
       vi.spyOn(global, 'fetch').mockResolvedValue(
