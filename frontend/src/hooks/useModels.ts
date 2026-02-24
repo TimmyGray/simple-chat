@@ -5,7 +5,14 @@ import * as api from '../api/client';
 import { useFocusRevalidation } from './useFocusRevalidation';
 import { getErrorMessage } from '../utils/getErrorMessage';
 
-export function useModels() {
+export interface UseModelsReturn {
+  models: ModelInfo[];
+  loading: boolean;
+  error: string | null;
+  clearError: () => void;
+}
+
+export function useModels(): UseModelsReturn {
   const { t } = useTranslation();
   const tRef = useRef(t);
   tRef.current = t;

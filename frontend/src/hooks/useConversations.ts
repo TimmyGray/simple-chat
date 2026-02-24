@@ -5,7 +5,18 @@ import * as api from '../api/client';
 import { useFocusRevalidation } from './useFocusRevalidation';
 import { getErrorMessage } from '../utils/getErrorMessage';
 
-export function useConversations() {
+export interface UseConversationsReturn {
+  conversations: Conversation[];
+  loading: boolean;
+  error: string | null;
+  clearError: () => void;
+  refresh: () => Promise<void>;
+  create: (model?: ModelId) => Promise<Conversation>;
+  update: (id: ConversationId, body: { title?: string; model?: ModelId }) => Promise<Conversation>;
+  remove: (id: ConversationId) => Promise<void>;
+}
+
+export function useConversations(): UseConversationsReturn {
   const { t } = useTranslation();
   const tRef = useRef(t);
   tRef.current = t;
