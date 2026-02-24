@@ -52,6 +52,7 @@ Isolate the working tree so multiple `/develop-feature` agents can run concurren
    - If `EnterWorktree` fails (e.g., already in a worktree), skip this step — the agent is already isolated
 3. **Verify isolation**: Run `git rev-parse --show-toplevel` and confirm the path contains `.claude/worktrees/`. If not, the worktree setup was skipped (which is acceptable for single-agent execution).
 4. **Install dependencies**: The worktree has no `node_modules/`. Run `npm install` at the repo root, then `npm install` in `backend/` and `npm install` in `frontend/`.
+5. **Sync remote refs**: Run `git fetch origin main` to ensure `origin/main` is up-to-date. **Never run `git checkout main`** inside a worktree — `main` is always checked out by the primary working tree and git forbids the same branch in two worktrees.
 
 > **Why worktrees?** Without isolation, two `/develop-feature` agents sharing the same working tree will conflict on `git checkout`, `git add`, and other file operations. Worktrees give each agent its own directory, while sharing the same `.git` object store (so pushes and fetches are fast).
 
@@ -66,7 +67,7 @@ Isolate the working tree so multiple `/develop-feature` agents can run concurren
 4. Read `docs/CONVENTIONS.md` for code standards
 
 ### Phase 3: Branch & Plan
-1. Create a feature branch: `git checkout -b feat/<kebab-case-task-name>`. In a worktree, this creates a new branch and switches to it (the worktree's initial branch is abandoned). This works because the feature branch name (`feat/...`) differs from the worktree-created branch.
+1. Create a feature branch: `git checkout -b feat/<kebab-case-task-name> origin/main`. In a worktree, this creates a new branch based on the latest `origin/main` and switches to it (the worktree's initial branch is abandoned). This works because the feature branch name (`feat/...`) differs from the worktree-created branch, and using `origin/main` avoids needing to checkout `main` (which is forbidden in worktrees).
 2. **Execution Plan (required for tasks > 1 day effort):**
    - Create `docs/exec-plans/active/<feature>.md` with:
      - Task description and acceptance criteria
