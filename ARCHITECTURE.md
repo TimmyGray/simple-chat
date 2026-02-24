@@ -17,7 +17,7 @@ simple-chat/
 │   │   ├── config/           # Configuration + Joi env validation
 │   │   ├── database/         # MongoDB native driver (global module)
 │   │   ├── chat/             # Core: conversations, messages, LLM streaming
-│   │   ├── models/           # Hardcoded LLM model catalog
+│   │   ├── models/           # LLM model catalog (fetched from OpenRouter)
 │   │   ├── health/           # Health check with MongoDB indicator
 │   │   ├── uploads/          # Cron-based upload cleanup
 │   │   ├── types/            # Shared document interfaces (ConversationDoc, MessageDoc, UserDoc)
@@ -69,7 +69,7 @@ AppModule
 │   └── FileExtractionService (PDF/text/CSV file content extraction)
 ├── ModelsModule
 │   ├── ModelsController (GET /api/models)
-│   └── ModelsService (hardcoded model catalog)
+│   └── ModelsService (fetches from OpenRouter, hourly refresh, fallback defaults)
 ├── HealthModule
 │   ├── HealthController (GET /api/health)
 │   └── MongoHealthIndicator (ping check)

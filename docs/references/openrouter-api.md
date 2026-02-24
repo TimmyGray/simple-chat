@@ -42,7 +42,7 @@ for await (const chunk of stream) {
 
 ## Available Models
 
-Served from `ModelsService` (hardcoded list). Each model has:
+Fetched dynamically from OpenRouter `GET /api/v1/models` on startup, cached in memory, refreshed hourly. Falls back to a hardcoded default list if the API is unreachable. Each model has:
 - id: OpenRouter model identifier
 - name: Display name
 - description: Short description
