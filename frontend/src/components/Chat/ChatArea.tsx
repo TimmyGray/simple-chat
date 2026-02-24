@@ -19,13 +19,18 @@ export default function ChatArea() {
   const { messages, loading, streaming, streamingContent, fetchMessages, sendMessage, clear } =
     useMessages();
 
+  // Depend on conversation ID (not object reference) to avoid
+  // re-fetching messages when the conversation list refreshes
+  // but the selected conversation hasn't actually changed.
+  const conversationId = conversation?._id ?? null;
+
   useEffect(() => {
-    if (conversation) {
-      void fetchMessages(conversation._id);
+    if (conversationId) {
+      void fetchMessages(conversationId);
     } else {
       clear();
     }
-  }, [conversation, fetchMessages, clear]);
+  }, [conversationId, fetchMessages, clear]);
 
   const handleSend = useCallback(
     async (content: string, attachments: Attachment[]) => {
