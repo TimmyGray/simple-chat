@@ -23,9 +23,9 @@ App (src/App.tsx)
 |
 +-- Layout (src/components/Layout.tsx)
 |     No data props. Pure layout concern.
-|     Responsive split: persistent sidebar on desktop, temporary Drawer on mobile.
+|     Responsive split: persistent sidebar on desktop/tablet, temporary Drawer on mobile.
 |     Breakpoint: theme.breakpoints.down('md') (< 900px).
-|     SIDEBAR_WIDTH = 280px.
+|     Sidebar: 240px (md–lg tablet), 280px (lg+ desktop).
 |
 |   +-- Sidebar (src/components/Sidebar/Sidebar.tsx)
 |   |     props: onMobileClose (optional, from Layout)
@@ -56,13 +56,13 @@ App (src/App.tsx)
 |       +-- MessageList (src/components/Chat/MessageList.tsx)
 |       |     Scrollable container. Auto-scrolls on new messages/streaming content.
 |       |     Shows CircularProgress while loading.
-|       |     Responsive horizontal padding: xs=16px, md=32px.
+|       |     Responsive horizontal padding: xs=16px, md=24px, lg=32px.
 |       |
 |       |   +-- MessageBubble[] (src/components/Chat/MessageBubble.tsx)
 |       |   |     User: right-aligned, purple tint background, pre-wrap text.
 |       |   |     Assistant: left-aligned, dark background, full Markdown rendering.
 |       |   |     Avatars: user = purple-blue gradient, assistant = cyan-green gradient.
-|       |   |     Max width: 75%. Asymmetric border-radius for speech-bubble effect.
+|       |   |     Max width: 85% (xs–lg), 75% (lg+). Asymmetric border-radius for speech-bubble effect.
 |       |   |     Markdown stack: ReactMarkdown + remarkGfm + rehypeSanitize + Prism (oneDark).
 |       |   |     Shows model name as caption below assistant messages.
 |       |   |     Renders attachment chips when present.

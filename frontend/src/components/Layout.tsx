@@ -10,7 +10,7 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import Sidebar from './Sidebar/Sidebar';
 import ChatArea from './Chat/ChatArea';
-import { SIDEBAR_WIDTH, MOBILE_MENU_OFFSET } from '../constants';
+import { SIDEBAR_WIDTH, SIDEBAR_WIDTH_TABLET, MOBILE_MENU_OFFSET } from '../constants';
 
 export default function Layout() {
   const { t } = useTranslation();
@@ -63,7 +63,7 @@ export default function Layout() {
       ) : (
         <Box
           sx={{
-            width: SIDEBAR_WIDTH,
+            width: { md: SIDEBAR_WIDTH_TABLET, lg: SIDEBAR_WIDTH },
             flexShrink: 0,
             borderRight: '1px solid',
             borderColor: 'divider',

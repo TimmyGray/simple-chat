@@ -1,5 +1,6 @@
 // ─── Layout ─────────────────────────────────────────────────
 export const SIDEBAR_WIDTH = 280;
+export const SIDEBAR_WIDTH_TABLET = 240;
 export const MOBILE_MENU_OFFSET = 12;
 
 // ─── Icons ──────────────────────────────────────────────────
@@ -8,6 +9,7 @@ export const ICON_SIZE_SM = 18;
 // ─── Message Bubble ─────────────────────────────────────────
 export const AVATAR_SIZE = 34;
 export const MESSAGE_MAX_WIDTH = '75%';
+export const MESSAGE_MAX_WIDTH_TABLET = '85%';
 export const USER_BUBBLE_RADIUS = '16px 16px 4px 16px';
 export const ASSISTANT_BUBBLE_RADIUS = '16px 16px 16px 4px';
 export const MODEL_TAG_OPACITY = 0.6;
