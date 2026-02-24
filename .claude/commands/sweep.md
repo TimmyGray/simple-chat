@@ -82,7 +82,9 @@ For **needs design** findings:
 After all fixes:
 1. Run the full validation suite: `npm run validate`
 2. Update `docs/QUALITY_SCORE.md` with new metrics
-3. Include quality grade changes in the commit
+3. If quality score was updated, **always** commit and push it:
+   - If an auto-fix PR branch is open, include it in that branch's commit
+   - If no auto-fix PRs were created (clean sweep), commit directly to main: `git add docs/QUALITY_SCORE.md && git commit -m "chore: sweep #N — update quality metrics" && git push origin main`
 
 ### 6. Report
 
