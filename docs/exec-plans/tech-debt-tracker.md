@@ -70,7 +70,7 @@ Each task has:
 | F-M21 | Replace window.alert() with Snackbar in FileAttachment | frontend | 0.25d | done | PR #57 merged. onError callback + Snackbar in ChatInput. |
 | F-M22 | Add aria-live to TypingIndicator | frontend | 0.1d | done | PR #59 merged. role="status" + aria-live="polite" + visually hidden i18n label. |
 | F-M23 | Localize "Error:" prefix in useMessages error display | frontend | 0.1d | done | Fixed in retrospective #2: uses t('errors.streamErrorPrefix') |
-| B-M11 | Update /develop-feature skill to use git worktree isolation for parallel execution | infra | 0.25d | todo | Task tool supports `isolation: "worktree"`. Modify skill to run in isolated worktree so multiple /develop-feature can run concurrently without branch conflicts. |
+| B-M11 | Update /develop-feature skill to use git worktree isolation for parallel execution | infra | 0.25d | done | PR #69 merged. Phase 1.5 uses EnterWorktree for isolated execution. |
 
 ## Low
 
