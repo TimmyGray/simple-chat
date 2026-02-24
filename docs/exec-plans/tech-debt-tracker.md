@@ -67,7 +67,7 @@ Each task has:
 | F-M18 | Add hook tests (useMessages streaming) | frontend | 1d | done | PR #53 merged. 17 tests: fetch, send, streaming, stop, clear. |
 | F-M19 | Add error scenario tests | frontend | 1d | done | PR #55 merged. 42 tests across 4 hooks: useConversations, useModels, useAuth, useMessages. |
 | F-M20 | Add accessibility tests (axe-core) | frontend | 1d | done | PR #56 merged. vitest-axe, 15 tests, 3 violations fixed. |
-| F-M21 | Replace window.alert() with Snackbar in FileAttachment | frontend | 0.25d | todo | UX anti-pattern, 2 occurrences. Now caught by ESLint (eslint-disable with task ID). |
+| F-M21 | Replace window.alert() with Snackbar in FileAttachment | frontend | 0.25d | done | PR #57 merged. onError callback + Snackbar in ChatInput. |
 | F-M22 | Add aria-live to TypingIndicator | frontend | 0.1d | todo | Missing role="status" aria-live="polite" |
 | F-M23 | Localize "Error:" prefix in useMessages error display | frontend | 0.1d | done | Fixed in retrospective #2: uses t('errors.streamErrorPrefix') |
 
@@ -172,3 +172,4 @@ Each task has:
 | F-M18 | Add useMessages hook tests (PR #53) | 2026-02-24 |
 | F-M19 | Add error scenario tests (PR #55) | 2026-02-24 |
 | F-M20 | Add accessibility tests with axe-core (PR #56) | 2026-02-24 |
+| F-M21 | Replace window.alert() with Snackbar in FileAttachment (PR #57) | 2026-02-24 |
