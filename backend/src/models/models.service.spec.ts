@@ -22,11 +22,20 @@ function makeOpenRouterResponse(models: Record<string, unknown>[]) {
 }
 
 const sampleOpenRouterModel = {
-  id: 'test/model-a',
-  name: 'Model A',
-  description: 'A test model',
+  id: 'google/gemma-3n-e2b-it:free',
+  name: 'Gemma 3n 2B',
+  description: 'Lightweight Google model',
   pricing: { prompt: '0', completion: '0' },
   context_length: 32768,
+  architecture: { modality: 'text->text' },
+};
+
+const nonWhitelistedFreeModel = {
+  id: 'unknown-provider/random-model:free',
+  name: 'Random Free Model',
+  description: 'A free model not in the whitelist',
+  pricing: { prompt: '0', completion: '0' },
+  context_length: 16384,
   architecture: { modality: 'text->text' },
 };
 
@@ -64,10 +73,10 @@ describe('ModelsService', () => {
     });
 
     it('should map model fields correctly', () => {
-      const model = service.getModelById('test/model-a');
+      const model = service.getModelById('google/gemma-3n-e2b-it:free');
       expect(model).toBeDefined();
-      expect(model!.name).toBe('Model A');
-      expect(model!.description).toBe('A test model');
+      expect(model!.name).toBe('Gemma 3n 2B');
+      expect(model!.description).toBe('Lightweight Google model');
       expect(model!.free).toBe(true);
       expect(model!.contextLength).toBe(32768);
       expect(model!.supportsVision).toBe(false);
@@ -169,9 +178,9 @@ describe('ModelsService', () => {
     });
 
     it('should return a model by id', () => {
-      const model = service.getModelById('test/model-a');
+      const model = service.getModelById('google/gemma-3n-e2b-it:free');
       expect(model).toBeDefined();
-      expect(model!.name).toBe('Model A');
+      expect(model!.name).toBe('Gemma 3n 2B');
     });
 
     it('should return undefined for non-existent model', () => {
@@ -213,6 +222,56 @@ describe('ModelsService', () => {
     });
   });
 
+  describe('free model whitelist filtering', () => {
+    it('should include whitelisted free models', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValue(
+        makeOpenRouterResponse([sampleOpenRouterModel]) as unknown as Response,
+      );
+      service = new ModelsService(createConfigService());
+      await service.onModuleInit();
+      expect(service.getModelById('google/gemma-3n-e2b-it:free')).toBeDefined();
+    });
+
+    it('should filter out non-whitelisted free models', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValue(
+        makeOpenRouterResponse([
+          nonWhitelistedFreeModel,
+        ]) as unknown as Response,
+      );
+      service = new ModelsService(createConfigService());
+      await service.onModuleInit();
+      expect(service.getModels()).toHaveLength(0);
+    });
+
+    it('should always include paid models regardless of whitelist', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValue(
+        makeOpenRouterResponse([sampleVisionModel]) as unknown as Response,
+      );
+      service = new ModelsService(createConfigService());
+      await service.onModuleInit();
+      expect(service.getModelById('test/vision-model')).toBeDefined();
+    });
+
+    it('should keep whitelisted free and paid, drop non-whitelisted free', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValue(
+        makeOpenRouterResponse([
+          sampleOpenRouterModel,
+          nonWhitelistedFreeModel,
+          sampleVisionModel,
+        ]) as unknown as Response,
+      );
+      service = new ModelsService(createConfigService());
+      await service.onModuleInit();
+      const models = service.getModels();
+      expect(models).toHaveLength(2);
+      expect(service.getModelById('google/gemma-3n-e2b-it:free')).toBeDefined();
+      expect(service.getModelById('test/vision-model')).toBeDefined();
+      expect(
+        service.getModelById('unknown-provider/random-model:free'),
+      ).toBeUndefined();
+    });
+  });
+
   describe('edge cases in mapping', () => {
     it('should handle null context_length', async () => {
       vi.spyOn(global, 'fetch').mockResolvedValue(
@@ -244,7 +303,7 @@ describe('ModelsService', () => {
       );
       service = new ModelsService(createConfigService());
       await service.onModuleInit();
-      expect(service.getModels()[0].name).toBe('test/model-a');
+      expect(service.getModels()[0].name).toBe('google/gemma-3n-e2b-it:free');
     });
 
     it('should handle missing pricing', async () => {
