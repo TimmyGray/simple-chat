@@ -12,7 +12,10 @@ import type { TokenUsage } from '../types/documents';
 import { FileExtractionService } from './file-extraction.service';
 import { ConversationDoc } from './interfaces/conversation.interface';
 import { MessageDoc } from './interfaces/message.interface';
-import { StreamEvent } from './interfaces/stream-event.interface';
+import {
+  StreamEvent,
+  SSE_ERROR_CODE,
+} from './interfaces/stream-event.interface';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { SendMessageDto } from './dto/send-message.dto';
@@ -35,9 +38,6 @@ export class ChatService {
         'X-Title': 'Simple Chat',
       },
     });
-    this.logger.log(
-      `OpenAI client initialized with baseURL: ${this.configService.get<string>('openrouter.baseUrl')}`,
-    );
   }
 
   async createConversation(
@@ -123,9 +123,7 @@ export class ChatService {
     conversationId: string,
     userId: ObjectId,
   ): Promise<MessageDoc[]> {
-    // Verify conversation ownership before returning messages
     await this.getConversation(conversationId, userId);
-
     const messages = await this.databaseService
       .messages()
       .find({ conversationId: new ObjectId(conversationId) })
@@ -276,7 +274,7 @@ export class ChatService {
           },
         );
         this.logger.debug(
-          `Token usage for conversation ${conversationId}: prompt=${usage.promptTokens}, completion=${usage.completionTokens}, total=${usage.totalTokens}`,
+          `Token usage: prompt=${usage.promptTokens}, completion=${usage.completionTokens}, total=${usage.totalTokens}`,
         );
       }
 
@@ -291,7 +289,11 @@ export class ChatService {
         `LLM stream failed for conversation ${conversationId}: ${errorMessage}`,
         error instanceof Error ? error.stack : undefined,
       );
-      yield { type: 'error', message: errorMessage };
+      yield {
+        type: 'error',
+        code: SSE_ERROR_CODE.LLM_FAILURE,
+        message: errorMessage,
+      };
     }
   }
 }

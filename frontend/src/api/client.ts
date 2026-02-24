@@ -114,7 +114,7 @@ export async function sendMessageStream(
   attachments?: Attachment[],
   onChunk?: (text: string) => void,
   onDone?: () => void,
-  onError?: (error: string) => void,
+  onError?: (error: string, code?: string) => void,
   abortSignal?: AbortSignal,
   idempotencyKey?: string,
 ): Promise<void> {
@@ -182,7 +182,7 @@ export async function sendMessageStream(
         try {
           const parsed = JSON.parse(payload);
           if (parsed.error) {
-            onError?.(parsed.error);
+            onError?.(parsed.error, parsed.code);
             return;
           }
           if (parsed.content) {

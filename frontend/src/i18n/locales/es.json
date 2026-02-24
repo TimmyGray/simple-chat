@@ -65,6 +65,11 @@
     "fetchModels": "Error al obtener los modelos",
     "filesNotAttached": "Algunos archivos no se adjuntaron:",
     "streamErrorPrefix": "Error: {{message}}",
-    "corsOrNetwork": "No se puede conectar al servidor. Verifica que el backend esté en ejecución y que CORS esté configurado correctamente."
+    "corsOrNetwork": "No se puede conectar al servidor. Verifica que el backend esté en ejecución y que CORS esté configurado correctamente.",
+    "sse": {
+      "STREAM_TIMEOUT": "La respuesta tardó demasiado y se agotó el tiempo.",
+      "LLM_FAILURE": "El modelo de IA no pudo generar una respuesta.",
+      "INTERNAL_ERROR": "Ocurrió un error interno del servidor."
+    }
   }
 }

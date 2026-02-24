@@ -65,6 +65,11 @@
     "fetchModels": "获取模型失败",
     "filesNotAttached": "部分文件未能附加：",
     "streamErrorPrefix": "错误: {{message}}",
-    "corsOrNetwork": "无法连接服务器。请检查后端是否正在运行以及 CORS 是否配置正确。"
+    "corsOrNetwork": "无法连接服务器。请检查后端是否正在运行以及 CORS 是否配置正确。",
+    "sse": {
+      "STREAM_TIMEOUT": "响应时间过长，已超时。",
+      "LLM_FAILURE": "AI 模型未能生成回复。",
+      "INTERNAL_ERROR": "服务器内部错误。"
+    }
   }
 }

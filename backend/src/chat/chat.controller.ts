@@ -25,6 +25,7 @@ import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 import type { StreamEvent } from './interfaces/stream-event.interface';
+import { SSE_ERROR_CODE } from './interfaces/stream-event.interface';
 import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -119,7 +120,9 @@ export class ChatController {
     const streamTimeout = setTimeout(() => {
       this.logger.warn(`Stream timeout for conversation ${id}`);
       if (!res.writableEnded) {
-        res.write(`data: ${JSON.stringify({ error: 'Stream timeout' })}\n\n`);
+        res.write(
+          `data: ${JSON.stringify({ error: 'Stream timeout', code: SSE_ERROR_CODE.STREAM_TIMEOUT })}\n\n`,
+        );
         res.end();
       }
       abortController.abort();
@@ -141,7 +144,9 @@ export class ChatController {
         `SSE stream failed for conversation ${id}: ${errorMessage}`,
       );
       if (!res.writableEnded) {
-        res.write(`data: ${JSON.stringify({ error: errorMessage })}\n\n`);
+        res.write(
+          `data: ${JSON.stringify({ error: errorMessage, code: SSE_ERROR_CODE.INTERNAL_ERROR })}\n\n`,
+        );
       }
     } finally {
       clearTimeout(streamTimeout);
@@ -169,7 +174,9 @@ export class ChatController {
           res.write('data: [DONE]\n\n');
           break;
         case 'error':
-          res.write(`data: ${JSON.stringify({ error: event.message })}\n\n`);
+          res.write(
+            `data: ${JSON.stringify({ error: event.message, code: event.code })}\n\n`,
+          );
           break;
       }
     }

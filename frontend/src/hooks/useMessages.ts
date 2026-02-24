@@ -87,12 +87,16 @@ export function useMessages() {
             };
             setMessages((prev) => [...prev, assistantMsg]);
           },
-          (streamError) => {
+          (streamError, code) => {
+            const i18nKey = code ? `errors.sse.${code}` : '';
+            const localizedMsg = i18nKey && tRef.current(i18nKey) !== i18nKey
+              ? tRef.current(i18nKey)
+              : streamError;
             const errorMsg: Message = {
               _id: asMessageId(crypto.randomUUID()),
               conversationId,
               role: 'assistant',
-              content: tRef.current('errors.streamErrorPrefix', { message: streamError }),
+              content: tRef.current('errors.streamErrorPrefix', { message: localizedMsg }),
               attachments: [],
               createdAt: new Date().toISOString(),
             };
