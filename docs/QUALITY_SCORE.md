@@ -1,14 +1,14 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-23 (sweep #7)
+> Last updated: 2026-02-24 (audit #8)
 
 ## Test Summary
 
 | Area | Test Files | Tests | Pass Rate |
 |------|-----------|-------|-----------|
 | Backend | 13 | 112 | 100% |
-| Frontend | 9 | 50 | 100% |
-| **Total** | **22** | **162** | **100%** |
+| Frontend | 10 | 75 | 100% |
+| **Total** | **23** | **187** | **100%** |
 
 ## Lint Status
 
@@ -40,20 +40,46 @@
 | Area | Total | Outdated | Vulnerabilities |
 |------|-------|----------|----------------|
 | Root | 3 | 0 | 0 |
-| Backend | ~25 | 12 (5 patch, 4 minor, 3 major) | 35 (5 moderate, 30 high — all in jest/babel transitive deps) |
-| Frontend | ~20 | 8 (3 patch, 2 minor, 3 major) | 11 (1 moderate, 10 high — all in eslint/minimatch transitive deps) |
+| Backend | ~25 | 14 (6 patch, 5 minor, 3 major) | 35 (5 moderate, 30 high — all in jest/babel transitive deps) |
+| Frontend | ~20 | 8 (4 patch, 1 minor, 3 major) | 11 (1 moderate, 10 high — all in eslint/minimatch transitive deps) |
 
 ## Bundle Size
 - Backend: 860 KB (dist/)
-- Frontend: 1.4 MB (dist/) — initial load 312 KB + 295 KB vendor-mui + 63 KB vendor-i18n + 796 KB lazy markdown chunk
+- Frontend: 1.4 MB (dist/) — initial load 314 KB + 295 KB vendor-mui + 63 KB vendor-i18n + 796 KB lazy markdown chunk
 
 ## Tech Debt
 - Critical: 0 todo, 4 done (JWT authentication completed)
 - High: 0 todo, 7 done — all high-priority items completed
-- Medium: 10 todo, 20 done, 1 wont-fix (F-M10, F-M13, F-M17 completed since last audit)
-- Low: 12 todo, 1 done
+- Medium: 6 todo, 24 done, 1 wont-fix (F-M11, F-M12, F-M14, F-M15 completed since last audit)
+- Low: 13 todo, 1 done
 - Features: 8 todo, 2 done (FEAT-6 completed)
 - Total tracked: 66 (see `docs/exec-plans/tech-debt-tracker.md`)
+
+## Audit #8 Findings
+- Backend tests: 112 (13 files, unchanged). Frontend tests: 50 -> 75 (+25 from getErrorMessage.test.ts expansion, new test file count 10)
+- Total tests now 187 (target: 100+ sustained, comfortably exceeded)
+- F-M11 (branded types), F-M12 (type guards), F-M14 (CORS error handling), F-M15 (no-floating-promises) completed since last audit
+- New ModelContext.tsx added to frontend/src/contexts/ (split from ChatAppContext per F-M10)
+- ARCHITECTURE.md drift found and fixed: ModelContext/ModelProvider not documented in component tree or state management
+- Frontend bundle: 314 KB index + 295 KB vendor-mui + 63 KB vendor-i18n + 796 KB lazy markdown (1.4 MB total, unchanged)
+- Backend bundle: 860 KB (unchanged)
+- No new lint, type, or build errors
+- No console.log/warn/error found in source (clean)
+- No dangerouslySetInnerHTML usage (clean)
+- No hardcoded secrets found in source files
+- No `any` types in non-test source files (clean)
+- No TODO/FIXME/HACK comments in source (clean)
+- i18n: all 4 locales in sync (49 keys each, up from 48 — new CORS error key)
+- All cross-module imports follow approved patterns
+- No services importing Express types (clean)
+- No direct MongoDB collection access outside DatabaseService (clean)
+- No files exceed 300-line limit (chat.service.ts at 297, under limit)
+- rgba/gradient occurrences reduced to 4 (all in theme.ts, which is exempt) — F-M13 migration complete
+- Existing tracked violations confirmed still present:
+  - window.alert() in FileAttachment.tsx (tracked as F-M21, caught by ESLint)
+  - 1 backend function exceeds 50-line limit: extractFileContent at 61 lines (tracked as B-L8)
+  - Frontend components/hooks exceed 50-line limit (React components, tracked as F-L2) — component size is expected for React
+  - Frontend bundle 1.4 MB total, split via manual chunks and lazy loading (tracked as F-M17, done)
 
 ## Sweep #7 Findings
 - All validation passing: lint 0 errors, typecheck 0 errors, build passing
@@ -229,7 +255,7 @@
 - 5 frontend functions exceed 50-line limit (React components/hooks, tracked as F-L2)
 
 ## Targets
-- Test count: 100+ (achieved — currently 162)
+- Test count: 100+ (achieved — currently 187)
 - Coverage: 80%+ (currently 60%/50% thresholds)
 - Lint errors: 0 (achieved)
 - Type errors: 0 (achieved)
