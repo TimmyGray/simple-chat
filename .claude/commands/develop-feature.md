@@ -227,7 +227,7 @@ Use the ports allocated in Phase 0. This ensures multiple agents can run dev ser
    - If rebase fails due to conflicts in **application source code** (`.ts`, `.tsx`, `.spec.ts`, etc.): abort the rebase (`git rebase --abort`), stop, and report the conflict — do not auto-resolve source code conflicts
    - Retry the merge check. If still not mergeable after one rebase attempt, stop and report
 3. Merge: `gh pr merge --squash --delete-branch`
-4. **Switch to the main repo working tree**: `cd` to the main repo root (remembered from Phase 1.5). In a worktree, `git checkout main` will fail because `main` is checked out in the main working tree. Instead, navigate to the main repo root directory and operate from there for all post-merge phases. Then run `git checkout main && git pull origin main`.
+4. **Switch to the main repo working tree**: `cd` to the main repo root (remembered from Phase 1.5). The main repo already has `main` checked out (running `git checkout main` from the worktree would fail). Once in the main repo root, run `git pull origin main` to sync with the merged PR.
 
 ### Phase 11: Bookkeeping (Post-Merge)
 
