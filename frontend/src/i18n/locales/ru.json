@@ -30,7 +30,8 @@
     "noConversation": "Диалог не выбран",
     "noConversationHint": "Начните новый чат или выберите существующий",
     "attachFiles": "Прикрепить файлы",
-    "charCount": "{{current}} / {{max}}"
+    "charCount": "{{current}} / {{max}}",
+    "typing": "ИИ печатает"
   },
   "dialog": {
     "deleteTitle": "Удалить диалог",

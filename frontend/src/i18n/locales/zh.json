@@ -30,7 +30,8 @@
     "noConversation": "未选择对话",
     "noConversationHint": "开始新聊天或选择已有对话",
     "attachFiles": "附加文件",
-    "charCount": "{{current}} / {{max}}"
+    "charCount": "{{current}} / {{max}}",
+    "typing": "AI 正在输入"
   },
   "dialog": {
     "deleteTitle": "删除对话",
