@@ -5,7 +5,19 @@ import { asMessageId } from '../types';
 import * as api from '../api/client';
 import { getErrorMessage } from '../utils/getErrorMessage';
 
-export function useMessages() {
+export interface UseMessagesReturn {
+  messages: Message[];
+  loading: boolean;
+  streaming: boolean;
+  streamingContent: string;
+  error: string | null;
+  fetchMessages: (conversationId: ConversationId) => Promise<void>;
+  sendMessage: (conversationId: ConversationId, content: string, model?: ModelId, attachments?: Attachment[]) => Promise<void>;
+  stopStreaming: () => void;
+  clear: () => void;
+}
+
+export function useMessages(): UseMessagesReturn {
   const { t } = useTranslation();
   const tRef = useRef(t);
   tRef.current = t;

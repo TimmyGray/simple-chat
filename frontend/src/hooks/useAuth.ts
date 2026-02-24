@@ -4,7 +4,18 @@ import type { User } from '../types';
 import * as api from '../api/client';
 import { hasResponseStatus, isCorsLikeError } from '../utils/getErrorMessage';
 
-export function useAuth() {
+export interface UseAuthReturn {
+  user: User | null;
+  loading: boolean;
+  error: string | null;
+  clearError: () => void;
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string) => Promise<void>;
+  logout: () => void;
+  refreshUser: () => Promise<void>;
+}
+
+export function useAuth(): UseAuthReturn {
   const { t } = useTranslation();
   const tRef = useRef(t);
   useEffect(() => {
