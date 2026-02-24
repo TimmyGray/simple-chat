@@ -27,6 +27,16 @@ Key tasks:
 - Error scenario tests
 - Accessibility tests (axe-core)
 
+## Phase 5: System Prompt Templates (FEAT-5)
+Focus: Reusable system prompt library for different conversation modes.
+
+Key tasks:
+- Backend templates module with CRUD + 8-10 seed defaults (FEAT-5a)
+- Admin role system with isAdmin flag + AdminGuard (FEAT-5b)
+- Frontend template selector in conversation UI (FEAT-5c)
+- Frontend admin panel for template management (FEAT-5d)
+- Future: per-user custom templates (visible only to creator)
+
 ## Future Features
 See `docs/PRODUCT_SENSE.md` for prioritized feature list.
 See `docs/exec-plans/tech-debt-tracker.md` for detailed task backlog.

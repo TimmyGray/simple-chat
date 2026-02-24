@@ -99,7 +99,11 @@ Each task has:
 | FEAT-2 | Conversation Search (Cmd+K) | fullstack | 2d | todo | MongoDB text index + search UI |
 | FEAT-3 | Message Editing & Regeneration | fullstack | 3d | todo | Edit sent messages, regenerate responses |
 | FEAT-4 | Conversation Export (Markdown/PDF/JSON) | fullstack | 2d | todo | Data portability |
-| FEAT-5 | System Prompts / Custom Instructions | fullstack | 1d | todo | Per-conversation system prompt |
+| FEAT-5 | System Prompt Templates: template library with 8-10 defaults, admin CRUD, conversation selector. Future: per-user custom templates. | fullstack | 3d | todo | Replaces basic system prompt. Admin role required for global template management. |
+| FEAT-5a | Backend templates module: collection, CRUD endpoints, seed 8-10 default templates | backend | 1d | todo | Templates collection with name, content, category, isDefault fields. |
+| FEAT-5b | Admin role system: isAdmin flag on user doc, AdminGuard for protected routes | backend | 0.5d | todo | Minimal RBAC — single admin boolean, not full role system. |
+| FEAT-5c | Frontend template selector in conversation + active template indicator | frontend | 1d | todo | Dropdown/dialog to pick template when creating/editing conversation. Show active template chip. |
+| FEAT-5d | Frontend admin panel for template CRUD management | frontend | 0.5d | todo | Admin-only page: list, create, edit, delete global templates. |
 | FEAT-6 | Token Usage & Cost Tracking | fullstack | 2d | done | PR #28 merged. stream_options usage extraction, per-message + cumulative tracking. |
 | FEAT-7 | Streaming Response Controls (stop/copy/retry) | frontend | 1d | todo | AbortController for stop exists |
 | FEAT-8 | Dark/Light Theme Toggle | frontend | 1d | todo | System preference detection |
