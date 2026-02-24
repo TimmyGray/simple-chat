@@ -1,12 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { Logger as PinoLogger } from 'nestjs-pino';
-import { mkdirSync } from 'fs';
+import { mkdir } from 'fs/promises';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap() {
-  mkdirSync('./uploads', { recursive: true });
+  await mkdir('./uploads', { recursive: true });
 
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   app.useLogger(app.get(PinoLogger));
