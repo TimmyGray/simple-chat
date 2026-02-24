@@ -36,6 +36,7 @@ npm test                 # Run all tests
 
 | Command | When to Use |
 |---------|-------------|
+| `/add-feature` | Add feature or task to backlog interactively |
 | `/develop-feature` | Pick next task, implement end-to-end, PR, merge |
 | `/validate` | Before creating a PR |
 | `/review-pr` | After implementation, before merge |

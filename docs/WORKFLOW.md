@@ -5,24 +5,25 @@
 The autonomous development workflow improves itself over time:
 
 ```
-tech-debt-tracker.md → /develop-feature → /validate → /review-pr → PR
-                              ↑                                       |
-                              |                                       ↓
-                    /audit-service ← ← ← ← ← ← ← ← ← ← ←  merged PR
-                    (update metrics,                              |
-                     find new issues)                             ↓
-                              ↑                           /retrospective
-                              |                           (improve workflow)
-                              ← ← ← ← ← ← ← ← ← ← ← ← ← ← ←
-                              ↑
-                    /doc-garden + /sweep
-                    (continuous quality enforcement)
+User idea → /add-feature → tech-debt-tracker.md → /develop-feature → /validate → /review-pr → PR
+                                                         ↑                                       |
+                                                         |                                       ↓
+                                               /audit-service ← ← ← ← ← ← ← ← ← ← ←  merged PR
+                                               (update metrics,                              |
+                                                find new issues)                             ↓
+                                                         ↑                           /retrospective
+                                                         |                           (improve workflow)
+                                                         ← ← ← ← ← ← ← ← ← ← ← ← ← ← ←
+                                                         ↑
+                                               /doc-garden + /sweep
+                                               (continuous quality enforcement)
 ```
 
 ## Command Reference
 
 | Command | Purpose | When to Use |
 |---------|---------|-------------|
+| `/add-feature` | Interactive backlog intake | Add feature or task to tracker interactively |
 | `/develop-feature` | Autonomous feature development | Pick next task, implement, test, PR |
 | `/develop-feature <ID>` | Develop specific task | Implement a specific task by ID |
 | `/validate` | Run full validation suite | Before creating a PR |
@@ -38,6 +39,7 @@ tech-debt-tracker.md → /develop-feature → /validate → /review-pr → PR
 
 | Activity | Frequency | Trigger |
 |----------|-----------|---------|
+| `/add-feature` | On demand | Human triggers |
 | `/develop-feature` | On demand | Human triggers |
 | `/sweep` | Every 3 features | Auto: Phase 12 of develop-feature |
 | `/doc-garden` | After every audit | Auto: runs with audit in Phase 12 |
