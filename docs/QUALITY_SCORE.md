@@ -1,14 +1,14 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-24 (audit #10)
+> Last updated: 2026-02-24 (sweep #11)
 
 ## Test Summary
 
 | Area | Test Files | Tests | Pass Rate |
 |------|-----------|-------|-----------|
-| Backend | 13 | 125 | 100% |
-| Frontend | 16 | 149 | 100% |
-| **Total** | **29** | **274** | **100%** |
+| Backend | 13 | 128 | 100% |
+| Frontend | 16 | 151 | 100% |
+| **Total** | **29** | **279** | **100%** |
 
 ## Lint Status
 
@@ -44,16 +44,46 @@
 | Frontend | ~20 | 8 (3 patch, 2 minor, 3 major) | 11 (1 moderate, 10 high — all in eslint/minimatch transitive deps) |
 
 ## Bundle Size
-- Backend: 876 KB (dist/)
-- Frontend: 1.4 MB (dist/) — initial load 314 KB + 299 KB vendor-mui + 63 KB vendor-i18n + 796 KB lazy markdown chunk
+- Backend: 880 KB (dist/)
+- Frontend: 1.4 MB (dist/) — initial load 315 KB + 299 KB vendor-mui + 63 KB vendor-i18n + 796 KB lazy markdown chunk
 
 ## Tech Debt
 - Critical: 0 todo, 4 done (JWT authentication completed)
 - High: 0 todo, 7 done — all high-priority items completed
 - Medium: 0 todo, 30 done, 1 wont-fix — all medium items done
-- Low: 9 todo, 6 done (B-L3 completed since last sweep)
-- Features: 8 todo, 2 done (FEAT-6 completed)
+- Low: 8 todo, 7 done (B-L6 completed since last sweep)
+- Features: 12 todo, 2 done (FEAT-5 subtasks expanded)
 - Total tracked: 71 (see `docs/exec-plans/tech-debt-tracker.md`)
+
+## Sweep #11 Findings
+- All validation passing: lint 0 errors, typecheck 0 errors, 279 tests passing, build passing
+- Backend tests: 125 -> 128 (+3, 13 files unchanged)
+- Frontend tests: 149 -> 151 (+2, 16 files unchanged)
+- Total tests: 274 -> 279 (target: 100+ sustained, comfortably exceeded)
+- Completed since last sweep: B-L6 (SSE error format standardization, PR #67)
+- Low tech debt: 8 todo, 7 done (B-L6 moved to done)
+- No auto-fixable code violations found (codebase is clean)
+- No console.log/warn/error in source (clean)
+- No dangerouslySetInnerHTML (clean)
+- No hardcoded secrets (clean)
+- No `any` types in non-test source files (clean)
+- No hardcoded user-facing strings (all use t())
+- No TODO/FIXME/HACK comments in source (clean)
+- i18n: all 4 locales in sync (55 leaf keys each, up from 52 — 3 new SSE error keys from B-L6)
+- All cross-module imports follow approved patterns (chat->auth for guards/decorators only)
+- No services importing Express types (clean — Express types only in controller, middleware, exception filter per NestJS convention)
+- No direct MongoDB collection access outside DatabaseService (clean)
+- No files exceed 300-line limit (chat.service.ts at 297, under limit)
+- All hex/rgba/gradient colors in theme.ts only (exempt per convention)
+- No window.alert() in source (clean)
+- Backend `instanceof Error` pattern: 11 occurrences across 8 files (unchanged from audit #10, tracked as B-L9, needs design)
+- New finding: refreshModels at 52 lines, borderline 50-line limit overrun (models.service.ts, added with B-L3 — not worth separate task at 2 lines over)
+- Frontend bundle: 315 KB index + 299 KB vendor-mui + 63 KB vendor-i18n + 796 KB lazy markdown (1.4 MB total, unchanged)
+- Backend bundle: 880 KB (up from 876 KB)
+- Existing tracked violations confirmed still present:
+  - 2 backend functions exceed 50-line limit: extractFileContent at 61 lines (tracked as B-L8), refreshModels at 52 lines (borderline, not tracked separately)
+  - Frontend components/hooks exceed 50-line limit: MessageBubble (161 lines), ChatInput (243 lines), App.tsx (200 lines), AuthPage (178 lines), Sidebar (163 lines) — React components, tracked as F-L2
+  - B-L9 (backend getErrorMessage utility) still todo — 11 instanceof Error occurrences across 8 backend files
 
 ## Audit #10 Findings
 - Backend tests: 112 -> 125 (+13 from models.service.spec.ts, added with B-L3 dynamic model list)
@@ -418,7 +448,7 @@
 - 5 frontend functions exceed 50-line limit (React components/hooks, tracked as F-L2)
 
 ## Targets
-- Test count: 100+ (achieved — currently 274)
+- Test count: 100+ (achieved — currently 279)
 - Coverage: 80%+ (currently 60%/50% thresholds)
 - Lint errors: 0 (achieved)
 - Type errors: 0 (achieved)
