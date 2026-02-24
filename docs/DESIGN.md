@@ -108,7 +108,7 @@ MUI 7 `createTheme` with `mode: 'dark'`.
 
 ## Layout
 
-### Desktop (>= 900px, `md` breakpoint)
+### Desktop (>= 1200px, `lg` breakpoint)
 
 ```
 +------------------+----------------------------------------+
@@ -117,9 +117,22 @@ MUI 7 `createTheme` with `mode: 'dark'`.
 |  persistent      |                                        |
 |  background.paper|  background.default                    |
 |                  |                                        |
-|  1px right border|  px: 32px (md)                         |
+|  1px right border|  px: 32px (lg)                         |
 |                  |                                        |
 +------------------+----------------------------------------+
+```
+
+### Tablet (900–1199px, `md` breakpoint)
+
+```
++----------------+------------------------------------------+
+|                |                                          |
+| Sidebar (240px)|           Chat Area (flex: 1)            |
+| persistent     |                                          |
+| narrower width |  px: 24px (md)                           |
+|                |  msg max-width: 85%                      |
+|                |                                          |
++----------------+------------------------------------------+
 ```
 
 ### Mobile (< 900px)
@@ -130,6 +143,7 @@ MUI 7 `createTheme` with `mode: 'dark'`.
 |                                        |
 |           Chat Area (100%)             |
 |           px: 16px (xs)                |
+|           msg max-width: 85%           |
 |                                        |
 +----------------------------------------+
 
@@ -141,10 +155,15 @@ Menu button hidden when drawer is open
 
 | Element | Value |
 |---|---|
-| Sidebar width | `280px` |
+| Sidebar width (desktop) | `280px` (lg+) |
+| Sidebar width (tablet) | `240px` (md–lg) |
 | Mobile breakpoint | `md` (900px) |
 | Full height | `100vh` with `overflow: hidden` on root |
-| Message max width | `75%` of container |
+| Message max width (desktop) | `75%` of container (lg+) |
+| Message max width (tablet/mobile) | `85%` of container (xs–lg) |
+| Message padding (desktop) | `32px` (lg+) |
+| Message padding (tablet) | `24px` (md–lg) |
+| Message padding (mobile) | `16px` (xs–md) |
 | Avatar size | `34px` circle |
 | Send button | `36px` square |
 | Model selector min width | `140px` |
@@ -383,8 +402,10 @@ Copy-paste reference for common values:
 'linear-gradient(135deg, #00e5ff 0%, #1de9b6 100%)'   // assistant accent
 
 // Sizing
-SIDEBAR_WIDTH = 280               // pixels
-MESSAGE_MAX_WIDTH = '75%'
+SIDEBAR_WIDTH = 280               // desktop (lg+)
+SIDEBAR_WIDTH_TABLET = 240        // tablet (md–lg)
+MESSAGE_MAX_WIDTH = '75%'         // desktop (lg+)
+MESSAGE_MAX_WIDTH_TABLET = '85%'  // tablet/mobile (xs–lg)
 AVATAR_SIZE = 34                  // pixels
 SEND_BUTTON_SIZE = 36             // pixels
 ```

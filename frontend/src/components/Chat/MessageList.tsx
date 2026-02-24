@@ -116,7 +116,7 @@ export default function MessageList({
       initialTopMostItemIndex={items.length > 0 ? items.length - 1 : 0}
       increaseViewportBy={VIRTUOSO_VIEWPORT_INCREASE}
       itemContent={(_, message) => (
-        <Box sx={{ px: { xs: 2, md: 4 }, pb: 2 }}>
+        <Box sx={{ px: { xs: 2, md: 3, lg: 4 }, pb: 2 }}>
           <MessageBubble message={message} />
         </Box>
       )}
@@ -124,7 +124,7 @@ export default function MessageList({
         Header: () => <Box sx={{ height: LIST_SPACER_HEIGHT }} />,
         Footer: () =>
           streaming && !streamingContent ? (
-            <Box sx={{ px: { xs: 2, md: 4 }, pb: 2 }}>
+            <Box sx={{ px: { xs: 2, md: 3, lg: 4 }, pb: 2 }}>
               <TypingIndicator />
             </Box>
           ) : (

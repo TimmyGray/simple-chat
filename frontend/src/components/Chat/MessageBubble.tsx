@@ -8,6 +8,7 @@ import {
   ICON_SIZE_SM,
   AVATAR_SIZE,
   MESSAGE_MAX_WIDTH,
+  MESSAGE_MAX_WIDTH_TABLET,
   USER_BUBBLE_RADIUS,
   ASSISTANT_BUBBLE_RADIUS,
   MODEL_TAG_OPACITY,
@@ -63,7 +64,7 @@ function MessageBubble({ message }: MessageBubbleProps) {
         sx={{
           px: 2,
           py: 1.5,
-          maxWidth: MESSAGE_MAX_WIDTH,
+          maxWidth: { xs: MESSAGE_MAX_WIDTH_TABLET, lg: MESSAGE_MAX_WIDTH },
           borderRadius: isUser
             ? USER_BUBBLE_RADIUS
             : ASSISTANT_BUBBLE_RADIUS,
