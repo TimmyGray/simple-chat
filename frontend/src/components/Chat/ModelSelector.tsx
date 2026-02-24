@@ -26,6 +26,7 @@ export default function ModelSelector({
         value={value}
         onChange={handleChange}
         displayEmpty
+        inputProps={{ 'aria-label': t('models.selectModel') }}
         sx={{
           borderRadius: 2,
           backgroundColor: 'transparent',

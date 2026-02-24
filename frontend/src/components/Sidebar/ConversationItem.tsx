@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import {
+  ListItem,
   ListItemButton,
   ListItemText,
   IconButton,
   Typography,
-  Box,
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -25,47 +25,56 @@ export default function ConversationItem({
 }: ConversationItemProps) {
   const { t, i18n } = useTranslation();
   return (
-    <ListItemButton
-      selected={selected}
-      onClick={onClick}
-      sx={{
-        borderRadius: 2,
-        mb: 0.5,
-        '&.Mui-selected': {
-          backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.12),
-          '&:hover': {
-            backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.18),
-          },
-        },
-        '& .delete-btn': { opacity: 0 },
-        '&:hover .delete-btn': { opacity: 1 },
-      }}
-    >
-      <ListItemText
-        primary={
-          <Typography noWrap variant="body2" fontWeight={selected ? 600 : 400}>
-            {conversation.title}
-          </Typography>
-        }
-        secondary={
-          <Typography variant="caption" color="text.secondary" noWrap>
-            {new Date(conversation.updatedAt).toLocaleDateString(i18n.language)}
-          </Typography>
-        }
-      />
-      <Box className="delete-btn" sx={{ transition: 'opacity 0.2s' }}>
+    <ListItem
+      disablePadding
+      secondaryAction={
         <IconButton
+          edge="end"
           size="small"
           aria-label={t('common.delete')}
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
+          onClick={onDelete}
+          className="delete-btn"
+          sx={{
+            color: 'text.secondary',
+            '&:hover': { color: 'error.main' },
+            opacity: 0,
+            transition: 'opacity 0.2s',
           }}
-          sx={{ color: 'text.secondary', '&:hover': { color: 'error.main' } }}
         >
           <DeleteOutlineIcon fontSize="small" />
         </IconButton>
-      </Box>
-    </ListItemButton>
+      }
+      sx={{
+        mb: 0.5,
+        '&:hover .delete-btn': { opacity: 1 },
+      }}
+    >
+      <ListItemButton
+        selected={selected}
+        onClick={onClick}
+        sx={{
+          borderRadius: 2,
+          '&.Mui-selected': {
+            backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.12),
+            '&:hover': {
+              backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.18),
+            },
+          },
+        }}
+      >
+        <ListItemText
+          primary={
+            <Typography noWrap variant="body2" fontWeight={selected ? 600 : 400}>
+              {conversation.title}
+            </Typography>
+          }
+          secondary={
+            <Typography variant="caption" color="text.secondary" noWrap>
+              {new Date(conversation.updatedAt).toLocaleDateString(i18n.language)}
+            </Typography>
+          }
+        />
+      </ListItemButton>
+    </ListItem>
   );
 }

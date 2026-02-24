@@ -20,7 +20,8 @@
     "newChat": "Nuevo chat",
     "noConversations": "No hay conversaciones",
     "tokensUsed": "Tokens usados: {{tokens}}",
-    "openMenu": "Abrir menú"
+    "openMenu": "Abrir menú",
+    "loading": "Cargando"
   },
   "chat": {
     "placeholder": "Escribe tu mensaje...",
@@ -45,7 +46,8 @@
     "offline": "No hay conexión a internet. Verifica tu conexión."
   },
   "models": {
-    "free": "Gratis"
+    "free": "Gratis",
+    "selectModel": "Seleccionar modelo"
   },
   "errors": {
     "createConversation": "Error al crear la conversación",

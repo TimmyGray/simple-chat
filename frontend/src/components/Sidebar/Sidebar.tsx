@@ -75,7 +75,7 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
       <Box sx={{ flex: 1, overflow: 'auto' }}>
         {conversationsLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', pt: 4 }}>
-            <CircularProgress size={24} />
+            <CircularProgress size={24} aria-label={t('sidebar.loading')} />
           </Box>
         ) : conversations.length === 0 ? (
           <Typography
