@@ -370,7 +370,9 @@ Production builds generate **hidden source maps** (`build.sourcemap: 'hidden'` i
 - No `//# sourceMappingURL` comment is added to output files, so browsers won't request them
 - Maps can be uploaded to error tracking services (Sentry, Datadog, etc.) for stack trace deobfuscation
 
-To disable source maps for a specific build (e.g., to reduce build time): `VITE_SOURCEMAP=false` is not needed — modify `vite.config.ts` directly if needed.
+**Deployment note:** Ensure your web server or CDN does not serve `.map` files to the public. Either strip them from the deployment artifact after uploading to your error tracking service, or configure your web server to deny requests for `*.map` files.
+
+To disable source maps (e.g., to reduce build time), remove or change the `sourcemap` option in `vite.config.ts`.
 
 ### Chunk Strategy
 
