@@ -26,22 +26,39 @@ const REFRESH_INTERVAL_MS = 3_600_000; // 1 hour
 /**
  * Curated list of free model IDs known to work reliably on OpenRouter.
  * Only models in this set are shown — paid models are excluded.
- * Last verified: 2026-02-24.
+ *
+ * Models WITHOUT `:free` suffix have zero pricing but may revert to paid.
+ * Re-verify periodically with: `curl -s https://openrouter.ai/api/v1/models`
+ *
+ * Last verified: 2026-02-24 (tested each model with a completion request).
  */
 const FREE_MODEL_WHITELIST: ReadonlySet<string> = new Set([
+  // Arcee — lightweight, fast
   'arcee-ai/trinity-large-preview:free',
   'arcee-ai/trinity-mini:free',
+  // Google Gemma 3 — vision-capable (12b, 4b), efficient (3n variants)
   'google/gemma-3-12b-it:free',
   'google/gemma-3-4b-it:free',
   'google/gemma-3n-e2b-it:free',
   'google/gemma-3n-e4b-it:free',
+  // Liquid — small but fast
   'liquid/lfm-2.5-1.2b-instruct:free',
   'liquid/lfm-2.5-1.2b-thinking:free',
+  // NVIDIA Nemotron — large context, reliable
   'nvidia/nemotron-3-nano-30b-a3b:free',
+  'nvidia/nemotron-nano-12b-v2-vl:free',
   'nvidia/nemotron-nano-9b-v2:free',
+  // OpenRouter meta-model — picks best available free model
   'openrouter/free',
+  // Qwen 3 — high quality, zero pricing (no :free suffix, may revert)
+  'qwen/qwen3-235b-a22b-thinking-2507',
+  'qwen/qwen3-vl-235b-a22b-thinking',
+  'qwen/qwen3-vl-30b-a3b-thinking',
+  // StepFun — large context, reliable
   'stepfun/step-3.5-flash:free',
+  // Upstage Solar — reliable
   'upstage/solar-pro-3:free',
+  // Z-AI GLM — large context
   'z-ai/glm-4.5-air:free',
 ]);
 
@@ -51,39 +68,39 @@ const FALLBACK_MODELS: ModelInfo[] = [
     name: 'Free Models Router',
     description: 'Automatically picks from available free models',
     free: true,
-    contextLength: 128000,
+    contextLength: 200000,
     supportsVision: true,
   },
   {
-    id: 'google/gemma-3n-e2b-it:free',
-    name: 'Gemma 3n 2B',
-    description: 'Lightweight Google model',
+    id: 'google/gemma-3-12b-it:free',
+    name: 'Gemma 3 12B',
+    description: 'Google Gemma 3 with vision support',
     free: true,
     contextLength: 32768,
-    supportsVision: false,
+    supportsVision: true,
   },
   {
-    id: 'nvidia/nemotron-3-nano-30b-a3b:free',
-    name: 'Nemotron 3 Nano 30B',
-    description: 'NVIDIA Nemotron model',
+    id: 'google/gemma-3-4b-it:free',
+    name: 'Gemma 3 4B',
+    description: 'Lightweight Google Gemma model',
     free: true,
     contextLength: 32768,
-    supportsVision: false,
+    supportsVision: true,
   },
   {
-    id: 'nvidia/nemotron-nano-9b-v2:free',
-    name: 'Nemotron Nano 9B',
-    description: 'NVIDIA lightweight model',
+    id: 'arcee-ai/trinity-large-preview:free',
+    name: 'Trinity Large Preview',
+    description: 'Arcee AI fast model',
     free: true,
-    contextLength: 128000,
+    contextLength: 131000,
     supportsVision: false,
   },
   {
     id: 'stepfun/step-3.5-flash:free',
     name: 'Step 3.5 Flash',
-    description: 'StepFun fast model',
+    description: 'StepFun fast model with large context',
     free: true,
-    contextLength: 128000,
+    contextLength: 256000,
     supportsVision: false,
   },
 ];

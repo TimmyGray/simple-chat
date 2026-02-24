@@ -27,11 +27,11 @@
   },
   "lint-staged": {
     "backend/src/**/*.ts": [
-      "eslint --fix",
+      "eslint --fix --config backend/eslint.config.mjs",
       "prettier --write"
     ],
     "frontend/src/**/*.{ts,tsx}": [
-      "eslint --fix"
+      "eslint --fix --config frontend/eslint.config.js"
     ]
   }
 }
