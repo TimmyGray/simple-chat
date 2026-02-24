@@ -29,7 +29,7 @@ simple-chat/
         ├── App.tsx           # Root component (theme, error boundary, snackbar)
         ├── api/              # HTTP client (axios + fetch SSE)
         ├── components/       # UI components (Layout, Sidebar, Chat, common)
-        ├── contexts/         # React Context providers (ChatAppContext)
+        ├── contexts/         # React Context providers (ChatAppContext, ModelContext)
         ├── hooks/            # Custom state hooks
         ├── i18n/             # Internationalization (4 languages)
         ├── types/            # TypeScript interfaces
@@ -220,20 +220,21 @@ App (useAuth hook)
 │       │   └── Login/Register form
 │       ├── ChatApp (shown when authenticated)
 │       │   ├── ChatAppProvider (React Context for shared state)
-│       │   │   └── Layout (pure layout, no data props)
-│       │   │       ├── Sidebar (reads from ChatAppContext)
-│       │   │       │   ├── LanguageSwitcher
-│       │   │       │   ├── NewChatButton
-│       │   │       │   ├── ConversationItem[] (list with delete)
-│       │   │       │   └── User email + Logout button
-│       │   │       └── ChatArea (reads from ChatAppContext)
-│       │   │           ├── ModelSelector (dropdown)
-│       │   │           ├── MessageList
-│       │   │           │   ├── MessageBubble[] (lazy-loads MarkdownRenderer)
-│       │   │           │   └── TypingIndicator (during streaming)
-│       │   │           ├── EmptyState (no conversation selected)
-│       │   │           └── ChatInput
-│       │   │               └── FileAttachment (upload UI)
+│       │   │   └── ModelProvider (React Context for model selection)
+│       │   │       └── Layout (pure layout, no data props)
+│       │   │           ├── Sidebar (reads from ChatAppContext)
+│       │   │           │   ├── LanguageSwitcher
+│       │   │           │   ├── NewChatButton
+│       │   │           │   ├── ConversationItem[] (list with delete)
+│       │   │           │   └── User email + Logout button
+│       │   │           └── ChatArea (reads from ChatAppContext + ModelContext)
+│       │   │               ├── ModelSelector (reads from ModelContext)
+│       │   │               ├── MessageList
+│       │   │               │   ├── MessageBubble[] (lazy-loads MarkdownRenderer)
+│       │   │               │   └── TypingIndicator (during streaming)
+│       │   │               ├── EmptyState (no conversation selected)
+│       │   │               └── ChatInput
+│       │   │                   └── FileAttachment (upload UI)
 │       │   └── ConfirmDialog (shared delete confirmation)
 │       │   └── Snackbar + Alert (error display, auto-dismiss 4s)
 │       └── Loading spinner (during auth session restore)
@@ -241,11 +242,12 @@ App (useAuth hook)
 
 ### State Management
 
-Custom hooks with one React Context (`ChatAppContext`). No Redux, Zustand, or other external state library.
+Custom hooks with two React Contexts (`ChatAppContext`, `ModelContext`). No Redux, Zustand, or other external state library.
 
 | Hook / Context     | Responsibilities                                                    |
 |--------------------|---------------------------------------------------------------------|
-| `ChatAppContext`   | Shared state (conversations, models, selection, user info) + action callbacks. Provided by `ChatApp`, consumed by `Sidebar` and `ChatArea` via `useChatApp()`. |
+| `ChatAppContext`   | Shared state (conversations, selection, user info) + action callbacks. Provided by `ChatApp`, consumed by `Sidebar` and `ChatArea` via `useChatApp()`. |
+| `ModelContext`     | Model selection state (models list, selectedModel, changeModel). Split from ChatAppContext to prevent full-page re-renders on model change. Consumed via `useModel()`. |
 | `useAuth`          | JWT token management (localStorage), login, register, logout, session restore on mount. |
 | `useConversations` | Fetch, create, update, delete conversations. Error state. Auto-fetch on mount. |
 | `useMessages`      | Fetch messages, send with SSE streaming, optimistic user message insertion, stop streaming. Manages `streaming`, `streamingContent`, abort controller. |
@@ -253,7 +255,7 @@ Custom hooks with one React Context (`ChatAppContext`). No Redux, Zustand, or ot
 | `useFocusRevalidation` | Shared hook: refetches data on window focus/visibility change. Throttled (default 30s). Used by `useConversations` and `useModels`. |
 | `useOnlineStatus`  | Detects browser online/offline state. Returns `isOnline` boolean. Drives offline Snackbar and ChatInput disabled state. |
 
-State coordination happens in `ChatApp` (within `App.tsx`), which assembles the `ChatAppContext` value from `useConversations`, `useModels`, and local state (`selectedId`, `selectedModel`). `Layout` is a pure layout component with no data props.
+State coordination happens in `ChatApp` (within `App.tsx`), which assembles the `ChatAppContext` value from `useConversations` and local state (`selectedId`), and a separate `ModelContext` value from `useModels` and `selectedModel`. `Layout` is a pure layout component with no data props.
 
 ### API Layer
 
