@@ -68,7 +68,7 @@ Each task has:
 | F-M19 | Add error scenario tests | frontend | 1d | done | PR #55 merged. 42 tests across 4 hooks: useConversations, useModels, useAuth, useMessages. |
 | F-M20 | Add accessibility tests (axe-core) | frontend | 1d | done | PR #56 merged. vitest-axe, 15 tests, 3 violations fixed. |
 | F-M21 | Replace window.alert() with Snackbar in FileAttachment | frontend | 0.25d | done | PR #57 merged. onError callback + Snackbar in ChatInput. |
-| F-M22 | Add aria-live to TypingIndicator | frontend | 0.1d | todo | Missing role="status" aria-live="polite" |
+| F-M22 | Add aria-live to TypingIndicator | frontend | 0.1d | done | PR #59 merged. role="status" + aria-live="polite" + visually hidden i18n label. |
 | F-M23 | Localize "Error:" prefix in useMessages error display | frontend | 0.1d | done | Fixed in retrospective #2: uses t('errors.streamErrorPrefix') |
 
 ## Low
@@ -173,5 +173,6 @@ Each task has:
 | F-M19 | Add error scenario tests (PR #55) | 2026-02-24 |
 | F-M20 | Add accessibility tests with axe-core (PR #56) | 2026-02-24 |
 | F-M21 | Replace window.alert() with Snackbar in FileAttachment (PR #57) | 2026-02-24 |
+| F-M22 | Add aria-live to TypingIndicator (PR #59) | 2026-02-24 |
 | B-L4 | Add uploads/ to .gitignore (already present, discovered in audit #9) | 2026-02-24 |
 | B-L7 | Document CORS configuration (in ARCHITECTURE.md + SECURITY.md) | 2026-02-24 |
