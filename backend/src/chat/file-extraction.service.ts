@@ -44,50 +44,19 @@ export class FileExtractionService {
     fileName: string;
   }): Promise<string | null> {
     try {
-      // Reconstruct path from basename only to prevent path traversal
-      const fileName = path.basename(attachment.filePath);
-      const fullPath = path.join(UPLOADS_DIR, fileName);
-
-      // Defense-in-depth: resolved path must still be inside the uploads directory
-      if (!fullPath.startsWith(UPLOADS_DIR + path.sep)) {
-        this.logger.warn(
-          `Path traversal attempt blocked: "${attachment.filePath}" → "${fullPath}"`,
-        );
-        throw new ForbiddenException(
-          'Access denied: file path outside uploads directory',
-        );
-      }
-
-      if (!fs.existsSync(fullPath)) {
-        this.logger.warn(`File not found: "${fullPath}"`);
-        return null;
-      }
+      const fullPath = this.resolveUploadPath(attachment.filePath);
+      if (!fullPath) return null;
 
       this.logger.debug(
         `Extracting content from "${attachment.fileName}" (${attachment.fileType})`,
       );
 
-      if (
-        attachment.fileType === 'text/plain' ||
-        attachment.fileName.endsWith('.txt') ||
-        attachment.fileName.endsWith('.md') ||
-        attachment.fileName.endsWith('.csv')
-      ) {
+      if (this.isTextFile(attachment.fileType, attachment.fileName)) {
         return fs.readFileSync(fullPath, 'utf-8');
       }
 
-      if (
-        attachment.fileType === 'application/pdf' ||
-        attachment.fileName.endsWith('.pdf')
-      ) {
-        const buffer = fs.readFileSync(fullPath);
-        const parser = new PDFParse({ data: buffer });
-        try {
-          const result = await parser.getText();
-          return result.text;
-        } finally {
-          await parser.destroy();
-        }
+      if (this.isPdfFile(attachment.fileType, attachment.fileName)) {
+        return await this.readPdfContent(fullPath);
       }
 
       return `[Binary file: ${attachment.fileName}]`;
@@ -97,6 +66,51 @@ export class FileExtractionService {
         `Failed to extract content from "${attachment.fileName}": ${error instanceof Error ? error.message : String(error)}`,
       );
       return `[Could not read file: ${attachment.fileName}]`;
+    }
+  }
+
+  private resolveUploadPath(filePath: string): string | null {
+    const fileName = path.basename(filePath);
+    const fullPath = path.join(UPLOADS_DIR, fileName);
+
+    if (!fullPath.startsWith(UPLOADS_DIR + path.sep)) {
+      this.logger.warn(
+        `Path traversal attempt blocked: "${filePath}" → "${fullPath}"`,
+      );
+      throw new ForbiddenException(
+        'Access denied: file path outside uploads directory',
+      );
+    }
+
+    if (!fs.existsSync(fullPath)) {
+      this.logger.warn(`File not found: "${fullPath}"`);
+      return null;
+    }
+
+    return fullPath;
+  }
+
+  private isTextFile(fileType: string, fileName: string): boolean {
+    return (
+      fileType === 'text/plain' ||
+      fileName.endsWith('.txt') ||
+      fileName.endsWith('.md') ||
+      fileName.endsWith('.csv')
+    );
+  }
+
+  private isPdfFile(fileType: string, fileName: string): boolean {
+    return fileType === 'application/pdf' || fileName.endsWith('.pdf');
+  }
+
+  private async readPdfContent(fullPath: string): Promise<string> {
+    const buffer = fs.readFileSync(fullPath);
+    const parser = new PDFParse({ data: buffer });
+    try {
+      const result = await parser.getText();
+      return result.text;
+    } finally {
+      await parser.destroy();
     }
   }
 }
