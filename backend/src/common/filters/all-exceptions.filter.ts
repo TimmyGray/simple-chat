@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { getErrorStack } from '../utils/get-error-message';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -46,7 +47,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (status >= 500) {
       this.logger.error(
         `${request.method} ${request.url} ${status}`,
-        exception instanceof Error ? exception.stack : String(exception),
+        getErrorStack(exception) ?? String(exception),
       );
     } else {
       this.logger.warn(

@@ -32,6 +32,7 @@ import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { AuthUser } from '../auth/interfaces/auth-user.interface';
+import { getErrorMessage } from '../common/utils/get-error-message';
 
 const uploadLogger = new Logger('FileUpload');
 
@@ -142,8 +143,7 @@ export class ChatController {
       );
       await this.consumeStreamAsSSE(stream, res);
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = getErrorMessage(error);
       this.logger.error(
         `SSE stream failed for conversation ${id}: ${errorMessage}`,
       );

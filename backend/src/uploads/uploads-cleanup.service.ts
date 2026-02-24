@@ -3,6 +3,10 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 import * as path from 'path';
+import {
+  getErrorMessage,
+  getErrorStack,
+} from '../common/utils/get-error-message';
 
 @Injectable()
 export class UploadsCleanupService {
@@ -50,14 +54,16 @@ export class UploadsCleanupService {
             }
           }
         } catch (err) {
-          const message = err instanceof Error ? err.message : 'Unknown error';
-          this.logger.warn(`Failed to process file ${file}: ${message}`);
+          this.logger.warn(
+            `Failed to process file ${file}: ${getErrorMessage(err)}`,
+          );
         }
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      const stack = err instanceof Error ? err.stack : undefined;
-      this.logger.error(`Cleanup failed: ${message}`, stack);
+      this.logger.error(
+        `Cleanup failed: ${getErrorMessage(err)}`,
+        getErrorStack(err),
+      );
     }
 
     this.logger.log(`Upload cleanup complete: ${deleted} file(s) removed`);

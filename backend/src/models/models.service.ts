@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Interval } from '@nestjs/schedule';
+import { getErrorMessage } from '../common/utils/get-error-message';
 
 export interface ModelInfo {
   id: string;
@@ -155,7 +156,7 @@ export class ModelsService implements OnModuleInit {
       );
     } catch (err: unknown) {
       this.logger.warn(
-        `Failed to fetch models from OpenRouter: ${err instanceof Error ? err.message : String(err)}`,
+        `Failed to fetch models from OpenRouter: ${getErrorMessage(err)}`,
       );
     }
   }
