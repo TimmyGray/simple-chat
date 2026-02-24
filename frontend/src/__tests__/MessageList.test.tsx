@@ -82,6 +82,16 @@ describe('MessageList', () => {
     expect(dots.length).toBeGreaterThan(0);
   });
 
+  it('typing indicator has aria-live region for screen readers', () => {
+    renderWithTheme(
+      <MessageList messages={[makeMessage()]} loading={false} streaming={true} streamingContent="" />,
+    );
+    const status = screen.getByRole('status');
+    expect(status).toBeInTheDocument();
+    expect(status).toHaveAttribute('aria-live', 'polite');
+    expect(screen.getByText('AI is typing')).toBeInTheDocument();
+  });
+
   it('does not show typing indicator when not streaming', () => {
     renderWithTheme(
       <MessageList

@@ -30,7 +30,8 @@
     "noConversation": "Ninguna conversación seleccionada",
     "noConversationHint": "Inicia un nuevo chat o selecciona uno existente",
     "attachFiles": "Adjuntar archivos",
-    "charCount": "{{current}} / {{max}}"
+    "charCount": "{{current}} / {{max}}",
+    "typing": "La IA está escribiendo"
   },
   "dialog": {
     "deleteTitle": "Eliminar conversación",
