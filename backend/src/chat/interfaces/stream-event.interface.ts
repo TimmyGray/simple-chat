@@ -1,6 +1,5 @@
 import type { TokenUsage } from '../../types/documents';
 
-/** Machine-readable SSE error codes sent alongside human-readable messages. */
 export const SSE_ERROR_CODE = {
   STREAM_TIMEOUT: 'STREAM_TIMEOUT',
   LLM_FAILURE: 'LLM_FAILURE',

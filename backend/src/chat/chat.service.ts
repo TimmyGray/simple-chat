@@ -13,8 +13,8 @@ import { FileExtractionService } from './file-extraction.service';
 import { ConversationDoc } from './interfaces/conversation.interface';
 import { MessageDoc } from './interfaces/message.interface';
 import {
-  StreamEvent,
   SSE_ERROR_CODE,
+  type StreamEvent,
 } from './interfaces/stream-event.interface';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
@@ -38,6 +38,9 @@ export class ChatService {
         'X-Title': 'Simple Chat',
       },
     });
+    this.logger.log(
+      `OpenAI client initialized with baseURL: ${this.configService.get<string>('openrouter.baseUrl')}`,
+    );
   }
 
   async createConversation(
@@ -64,7 +67,6 @@ export class ChatService {
       .find({ userId })
       .sort({ updatedAt: -1 })
       .toArray();
-    this.logger.debug(`Fetched ${conversations.length} conversations`);
     return conversations;
   }
 
@@ -124,15 +126,11 @@ export class ChatService {
     userId: ObjectId,
   ): Promise<MessageDoc[]> {
     await this.getConversation(conversationId, userId);
-    const messages = await this.databaseService
+    return this.databaseService
       .messages()
       .find({ conversationId: new ObjectId(conversationId) })
       .sort({ createdAt: 1 })
       .toArray();
-    this.logger.debug(
-      `Fetched ${messages.length} messages for conversation ${conversationId}`,
-    );
-    return messages;
   }
 
   async *sendMessageAndStream(
@@ -274,7 +272,7 @@ export class ChatService {
           },
         );
         this.logger.debug(
-          `Token usage: prompt=${usage.promptTokens}, completion=${usage.completionTokens}, total=${usage.totalTokens}`,
+          `Token usage for conversation ${conversationId}: prompt=${usage.promptTokens}, completion=${usage.completionTokens}, total=${usage.totalTokens}`,
         );
       }
 
