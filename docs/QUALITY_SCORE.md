@@ -1,14 +1,14 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-24 (audit #8)
+> Last updated: 2026-02-24 (sweep #8)
 
 ## Test Summary
 
 | Area | Test Files | Tests | Pass Rate |
 |------|-----------|-------|-----------|
 | Backend | 13 | 112 | 100% |
-| Frontend | 10 | 75 | 100% |
-| **Total** | **23** | **187** | **100%** |
+| Frontend | 11 | 92 | 100% |
+| **Total** | **24** | **204** | **100%** |
 
 ## Lint Status
 
@@ -50,10 +50,39 @@
 ## Tech Debt
 - Critical: 0 todo, 4 done (JWT authentication completed)
 - High: 0 todo, 7 done — all high-priority items completed
-- Medium: 6 todo, 24 done, 1 wont-fix (F-M11, F-M12, F-M14, F-M15 completed since last audit)
-- Low: 13 todo, 1 done
+- Medium: 4 todo, 26 done, 1 wont-fix (F-M16, F-M18 completed since last audit)
+- Low: 14 todo, 1 done (B-L9 added: backend getErrorMessage utility)
 - Features: 8 todo, 2 done (FEAT-6 completed)
-- Total tracked: 66 (see `docs/exec-plans/tech-debt-tracker.md`)
+- Total tracked: 67 (see `docs/exec-plans/tech-debt-tracker.md`)
+
+## Sweep #8 Findings
+- All validation passing: lint 0 errors, typecheck 0 errors, build passing
+- Backend tests: 112 (13 files, unchanged)
+- Frontend tests: 75 -> 92 (+17 from useMessages hook tests in PR #53, test file count 10 -> 11)
+- Total tests: 187 -> 204 (target: 100+ sustained, comfortably exceeded)
+- Fixed: test summary in quality score was stale (75/10 -> 92/11 frontend, 187/23 -> 204/24 total)
+- Fixed: medium tech debt count corrected (was 6/24, actually 4/26 — F-M16 and F-M18 completed)
+- No auto-fixable code violations found (codebase is clean)
+- No console.log/warn/error in source (clean)
+- No dangerouslySetInnerHTML (clean)
+- No hardcoded secrets (clean)
+- No `any` types in non-test source files (clean)
+- No hardcoded user-facing strings (all use t())
+- No TODO/FIXME/HACK comments in source (clean)
+- i18n: all 4 locales in sync (49 keys each)
+- All cross-module imports follow approved patterns (chat->auth for guards/decorators only)
+- No services importing Express types (clean)
+- No direct MongoDB collection access outside DatabaseService (clean)
+- No files exceed 300-line limit (chat.service.ts at 297, under limit)
+- All hex/rgba/gradient colors in theme.ts only (exempt per convention)
+- Backend `instanceof Error` pattern: 10 occurrences across 7 files (up from 6 in sweep #7, above 3+ threshold). Backend uses NestJS Logger with different semantics than frontend — needs design for backend-specific `getErrorMessage` utility (added as B-L9).
+- Frontend bundle: 314 KB index + 295 KB vendor-mui + 63 KB vendor-i18n + 796 KB lazy markdown (1.4 MB total, unchanged)
+- Backend bundle: 860 KB (unchanged)
+- Existing tracked violations confirmed still present:
+  - window.alert() in FileAttachment.tsx (tracked as F-M21, caught by ESLint)
+  - 1 backend function exceeds 50-line limit: extractFileContent at 61 lines (tracked as B-L8)
+  - Frontend components/hooks exceed 50-line limit (React components, tracked as F-L2) — component size is expected for React
+  - Frontend bundle 1.4 MB total, split via manual chunks and lazy loading (tracked as F-M17, done)
 
 ## Audit #8 Findings
 - Backend tests: 112 (13 files, unchanged). Frontend tests: 50 -> 75 (+25 from getErrorMessage.test.ts expansion, new test file count 10)
@@ -255,7 +284,7 @@
 - 5 frontend functions exceed 50-line limit (React components/hooks, tracked as F-L2)
 
 ## Targets
-- Test count: 100+ (achieved — currently 187)
+- Test count: 100+ (achieved — currently 204)
 - Coverage: 80%+ (currently 60%/50% thresholds)
 - Lint errors: 0 (achieved)
 - Type errors: 0 (achieved)
