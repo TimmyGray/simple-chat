@@ -73,8 +73,15 @@ Each agent is assigned a unique port pair based on its slot in the registry:
 
 Agents kill only their own dev servers using port-specific `lsof -ti:<port>` commands (never `pkill -f` which could affect other agents).
 
+### Worktree Isolation
+
+Each `/develop-feature` agent creates an isolated git worktree (via `EnterWorktree`) after task selection. This gives each agent its own working directory, eliminating branch conflicts and file operation races between concurrent agents. The worktrees are created at `.claude/worktrees/<name>/` and cleaned up on session exit.
+
+**Important**: Phases 0–1 (concurrency setup and task selection) run in the main repo because `active-work.json` is gitignored and only exists there. Phase 1.5 enters the worktree, and all subsequent phases run in isolation.
+
 ### Concurrency Safety
 
+- **Working tree isolation**: Each agent runs in its own git worktree — no branch or file conflicts
 - **Task selection**: Agents skip tasks that are already active in the registry
 - **Dev servers**: Each agent uses its allocated ports — no conflicts
 - **Maintenance counters**: Slight over-counting from concurrent agents is acceptable and self-correcting (maintenance runs slightly more often)
@@ -83,7 +90,7 @@ Agents kill only their own dev servers using port-specific `lsof -ti:<port>` com
 
 ### Example: Running Two Agents in Parallel
 
-Open two terminals and run `/develop-feature` in each. The first agent will take slot 0 (ports 3001/5173) and the second will take slot 1 (ports 3002/5174). They will automatically select different tasks and work independently.
+Open two terminals and run `/develop-feature` in each. The first agent will take slot 0 (ports 3001/5173) and the second will take slot 1 (ports 3002/5174). They will automatically select different tasks, enter separate worktrees, and work independently without any file or branch conflicts.
 
 ## Maintenance Cadence State
 

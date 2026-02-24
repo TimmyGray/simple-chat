@@ -9,7 +9,7 @@ $ARGUMENTS — Optional task ID from `docs/exec-plans/tech-debt-tracker.md`. If 
 
 ### Phase 0: Concurrency Setup
 
-Before task selection, set up for safe parallel execution with other agents.
+Before task selection, set up for safe parallel execution with other agents. **Phases 0–1 must run in the main repo** (before entering a worktree) because `active-work.json` is gitignored and only exists in the main working tree.
 
 1. Read `docs/exec-plans/active-work.json`. If the file is missing or corrupt, back up the corrupt file (`cp active-work.json active-work.json.bak 2>/dev/null || true`), then create a fresh file with: `{"schema_version":1,"sessions":[]}`
 2. **Stale cleanup**: For each session entry:
@@ -42,6 +42,19 @@ Before task selection, set up for safe parallel execution with other agents.
    - No other entry has the same slot number or task_id
    - If a conflict is detected (another agent registered simultaneously), pick a new slot/task and retry from step 1 (max 3 retries)
 
+### Phase 1.5: Worktree Isolation
+
+Isolate the working tree so multiple `/develop-feature` agents can run concurrently without branch conflicts.
+
+1. **Store main repo root** for later reference to shared files (e.g., `active-work.json` which is gitignored and only exists in the main working tree):
+   - Run `git rev-parse --show-toplevel` and **remember this path as the main repo root** (referred to as "the main repo root" in Phases 10–12). This is agent-remembered state, not a persistent environment variable.
+2. **Enter an isolated worktree** using the `EnterWorktree` tool with `name: "feat-<task-kebab>"`. This creates a fresh copy of the repo at `.claude/worktrees/<name>/` with its own branch.
+   - If `EnterWorktree` fails (e.g., already in a worktree), skip this step — the agent is already isolated
+3. **Verify isolation**: Run `git rev-parse --show-toplevel` and confirm the path contains `.claude/worktrees/`. If not, the worktree setup was skipped (which is acceptable for single-agent execution).
+4. **Install dependencies**: The worktree has no `node_modules/`. Run `npm install` at the repo root, then `npm install` in `backend/` and `npm install` in `frontend/`.
+
+> **Why worktrees?** Without isolation, two `/develop-feature` agents sharing the same working tree will conflict on `git checkout`, `git add`, and other file operations. Worktrees give each agent its own directory, while sharing the same `.git` object store (so pushes and fetches are fast).
+
 ### Phase 2: Context Gathering
 1. Read `ARCHITECTURE.md` for system overview
 2. Based on the task area:
@@ -53,7 +66,7 @@ Before task selection, set up for safe parallel execution with other agents.
 4. Read `docs/CONVENTIONS.md` for code standards
 
 ### Phase 3: Branch & Plan
-1. Create a feature branch: `git checkout -b feat/<kebab-case-task-name>`
+1. Create a feature branch: `git checkout -b feat/<kebab-case-task-name>`. In a worktree, this creates a new branch and switches to it (the worktree's initial branch is abandoned). This works because the feature branch name (`feat/...`) differs from the worktree-created branch.
 2. **Execution Plan (required for tasks > 1 day effort):**
    - Create `docs/exec-plans/active/<feature>.md` with:
      - Task description and acceptance criteria
@@ -214,14 +227,17 @@ Use the ports allocated in Phase 0. This ensures multiple agents can run dev ser
    - If rebase fails due to conflicts in **application source code** (`.ts`, `.tsx`, `.spec.ts`, etc.): abort the rebase (`git rebase --abort`), stop, and report the conflict — do not auto-resolve source code conflicts
    - Retry the merge check. If still not mergeable after one rebase attempt, stop and report
 3. Merge: `gh pr merge --squash --delete-branch`
-4. Switch to main: `git checkout main && git pull origin main`
+4. **Switch to the main repo working tree**: `cd` to the main repo root (remembered from Phase 1.5). The main repo already has `main` checked out (running `git checkout main` from the worktree would fail). Once in the main repo root, run `git pull origin main` to sync with the merged PR.
 
 ### Phase 11: Bookkeeping (Post-Merge)
+
+> **Important**: All Phase 11 and 12 operations run from the **main repo working tree** (the path remembered from Phase 1.5), not from the worktree. The worktree's branch was deleted by `--delete-branch` in Phase 10, so the worktree is abandoned after merge.
+
 1. Update task status in `docs/exec-plans/tech-debt-tracker.md` to `done`
 2. If an exec plan was created, move it to `docs/exec-plans/completed/`
 3. Stage bookkeeping files explicitly by name
 4. Commit bookkeeping changes directly to main and push
-5. **Unregister from active-work registry**: Read `docs/exec-plans/active-work.json`, remove own session entry (matching own `task_id` — this is the authoritative identifier), write the updated registry back using atomic rename. No need to commit — it's gitignored.
+5. **Unregister from active-work registry**: Read `docs/exec-plans/active-work.json` (you are already in the main repo root per the Phase 11 note above), remove own session entry (matching own `task_id` — this is the authoritative identifier), write the updated registry back using atomic rename. No need to commit — it's gitignored.
 
 ### Phase 12: Maintenance Cadence Check
 
