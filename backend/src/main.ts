@@ -4,6 +4,7 @@ import { Logger as PinoLogger } from 'nestjs-pino';
 import { mkdir } from 'fs/promises';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { getErrorStack } from './common/utils/get-error-message';
 
 async function bootstrap() {
   await mkdir('./uploads', { recursive: true });
@@ -28,7 +29,7 @@ bootstrap().catch((err: unknown) => {
   const logger = new Logger('Bootstrap');
   logger.fatal(
     'Failed to start application',
-    err instanceof Error ? err.stack : String(err),
+    getErrorStack(err) ?? String(err),
   );
   process.exit(1);
 });

@@ -7,6 +7,7 @@ import {
 import { Inject } from '@nestjs/common';
 import { MongoClient } from 'mongodb';
 import { MONGO_CLIENT } from '../database/database.constants';
+import { getErrorMessage } from '../common/utils/get-error-message';
 
 @Injectable()
 export class MongoHealthIndicator extends HealthIndicator {
@@ -19,7 +20,7 @@ export class MongoHealthIndicator extends HealthIndicator {
       await this.client.db().command({ ping: 1 });
       return this.getStatus(key, true);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
+      const message = getErrorMessage(error);
       throw new HealthCheckError(
         'MongoDB check failed',
         this.getStatus(key, false, { message }),

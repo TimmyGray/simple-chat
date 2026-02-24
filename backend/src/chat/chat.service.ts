@@ -19,6 +19,10 @@ import {
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { SendMessageDto } from './dto/send-message.dto';
+import {
+  getErrorMessage,
+  getErrorStack,
+} from '../common/utils/get-error-message';
 
 @Injectable()
 export class ChatService {
@@ -281,16 +285,14 @@ export class ChatService {
       );
       yield { type: 'done', usage };
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(
-        `LLM stream failed for conversation ${conversationId}: ${errorMessage}`,
-        error instanceof Error ? error.stack : undefined,
+        `LLM stream failed for conversation ${conversationId}: ${getErrorMessage(error)}`,
+        getErrorStack(error),
       );
       yield {
         type: 'error',
         code: SSE_ERROR_CODE.LLM_FAILURE,
-        message: errorMessage,
+        message: getErrorMessage(error),
       };
     }
   }

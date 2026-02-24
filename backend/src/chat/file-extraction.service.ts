@@ -4,6 +4,7 @@ import * as path from 'path';
 import { PDFParse } from 'pdf-parse';
 import type OpenAI from 'openai';
 import type { MessageDoc } from './interfaces/message.interface';
+import { getErrorMessage } from '../common/utils/get-error-message';
 
 const UPLOADS_DIR = path.resolve('./uploads');
 
@@ -63,7 +64,7 @@ export class FileExtractionService {
     } catch (error) {
       if (error instanceof ForbiddenException) throw error;
       this.logger.error(
-        `Failed to extract content from "${attachment.fileName}": ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to extract content from "${attachment.fileName}": ${getErrorMessage(error)}`,
       );
       return `[Could not read file: ${attachment.fileName}]`;
     }

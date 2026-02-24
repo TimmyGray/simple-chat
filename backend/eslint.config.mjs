@@ -30,6 +30,17 @@ export default tseslint.config(
       '@typescript-eslint/no-floating-promises': 'warn',
       "prettier/prettier": ["error", { endOfLine: "auto" }],
       'no-console': 'error',
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'ConditionalExpression[test.type="BinaryExpression"][test.operator="instanceof"][test.right.name="Error"]',
+          message: 'Use getErrorMessage(err) or getErrorStack(err) from common/utils/get-error-message instead of inline instanceof Error checks.',
+        },
+        {
+          selector: 'IfStatement[test.type="BinaryExpression"][test.operator="instanceof"][test.right.name="Error"]',
+          message: 'Use getErrorMessage(err) or getErrorStack(err) from common/utils/get-error-message instead of inline instanceof Error checks.',
+        },
+      ],
       'no-restricted-imports': ['error', {
         patterns: [
           {
@@ -80,6 +91,13 @@ export default tseslint.config(
           },
         ],
       }],
+    },
+  },
+  {
+    // get-error-message.ts is the canonical implementation — exempt it from the instanceof Error rule
+    files: ['src/common/utils/get-error-message.ts'],
+    rules: {
+      'no-restricted-syntax': 'off',
     },
   },
   {
