@@ -80,7 +80,7 @@ Each task has:
 | B-L3 | Load model list from config or OpenRouter API | backend | 0.5d | done | PR #62 merged. Dynamic fetch from OpenRouter, hourly refresh, fallback defaults. |
 | B-L4 | Add uploads/ to .gitignore | backend | 0.1d | done | Already present in root .gitignore as `/uploads` |
 | B-L5 | Enable strict: true in backend tsconfig | backend | 0.5d | todo | Some strict flags missing |
-| B-L6 | Standardize SSE error format | backend | 0.25d | todo | Inconsistent error envelope |
+| B-L6 | Standardize SSE error format | backend | 0.25d | done | PR #67 merged. Typed SSE_ERROR_CODE + i18n fallback. |
 | B-L7 | Document CORS configuration | backend | 0.1d | done | Documented in ARCHITECTURE.md env vars table and SECURITY.md |
 | B-L8 | Refactor extractFileContent (61 lines, exceeds 50-line limit) | backend | 0.25d | todo | file-extraction.service.ts — extract helpers for text/PDF branches |
 | B-L9 | Create backend getErrorMessage utility for `instanceof Error` pattern | backend | 0.5d | todo | 11 occurrences across 8 files (grew from 10/7 — models.service.ts added). Needs design: backend uses NestJS Logger with stack traces, different from frontend pattern. |
@@ -179,3 +179,4 @@ Each task has:
 | B-L1 | Use PartialType for duplicate DTOs (PR #60) | 2026-02-24 |
 | B-L2 | Replace synchronous mkdirSync with async (PR #61) | 2026-02-24 |
 | B-L3 | Load model list dynamically from OpenRouter (PR #62) | 2026-02-24 |
+| B-L6 | Standardize SSE error format with typed codes (PR #67) | 2026-02-24 |
