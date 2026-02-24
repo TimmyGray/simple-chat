@@ -9,7 +9,7 @@ $ARGUMENTS — Optional task ID from `docs/exec-plans/tech-debt-tracker.md`. If 
 
 ### Phase 0: Concurrency Setup
 
-Before task selection, set up for safe parallel execution with other agents.
+Before task selection, set up for safe parallel execution with other agents. **Phases 0–1 must run in the main repo** (before entering a worktree) because `active-work.json` is gitignored and only exists in the main working tree.
 
 1. Read `docs/exec-plans/active-work.json`. If the file is missing or corrupt, back up the corrupt file (`cp active-work.json active-work.json.bak 2>/dev/null || true`), then create a fresh file with: `{"schema_version":1,"sessions":[]}`
 2. **Stale cleanup**: For each session entry:
@@ -41,6 +41,18 @@ Before task selection, set up for safe parallel execution with other agents.
    - Own entry is present
    - No other entry has the same slot number or task_id
    - If a conflict is detected (another agent registered simultaneously), pick a new slot/task and retry from step 1 (max 3 retries)
+
+### Phase 1.5: Worktree Isolation
+
+Isolate the working tree so multiple `/develop-feature` agents can run concurrently without branch conflicts.
+
+1. **Store main repo root** for later reference to shared files (e.g., `active-work.json` which is gitignored and only exists in the main working tree):
+   - Run `MAIN_REPO_ROOT=$(git rev-parse --show-toplevel)` and remember this path for Phase 11
+2. **Enter an isolated worktree** using the `EnterWorktree` tool with `name: "feat-<task-kebab>"` (matching the branch name from Phase 1). This creates a fresh copy of the repo at `.claude/worktrees/<name>/` with its own branch.
+   - If `EnterWorktree` fails (e.g., already in a worktree), skip this step — the agent is already isolated
+3. **Verify isolation**: Run `git rev-parse --show-toplevel` and confirm the path contains `.claude/worktrees/`. If not, the worktree setup was skipped (which is acceptable for single-agent execution).
+
+> **Why worktrees?** Without isolation, two `/develop-feature` agents sharing the same working tree will conflict on `git checkout`, `git add`, and other file operations. Worktrees give each agent its own directory, while sharing the same `.git` object store (so pushes and fetches are fast).
 
 ### Phase 2: Context Gathering
 1. Read `ARCHITECTURE.md` for system overview
@@ -221,7 +233,7 @@ Use the ports allocated in Phase 0. This ensures multiple agents can run dev ser
 2. If an exec plan was created, move it to `docs/exec-plans/completed/`
 3. Stage bookkeeping files explicitly by name
 4. Commit bookkeeping changes directly to main and push
-5. **Unregister from active-work registry**: Read `docs/exec-plans/active-work.json`, remove own session entry (matching own `task_id` — this is the authoritative identifier), write the updated registry back using atomic rename. No need to commit — it's gitignored.
+5. **Unregister from active-work registry**: Read `active-work.json` from the **main repo root** (use `MAIN_REPO_ROOT` stored in Phase 1.5, e.g., `$MAIN_REPO_ROOT/docs/exec-plans/active-work.json`), remove own session entry (matching own `task_id` — this is the authoritative identifier), write the updated registry back using atomic rename. No need to commit — it's gitignored. Note: `active-work.json` is gitignored, so it only exists in the main working tree — not in worktrees.
 
 ### Phase 12: Maintenance Cadence Check
 
