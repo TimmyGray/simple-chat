@@ -6,5 +6,5 @@ export class BaseAuthDto {
     typeof value === 'string' ? value.toLowerCase().trim() : value,
   )
   @IsEmail()
-  email: string;
+  email!: string;
 }

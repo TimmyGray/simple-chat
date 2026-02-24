@@ -5,5 +5,5 @@ export class RegisterDto extends BaseAuthDto {
   @IsString()
   @MinLength(8)
   @MaxLength(128)
-  password: string;
+  password!: string;
 }

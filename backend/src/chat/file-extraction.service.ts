@@ -94,7 +94,7 @@ export class FileExtractionService {
     } catch (error) {
       if (error instanceof ForbiddenException) throw error;
       this.logger.error(
-        `Failed to extract content from "${attachment.fileName}": ${error instanceof Error ? error.message : error}`,
+        `Failed to extract content from "${attachment.fileName}": ${error instanceof Error ? error.message : String(error)}`,
       );
       return `[Could not read file: ${attachment.fileName}]`;
     }
