@@ -83,7 +83,7 @@ Each task has:
 | B-L5 | Enable strict: true in backend tsconfig | backend | 0.5d | done | PR #68 merged. Replaces individual flags with `strict: true`. |
 | B-L6 | Standardize SSE error format | backend | 0.25d | done | PR #67 merged. Typed SSE_ERROR_CODE + i18n fallback. |
 | B-L7 | Document CORS configuration | backend | 0.1d | done | Documented in ARCHITECTURE.md env vars table and SECURITY.md |
-| B-L8 | Refactor extractFileContent (61 lines, exceeds 50-line limit) | backend | 0.25d | todo | file-extraction.service.ts — extract helpers for text/PDF branches |
+| B-L8 | Refactor extractFileContent (61 lines, exceeds 50-line limit) | backend | 0.25d | done | PR #70 merged. Extracted resolveUploadPath, isTextFile, isPdfFile, readPdfContent. |
 | B-L9 | Create backend getErrorMessage utility for `instanceof Error` pattern | backend | 0.5d | todo | 11 occurrences across 8 files (grew from 10/7 — models.service.ts added). Needs design: backend uses NestJS Logger with stack traces, different from frontend pattern. |
 | F-L1 | Extract magic numbers to constants/theme | frontend | 0.25d | todo | Hardcoded values in styles |
 | F-L2 | Split large component files (180+ lines) | frontend | 0.5d | todo | Some files too large |
@@ -182,3 +182,4 @@ Each task has:
 | B-L3 | Load model list dynamically from OpenRouter (PR #62) | 2026-02-24 |
 | B-L6 | Standardize SSE error format with typed codes (PR #67) | 2026-02-24 |
 | B-L5 | Enable strict: true in backend tsconfig (PR #68) | 2026-02-24 |
+| B-L8 | Refactor extractFileContent — extract 4 helpers (PR #70) | 2026-02-24 |
