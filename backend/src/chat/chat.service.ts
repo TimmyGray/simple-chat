@@ -171,6 +171,7 @@ export class ChatService {
       model,
       userId,
       abortSignal,
+      conversation.templateId,
     );
   }
 
@@ -205,6 +206,7 @@ export class ChatService {
       model,
       userId,
       abortSignal,
+      conversation.templateId,
     );
   }
 
@@ -231,6 +233,7 @@ export class ChatService {
       conversation.model,
       userId,
       abortSignal,
+      conversation.templateId,
     );
   }
 }

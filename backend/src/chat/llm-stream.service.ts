@@ -38,18 +38,16 @@ export class LlmStreamService {
   }
 
   private async getSystemPrompt(
+    templateId: ObjectId | undefined,
     conversationId: string,
   ): Promise<string | null> {
-    const conversation = await this.databaseService
-      .conversations()
-      .findOne({ _id: new ObjectId(conversationId) });
-    if (!conversation?.templateId) return null;
+    if (!templateId) return null;
     const template = await this.databaseService
       .templates()
-      .findOne({ _id: conversation.templateId });
+      .findOne({ _id: templateId });
     if (!template) {
       this.logger.warn(
-        `Template ${String(conversation.templateId)} not found for conversation ${conversationId}`,
+        `Template ${String(templateId)} not found for conversation ${conversationId}`,
       );
       return null;
     }
@@ -61,6 +59,7 @@ export class LlmStreamService {
     model: string,
     userId: ObjectId,
     abortSignal?: AbortSignal,
+    templateId?: ObjectId,
   ): AsyncGenerator<StreamEvent> {
     const messages = await this.databaseService
       .messages()
@@ -69,7 +68,7 @@ export class LlmStreamService {
       .toArray();
     const llmMessages =
       await this.fileExtractionService.buildLlmMessages(messages);
-    const systemPrompt = await this.getSystemPrompt(conversationId);
+    const systemPrompt = await this.getSystemPrompt(templateId, conversationId);
     if (systemPrompt) {
       llmMessages.unshift({ role: 'system', content: systemPrompt });
     }

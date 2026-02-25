@@ -240,12 +240,8 @@ describe('LlmStreamService', () => {
     expect(mockMessagesCollection.insertOne).not.toHaveBeenCalled();
   });
 
-  it('should prepend system prompt when conversation has templateId', async () => {
+  it('should prepend system prompt when templateId is provided', async () => {
     const templateId = new ObjectId('707f1f77bcf86cd799439033');
-    mockConversationsCollection.findOne.mockResolvedValue({
-      _id: mockObjectId,
-      templateId,
-    });
     mockTemplatesCollection.findOne.mockResolvedValue({
       _id: templateId,
       name: 'Code Reviewer',
@@ -254,32 +250,35 @@ describe('LlmStreamService', () => {
       isDefault: true,
     });
 
-    mockOpenAiStream([
-      { choices: [{ delta: { content: 'Review' } }] },
-    ]);
+    mockOpenAiStream([{ choices: [{ delta: { content: 'Review' } }] }]);
     await collectEvents(
-      service.stream('507f1f77bcf86cd799439011', 'openrouter/free', mockUserId),
+      service.stream(
+        '507f1f77bcf86cd799439011',
+        'openrouter/free',
+        mockUserId,
+        undefined,
+        templateId,
+      ),
     );
 
-    const createCall = vi.spyOn(service['openai'].chat.completions, 'create').mock.calls[0];
+    const createCall = vi.spyOn(service['openai'].chat.completions, 'create')
+      .mock.calls[0];
     const messages = (createCall[0] as any).messages;
-    expect(messages[0]).toEqual({ role: 'system', content: 'You are a code reviewer.' });
+    expect(messages[0]).toEqual({
+      role: 'system',
+      content: 'You are a code reviewer.',
+    });
     expect(messages[1]).toEqual({ role: 'user', content: 'Hello' });
   });
 
-  it('should not prepend system prompt when conversation has no templateId', async () => {
-    mockConversationsCollection.findOne.mockResolvedValue({
-      _id: mockObjectId,
-    });
-
-    mockOpenAiStream([
-      { choices: [{ delta: { content: 'Hi' } }] },
-    ]);
+  it('should not prepend system prompt when no templateId is provided', async () => {
+    mockOpenAiStream([{ choices: [{ delta: { content: 'Hi' } }] }]);
     await collectEvents(
       service.stream('507f1f77bcf86cd799439011', 'openrouter/free', mockUserId),
     );
 
-    const createCall = vi.spyOn(service['openai'].chat.completions, 'create').mock.calls[0];
+    const createCall = vi.spyOn(service['openai'].chat.completions, 'create')
+      .mock.calls[0];
     const messages = (createCall[0] as any).messages;
     expect(messages).toEqual([{ role: 'user', content: 'Hello' }]);
   });
