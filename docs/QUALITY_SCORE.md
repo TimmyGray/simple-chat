@@ -1,14 +1,14 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-25 (sweep #14)
+> Last updated: 2026-02-25 (audit #12)
 
 ## Test Summary
 
 | Area | Test Files | Tests | Pass Rate |
 |------|-----------|-------|-----------|
-| Backend | 16 | 153 | 100% |
-| Frontend | 17 | 166 | 100% |
-| **Total** | **33** | **319** | **100%** |
+| Backend | 17 | 162 | 100% |
+| Frontend | 18 | 174 | 100% |
+| **Total** | **35** | **336** | **100%** |
 
 ## Lint Status
 
@@ -44,16 +44,52 @@
 | Frontend | ~20 | 8 (3 patch, 2 minor, 3 major) | 11 (1 moderate, 10 high — all in eslint/minimatch transitive deps) |
 
 ## Bundle Size
-- Backend: 952 KB (dist/)
-- Frontend: 1.5 MB (dist/) — initial load 327 KB + 303 KB vendor-mui + 63 KB vendor-i18n + 808 KB lazy markdown chunk
+- Backend: 1.3 MB (dist/)
+- Frontend: 1.5 MB (dist/) — initial load 323 KB + 298 KB vendor-mui + 62 KB vendor-i18n + 789 KB lazy markdown chunk
 
 ## Tech Debt
 - Critical: 0 todo, 4 done (JWT authentication completed)
 - High: 0 todo, 7 done — all high-priority items completed
 - Medium: 0 todo, 31 done, 1 wont-fix — all medium items done
 - Low: 0 todo, 15 done — all low-priority items completed
-- Features: 9 todo, 5 done (FEAT-2, FEAT-3, FEAT-8 completed)
+- Features: 7 todo, 7 done (FEAT-4, FEAT-7 completed since last sweep)
 - Total tracked: 72 (see `docs/exec-plans/tech-debt-tracker.md`)
+
+## Audit #12 Findings
+- All validation passing: lint 0 errors, typecheck 0 errors, 336 tests passing, build passing
+- Backend tests: 153 -> 162 (+9, 17 files — new export.service.spec.ts from FEAT-4, chat.controller.spec.ts grew)
+- Frontend tests: 166 -> 174 (+8, 18 files — new ExportMenu tests, streaming controls tests from FEAT-7)
+- Total tests: 319 -> 336 (+17, target: 100+ sustained, comfortably exceeded)
+- Completed since last audit: FEAT-4 (Conversation Export, PR #83), FEAT-7 (Streaming Response Controls, PR #82)
+- **DB schema drift found and fixed:** `isEdited` field was in TypeScript interfaces (added by FEAT-3 message editing) but missing from `database.schemas.ts` MongoDB validator and `docs/generated/db-schema.md`
+- Fixed: `database.schemas.ts` — added `isEdited: { bsonType: 'bool' }` to messages schema
+- Fixed: `db-schema.md` — added isEdited field documentation
+- Fixed: Features count was stale (was 9 todo/5 done, actually 7 todo/7 done — FEAT-4, FEAT-7 completed)
+- Fixed: Backend bundle size was stale (was 952 KB, actually 1.3 MB — export service + PDF generation growth)
+- Fixed: Frontend bundle sizes slightly changed (323 KB index, 298 KB vendor-mui, 62 KB vendor-i18n, 789 KB lazy markdown)
+- i18n: all 4 locales in sync (80 leaf keys each, up from 71 — 9 new keys from FEAT-4 export, FEAT-7 streaming controls)
+- npm outdated: could not check (npm cache permission issue — `sudo chown -R 501:20 ~/.npm` needed)
+- npm audit (root): 0 vulnerabilities
+- No console.log/warn/error in source (clean)
+- No dangerouslySetInnerHTML (clean)
+- No hardcoded secrets (clean)
+- No `any` types in non-test source files (clean)
+- No hardcoded user-facing strings in .tsx files (all use t())
+- No TODO/FIXME/HACK comments in source (clean)
+- All cross-module imports follow approved patterns (chat->auth for guards/decorators only)
+- No services importing Express types (clean)
+- No direct MongoDB collection access outside DatabaseService (clean)
+- No files exceed 300-line limit (largest: MessageBubble.tsx at 269, chat.controller.ts at 274, export.service.ts at 264)
+- All hex/rgba/gradient colors in theme.ts only (exempt per convention)
+- No window.alert() in source (clean)
+- No hardcoded hex colors outside theme.ts (clean)
+- Backend `instanceof Error` pattern: RESOLVED — 0 inline occurrences (canonical utilities in place, ESLint enforced)
+- Frontend `instanceof Error` pattern: 1 occurrence in getErrorMessage.ts utility only (exempt per convention)
+- Existing tracked observations:
+  - 1 backend function borderline over 50-line limit: refreshModels at 52 lines (not tracked separately, only 2 lines over)
+  - Frontend components exceed 50-line function limit: MessageBubble (269), SearchDialog (214), ChatInput (204) — React components with JSX, expected
+  - stream.ts has 3 hardcoded English fallback strings — acceptable per convention (plain .ts without React hooks)
+- 95+ non-test source files scanned, 35 test files scanned
 
 ## Sweep #14 Findings
 - All validation passing: lint 0 errors, typecheck 0 errors, 319 tests passing, build passing

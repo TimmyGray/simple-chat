@@ -1,6 +1,6 @@
 # Database Schema
 
-> Auto-generated from MongoDB collection interfaces. Last updated: 2026-02-24.
+> Auto-generated from MongoDB collection interfaces. Last updated: 2026-02-25.
 
 ## Database: simple-chat
 
@@ -29,6 +29,7 @@
 | role | enum | yes | "user" or "assistant" |
 | content | string | yes | Message text content |
 | model | string | no | LLM model used (assistant messages only) |
+| isEdited | boolean | no | Whether message has been edited by user |
 | idempotencyKey | string | no | Client-generated UUID to prevent duplicate message creation (user messages only) |
 | attachments | AttachmentDoc[] | yes | File attachments (can be empty array) |
 | promptTokens | number | no | LLM prompt tokens consumed (assistant messages only) |

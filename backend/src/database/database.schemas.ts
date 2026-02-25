@@ -41,6 +41,7 @@ export const messagesSchema: Document = {
       role: { bsonType: 'string', enum: ['user', 'assistant'] },
       content: { bsonType: 'string' },
       model: { bsonType: 'string' },
+      isEdited: { bsonType: 'bool' },
       idempotencyKey: { bsonType: 'string' },
       attachments: {
         bsonType: 'array',
