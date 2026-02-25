@@ -69,6 +69,7 @@ describe('AuthService', () => {
         expect.objectContaining({
           email: 'new@example.com',
           password: 'hashed-password',
+          isAdmin: false,
           totalTokensUsed: 0,
           totalPromptTokens: 0,
           totalCompletionTokens: 0,
@@ -182,6 +183,7 @@ describe('AuthService', () => {
       mockUsersCollection.findOne.mockResolvedValue({
         _id: mockUserId,
         email: 'test@example.com',
+        isAdmin: false,
         totalTokensUsed: 100,
         totalPromptTokens: 60,
         totalCompletionTokens: 40,
@@ -195,13 +197,32 @@ describe('AuthService', () => {
       expect(result).toEqual({
         _id: mockUserId,
         email: 'test@example.com',
+        isAdmin: false,
         totalTokensUsed: 100,
         totalPromptTokens: 60,
         totalCompletionTokens: 40,
       });
     });
 
-    it('should default token fields to 0 for legacy users', async () => {
+    it('should return isAdmin true for admin users', async () => {
+      mockUsersCollection.findOne.mockResolvedValue({
+        _id: mockUserId,
+        email: 'admin@example.com',
+        isAdmin: true,
+        totalTokensUsed: 0,
+        totalPromptTokens: 0,
+        totalCompletionTokens: 0,
+      });
+
+      const result = await service.validateUser({
+        sub: mockUserId.toHexString(),
+        email: 'admin@example.com',
+      });
+
+      expect(result).toEqual(expect.objectContaining({ isAdmin: true }));
+    });
+
+    it('should default token fields and isAdmin to false for legacy users', async () => {
       mockUsersCollection.findOne.mockResolvedValue({
         _id: mockUserId,
         email: 'test@example.com',
@@ -215,6 +236,7 @@ describe('AuthService', () => {
       expect(result).toEqual({
         _id: mockUserId,
         email: 'test@example.com',
+        isAdmin: false,
         totalTokensUsed: 0,
         totalPromptTokens: 0,
         totalCompletionTokens: 0,

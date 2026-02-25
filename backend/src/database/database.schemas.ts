@@ -99,6 +99,7 @@ export const usersSchema: Document = {
       _id: { bsonType: 'objectId' },
       email: { bsonType: 'string' },
       password: { bsonType: 'string' },
+      isAdmin: { bsonType: 'bool' },
       totalTokensUsed: { bsonType: ['int', 'long', 'double'] },
       totalPromptTokens: { bsonType: ['int', 'long', 'double'] },
       totalCompletionTokens: { bsonType: ['int', 'long', 'double'] },

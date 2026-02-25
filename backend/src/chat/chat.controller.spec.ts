@@ -15,6 +15,7 @@ describe('ChatController', () => {
   const mockUser = {
     _id: mockUserId,
     email: 'test@example.com',
+    isAdmin: false,
     totalTokensUsed: 0,
     totalPromptTokens: 0,
     totalCompletionTokens: 0,

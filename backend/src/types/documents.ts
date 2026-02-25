@@ -52,6 +52,7 @@ export interface UserDoc {
   _id?: ObjectId;
   email: string;
   password: string;
+  isAdmin: boolean;
   totalTokensUsed: number;
   totalPromptTokens: number;
   totalCompletionTokens: number;

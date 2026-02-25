@@ -63,6 +63,7 @@
 | _id | ObjectId | auto | Primary key |
 | email | string | yes | User email (unique) |
 | password | string | yes | bcrypt-hashed password |
+| isAdmin | boolean | no | Admin flag for template management (default: false) |
 | totalTokensUsed | number | no | Cumulative total tokens consumed (for billing) |
 | totalPromptTokens | number | no | Cumulative prompt tokens consumed |
 | totalCompletionTokens | number | no | Cumulative completion tokens consumed |
