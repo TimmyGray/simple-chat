@@ -73,7 +73,20 @@ For each missing file, report: `BROKEN REFERENCE: <file> referenced in CLAUDE.md
    - Belief 6 (i18n) → check a random component uses `t()`
 3. Report any violations found
 
-### 8. Report & Fix
+### 8. Product Sense Staleness
+
+1. Read `docs/PRODUCT_SENSE.md` — extract every named feature from the prioritization lists (P0, P1, P2)
+2. Read `docs/exec-plans/tech-debt-tracker.md` — collect all `done` FEAT-* tasks
+3. For each feature in PRODUCT_SENSE.md:
+   - Search for a matching FEAT-* entry in the tracker (match by keyword/description)
+   - If the tracker entry is `done` but PRODUCT_SENSE.md still lists it as pending/planned, flag: `STALE PRODUCT SENSE: "<feature>" is listed as planned but already completed (FEAT-XX)`
+4. Check for features that exist in the tracker but are missing from PRODUCT_SENSE.md entirely
+5. If any staleness found, update `docs/PRODUCT_SENSE.md`:
+   - Move completed features to a new "Completed" section or strike them from planned lists
+   - Add any missing features from the tracker
+   - Keep the document's voice and structure consistent
+
+### 9. Report & Fix
 
 Create a summary:
 ```
@@ -86,6 +99,7 @@ Create a summary:
 ### Tracker Inconsistencies: X
 ### Broken Links: X
 ### Belief Violations: X
+### Product Sense Stale: X features
 ```
 
 If any issues found:
