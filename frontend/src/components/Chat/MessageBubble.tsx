@@ -1,9 +1,14 @@
-import { lazy, memo, Suspense } from 'react';
-import { Box, Typography, Paper, Chip } from '@mui/material';
+import { lazy, memo, Suspense, useState, useCallback } from 'react';
+import { Box, Typography, Paper, Chip, IconButton, TextField } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import PersonIcon from '@mui/icons-material/Person';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
-import type { Message } from '../../types';
+import EditOutlined from '@mui/icons-material/EditOutlined';
+import RefreshOutlined from '@mui/icons-material/RefreshOutlined';
+import CheckOutlined from '@mui/icons-material/CheckOutlined';
+import CloseOutlined from '@mui/icons-material/CloseOutlined';
+import { useTranslation } from 'react-i18next';
+import type { Message, MessageId } from '../../types';
 import {
   ICON_SIZE_SM,
   AVATAR_SIZE,
@@ -14,16 +19,63 @@ import {
   MODEL_TAG_OPACITY,
   BLOCKQUOTE_OPACITY,
   CODE_FONT_SIZE,
+  MESSAGE_ACTION_ICON_SIZE,
+  MESSAGE_ACTION_BUTTON_SIZE,
 } from '../../constants';
 
 const LazyMarkdownRenderer = lazy(() => import('./MarkdownRenderer'));
 
 interface MessageBubbleProps {
   message: Message;
+  onEdit?: (messageId: MessageId, content: string) => void;
+  onRegenerate?: (messageId: MessageId) => void;
+  isStreaming?: boolean;
 }
 
-function MessageBubble({ message }: MessageBubbleProps) {
+function MessageBubble({ message, onEdit, onRegenerate, isStreaming }: MessageBubbleProps) {
+  const { t } = useTranslation();
   const isUser = message.role === 'user';
+  const [editing, setEditing] = useState(false);
+  const [editContent, setEditContent] = useState('');
+
+  const handleStartEdit = useCallback(() => {
+    setEditContent(message.content);
+    setEditing(true);
+  }, [message.content]);
+
+  const handleCancelEdit = useCallback(() => {
+    setEditing(false);
+    setEditContent('');
+  }, []);
+
+  const handleSaveEdit = useCallback(() => {
+    const trimmed = editContent.trim();
+    if (!trimmed || trimmed === message.content) {
+      handleCancelEdit();
+      return;
+    }
+    onEdit?.(message._id, trimmed);
+    setEditing(false);
+    setEditContent('');
+  }, [editContent, message.content, message._id, onEdit, handleCancelEdit]);
+
+  const handleRegenerate = useCallback(() => {
+    onRegenerate?.(message._id);
+  }, [message._id, onRegenerate]);
+
+  const handleEditKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSaveEdit();
+      } else if (e.key === 'Escape') {
+        handleCancelEdit();
+      }
+    },
+    [handleSaveEdit, handleCancelEdit],
+  );
+
+  const showActions = !isStreaming && !editing;
 
   return (
     <Box
@@ -58,113 +110,231 @@ function MessageBubble({ message }: MessageBubbleProps) {
         )}
       </Box>
 
-      {/* Bubble */}
-      <Paper
-        elevation={0}
+      {/* Bubble + actions wrapper */}
+      <Box
         sx={{
-          px: 2,
-          py: 1.5,
+          position: 'relative',
           maxWidth: { xs: MESSAGE_MAX_WIDTH_TABLET, lg: MESSAGE_MAX_WIDTH },
-          borderRadius: isUser
-            ? USER_BUBBLE_RADIUS
-            : ASSISTANT_BUBBLE_RADIUS,
-          backgroundColor: (theme) =>
-            isUser
-              ? alpha(theme.palette.primary.main, 0.12)
-              : alpha(theme.palette.text.primary, 0.05),
-          border: '1px solid',
-          borderColor: (theme) =>
-            isUser
-              ? alpha(theme.palette.primary.main, 0.2)
-              : theme.palette.divider,
+          '&:hover .message-actions': { opacity: 1 },
         }}
       >
-        {/* Attachments */}
-        {message.attachments && message.attachments.length > 0 && (
-          <Box sx={{ mb: 1, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-            {message.attachments.map((att) => (
-              <Chip
-                key={att.filePath}
-                label={att.fileName}
-                size="small"
-                variant="outlined"
-              />
-            ))}
-          </Box>
-        )}
-
-        {/* Content */}
-        {isUser ? (
-          <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-            {message.content}
-          </Typography>
-        ) : (
+        {/* Action buttons (hover overlay) */}
+        {showActions && (
           <Box
+            className="message-actions"
             sx={{
-              '& p': { m: 0, mb: 1, '&:last-child': { mb: 0 } },
-              '& pre': { m: 0, mb: 1 },
-              '& code': {
-                fontFamily: '"Fira Code", "Consolas", monospace',
-                fontSize: CODE_FONT_SIZE,
-              },
-              '& p code': {
-                backgroundColor: (theme) => alpha(theme.palette.text.primary, 0.1),
-                px: 0.5,
-                borderRadius: 0.5,
-              },
-              '& a': { color: 'primary.light' },
-              '& table': {
-                borderCollapse: 'collapse',
-                width: '100%',
-                mb: 1,
-                fontSize: CODE_FONT_SIZE,
-              },
-              '& th, & td': {
-                border: (theme) => `1px solid ${alpha(theme.palette.text.primary, 0.15)}`,
-                px: 1.5,
-                py: 0.75,
-                textAlign: 'left',
-              },
-              '& th': {
-                backgroundColor: (theme) => alpha(theme.palette.text.primary, 0.08),
-                fontWeight: 600,
-              },
-              '& tr:nth-of-type(even)': {
-                backgroundColor: (theme) => alpha(theme.palette.text.primary, 0.03),
-              },
-              '& ul, & ol': { pl: 2, mb: 1 },
-              '& blockquote': {
-                borderLeft: '3px solid',
-                borderColor: 'primary.main',
-                pl: 1.5,
-                ml: 0,
-                opacity: BLOCKQUOTE_OPACITY,
-              },
+              position: 'absolute',
+              top: -4,
+              [isUser ? 'left' : 'right']: -4,
+              opacity: 0,
+              transition: 'opacity 0.2s',
+              zIndex: 1,
+              display: 'flex',
+              gap: 0.25,
             }}
           >
-            <Suspense
-              fallback={
-                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                  {message.content}
-                </Typography>
-              }
-            >
-              <LazyMarkdownRenderer content={message.content} />
-            </Suspense>
+            {isUser && onEdit && (
+              <IconButton
+                size="small"
+                onClick={handleStartEdit}
+                aria-label={t('chat.editMessage')}
+                sx={{
+                  width: MESSAGE_ACTION_BUTTON_SIZE,
+                  height: MESSAGE_ACTION_BUTTON_SIZE,
+                  backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.9),
+                  backdropFilter: 'blur(4px)',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  '&:hover': {
+                    backgroundColor: 'action.hover',
+                  },
+                }}
+              >
+                <EditOutlined sx={{ fontSize: MESSAGE_ACTION_ICON_SIZE }} />
+              </IconButton>
+            )}
+            {!isUser && onRegenerate && (
+              <IconButton
+                size="small"
+                onClick={handleRegenerate}
+                aria-label={t('chat.regenerate')}
+                sx={{
+                  width: MESSAGE_ACTION_BUTTON_SIZE,
+                  height: MESSAGE_ACTION_BUTTON_SIZE,
+                  backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.9),
+                  backdropFilter: 'blur(4px)',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  '&:hover': {
+                    backgroundColor: 'action.hover',
+                  },
+                }}
+              >
+                <RefreshOutlined sx={{ fontSize: MESSAGE_ACTION_ICON_SIZE }} />
+              </IconButton>
+            )}
           </Box>
         )}
 
-        {/* Model tag for assistant */}
-        {!isUser && message.model && (
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ display: 'block', mt: 0.5, opacity: MODEL_TAG_OPACITY }}
-          >
-            {message.model}
-          </Typography>
-        )}
-      </Paper>
+        <Paper
+          elevation={0}
+          sx={{
+            px: 2,
+            py: 1.5,
+            borderRadius: isUser
+              ? USER_BUBBLE_RADIUS
+              : ASSISTANT_BUBBLE_RADIUS,
+            backgroundColor: (theme) =>
+              isUser
+                ? alpha(theme.palette.primary.main, 0.12)
+                : alpha(theme.palette.text.primary, 0.05),
+            border: '1px solid',
+            borderColor: (theme) =>
+              isUser
+                ? alpha(theme.palette.primary.main, 0.2)
+                : theme.palette.divider,
+          }}
+        >
+          {/* Attachments */}
+          {message.attachments && message.attachments.length > 0 && (
+            <Box sx={{ mb: 1, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+              {message.attachments.map((att) => (
+                <Chip
+                  key={att.filePath}
+                  label={att.fileName}
+                  size="small"
+                  variant="outlined"
+                />
+              ))}
+            </Box>
+          )}
+
+          {/* Content */}
+          {editing ? (
+            <Box>
+              <TextField
+                multiline
+                fullWidth
+                size="small"
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                onKeyDown={handleEditKeyDown}
+                autoFocus
+                sx={{
+                  '& .MuiInputBase-root': {
+                    fontSize: '0.875rem',
+                  },
+                }}
+              />
+              <Box sx={{ display: 'flex', gap: 0.5, mt: 1, justifyContent: 'flex-end' }}>
+                <IconButton
+                  size="small"
+                  onClick={handleCancelEdit}
+                  aria-label={t('chat.cancelEdit')}
+                  sx={{
+                    width: MESSAGE_ACTION_BUTTON_SIZE,
+                    height: MESSAGE_ACTION_BUTTON_SIZE,
+                  }}
+                >
+                  <CloseOutlined sx={{ fontSize: MESSAGE_ACTION_ICON_SIZE }} />
+                </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={handleSaveEdit}
+                  aria-label={t('chat.saveEdit')}
+                  color="primary"
+                  sx={{
+                    width: MESSAGE_ACTION_BUTTON_SIZE,
+                    height: MESSAGE_ACTION_BUTTON_SIZE,
+                  }}
+                >
+                  <CheckOutlined sx={{ fontSize: MESSAGE_ACTION_ICON_SIZE }} />
+                </IconButton>
+              </Box>
+            </Box>
+          ) : isUser ? (
+            <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+              {message.content}
+            </Typography>
+          ) : (
+            <Box
+              sx={{
+                '& p': { m: 0, mb: 1, '&:last-child': { mb: 0 } },
+                '& pre': { m: 0, mb: 1 },
+                '& code': {
+                  fontFamily: '"Fira Code", "Consolas", monospace',
+                  fontSize: CODE_FONT_SIZE,
+                },
+                '& p code': {
+                  backgroundColor: (theme) => alpha(theme.palette.text.primary, 0.1),
+                  px: 0.5,
+                  borderRadius: 0.5,
+                },
+                '& a': { color: 'primary.light' },
+                '& table': {
+                  borderCollapse: 'collapse',
+                  width: '100%',
+                  mb: 1,
+                  fontSize: CODE_FONT_SIZE,
+                },
+                '& th, & td': {
+                  border: (theme) => `1px solid ${alpha(theme.palette.text.primary, 0.15)}`,
+                  px: 1.5,
+                  py: 0.75,
+                  textAlign: 'left',
+                },
+                '& th': {
+                  backgroundColor: (theme) => alpha(theme.palette.text.primary, 0.08),
+                  fontWeight: 600,
+                },
+                '& tr:nth-of-type(even)': {
+                  backgroundColor: (theme) => alpha(theme.palette.text.primary, 0.03),
+                },
+                '& ul, & ol': { pl: 2, mb: 1 },
+                '& blockquote': {
+                  borderLeft: '3px solid',
+                  borderColor: 'primary.main',
+                  pl: 1.5,
+                  ml: 0,
+                  opacity: BLOCKQUOTE_OPACITY,
+                },
+              }}
+            >
+              <Suspense
+                fallback={
+                  <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                    {message.content}
+                  </Typography>
+                }
+              >
+                <LazyMarkdownRenderer content={message.content} />
+              </Suspense>
+            </Box>
+          )}
+
+          {/* Edited indicator */}
+          {isUser && message.isEdited && !editing && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: 'block', mt: 0.5, opacity: MODEL_TAG_OPACITY }}
+            >
+              {t('chat.edited')}
+            </Typography>
+          )}
+
+          {/* Model tag for assistant */}
+          {!isUser && message.model && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: 'block', mt: 0.5, opacity: MODEL_TAG_OPACITY }}
+            >
+              {message.model}
+            </Typography>
+          )}
+        </Paper>
+      </Box>
     </Box>
   );
 }

@@ -31,7 +31,12 @@
     "noConversationHint": "Inicia un nuevo chat o selecciona uno existente",
     "attachFiles": "Adjuntar archivos",
     "charCount": "{{current}} / {{max}}",
-    "typing": "La IA está escribiendo"
+    "typing": "La IA está escribiendo",
+    "editMessage": "Editar mensaje",
+    "regenerate": "Regenerar respuesta",
+    "edited": "(editado)",
+    "saveEdit": "Guardar",
+    "cancelEdit": "Cancelar"
   },
   "dialog": {
     "deleteTitle": "Eliminar conversación",
@@ -77,6 +82,8 @@
     "fetchModels": "Error al obtener los modelos",
     "filesNotAttached": "Algunos archivos no se adjuntaron:",
     "streamErrorPrefix": "Error: {{message}}",
+    "editFailed": "Error al editar el mensaje",
+    "regenerateFailed": "Error al regenerar la respuesta",
     "searchFailed": "Error al buscar conversaciones",
     "corsOrNetwork": "No se puede conectar al servidor. Verifica que el backend esté en ejecución y que CORS esté configurado correctamente.",
     "sse": {

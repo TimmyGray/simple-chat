@@ -1,18 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { MongoServerError, ObjectId } from 'mongodb';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ChatService } from './chat.service';
+import { LlmStreamService } from './llm-stream.service';
 import { DatabaseService } from '../database/database.service';
-import { FileExtractionService } from './file-extraction.service';
 import type { StreamEvent } from './interfaces/stream-event.interface';
 
 describe('ChatService', () => {
   let service: ChatService;
   let mockConversationsCollection: any;
   let mockMessagesCollection: any;
-  let mockUsersCollection: any;
+  let mockLlmStreamService: any;
 
   const mockObjectId = new ObjectId('507f1f77bcf86cd799439011');
   const mockMessageId = new ObjectId('507f1f77bcf86cd799439012');
@@ -38,6 +37,20 @@ describe('ChatService', () => {
     updatedAt: new Date(),
   };
 
+  function createMockStreamFn(events: StreamEvent[]) {
+    return vi.fn().mockImplementation(async function* () {
+      for (const event of events) yield event;
+    });
+  }
+
+  const defaultStreamEvents: StreamEvent[] = [
+    { type: 'content', content: 'Hi' },
+    {
+      type: 'done',
+      usage: { promptTokens: 10, completionTokens: 5, totalTokens: 15 },
+    },
+  ];
+
   beforeEach(async () => {
     mockConversationsCollection = {
       insertOne: vi.fn().mockResolvedValue({ insertedId: mockObjectId }),
@@ -59,54 +72,39 @@ describe('ChatService', () => {
         }),
       }),
       findOne: vi.fn().mockResolvedValue(mockMessage),
+      findOneAndUpdate: vi.fn().mockResolvedValue(mockMessage),
       deleteMany: vi.fn().mockResolvedValue({ deletedCount: 1 }),
       countDocuments: vi.fn().mockResolvedValue(1),
-    };
-
-    mockUsersCollection = {
-      updateOne: vi.fn().mockResolvedValue({ modifiedCount: 1 }),
     };
 
     const mockDatabaseService = {
       conversations: vi.fn().mockReturnValue(mockConversationsCollection),
       messages: vi.fn().mockReturnValue(mockMessagesCollection),
-      users: vi.fn().mockReturnValue(mockUsersCollection),
+      users: vi.fn().mockReturnValue({ updateOne: vi.fn() }),
     };
 
-    const mockFileExtractionService = {
-      buildLlmMessages: vi
-        .fn()
-        .mockResolvedValue([{ role: 'user', content: 'Hello' }]),
+    mockLlmStreamService = {
+      stream: createMockStreamFn(defaultStreamEvents),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ChatService,
-        {
-          provide: DatabaseService,
-          useValue: mockDatabaseService,
-        },
-        {
-          provide: FileExtractionService,
-          useValue: mockFileExtractionService,
-        },
-        {
-          provide: ConfigService,
-          useValue: {
-            get: vi.fn((key: string) => {
-              if (key === 'openrouter.apiKey') return 'test-key';
-              if (key === 'openrouter.baseUrl')
-                return 'https://openrouter.ai/api/v1';
-              if (key === 'corsOrigin') return 'http://localhost:5173';
-              return null;
-            }),
-          },
-        },
+        { provide: DatabaseService, useValue: mockDatabaseService },
+        { provide: LlmStreamService, useValue: mockLlmStreamService },
       ],
     }).compile();
 
     service = module.get<ChatService>(ChatService);
   });
+
+  async function collectEvents(
+    gen: AsyncGenerator<StreamEvent>,
+  ): Promise<StreamEvent[]> {
+    const events: StreamEvent[] = [];
+    for await (const event of gen) events.push(event);
+    return events;
+  }
 
   describe('createConversation', () => {
     it('should create a conversation with userId and default values', async () => {
@@ -120,10 +118,7 @@ describe('ChatService', () => {
 
     it('should create a conversation with custom title', async () => {
       const result = await service.createConversation(
-        {
-          title: 'My Chat',
-          model: 'meta-llama/llama-3.3-70b-instruct:free',
-        },
+        { title: 'My Chat', model: 'meta-llama/llama-3.3-70b-instruct:free' },
         mockUserId,
       );
       expect(result).toBeDefined();
@@ -154,7 +149,6 @@ describe('ChatService', () => {
 
     it('should throw NotFoundException when not found', async () => {
       mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
-
       await expect(
         service.getConversation('507f1f77bcf86cd799439011', mockUserId),
       ).rejects.toThrow(NotFoundException);
@@ -162,7 +156,6 @@ describe('ChatService', () => {
 
     it('should throw NotFoundException when user does not own the conversation', async () => {
       mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
-
       await expect(
         service.getConversation('507f1f77bcf86cd799439011', otherUserId),
       ).rejects.toThrow(NotFoundException);
@@ -192,7 +185,6 @@ describe('ChatService', () => {
       mockConversationsCollection.findOneAndUpdate = vi
         .fn()
         .mockResolvedValue(null);
-
       await expect(
         service.updateConversation(
           '507f1f77bcf86cd799439011',
@@ -231,14 +223,12 @@ describe('ChatService', () => {
           callOrder.push('deleteConversation');
           return Promise.resolve(mockConversation);
         });
-
       await service.deleteConversation('507f1f77bcf86cd799439011', mockUserId);
       expect(callOrder).toEqual(['deleteMessages', 'deleteConversation']);
     });
 
     it('should throw NotFoundException when not found or not owned', async () => {
       mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
-
       await expect(
         service.deleteConversation('507f1f77bcf86cd799439011', mockUserId),
       ).rejects.toThrow(NotFoundException);
@@ -246,7 +236,6 @@ describe('ChatService', () => {
 
     it('should not delete messages if conversation not found', async () => {
       mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
-
       await expect(
         service.deleteConversation('507f1f77bcf86cd799439011', mockUserId),
       ).rejects.toThrow(NotFoundException);
@@ -266,7 +255,6 @@ describe('ChatService', () => {
 
     it('should throw NotFoundException if conversation not owned by user', async () => {
       mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
-
       await expect(
         service.getMessages('507f1f77bcf86cd799439011', otherUserId),
       ).rejects.toThrow(NotFoundException);
@@ -274,42 +262,7 @@ describe('ChatService', () => {
   });
 
   describe('sendMessageAndStream', () => {
-    async function collectEvents(
-      gen: AsyncGenerator<StreamEvent>,
-    ): Promise<StreamEvent[]> {
-      const events: StreamEvent[] = [];
-      for await (const event of gen) {
-        events.push(event);
-      }
-      return events;
-    }
-
-    it('should yield content events and a done event on successful stream', async () => {
-      // Mock OpenAI streaming response
-      const mockChunks = [
-        { choices: [{ delta: { content: 'Hello' } }] },
-        { choices: [{ delta: { content: ' world' } }] },
-        {
-          choices: [],
-          usage: {
-            prompt_tokens: 10,
-            completion_tokens: 5,
-            total_tokens: 15,
-          },
-        },
-      ];
-      const mockStream = {
-        [Symbol.asyncIterator]: async function* () {
-          for (const chunk of mockChunks) {
-            yield chunk;
-          }
-        },
-        controller: { abort: vi.fn() },
-      };
-      vi.spyOn(service['openai'].chat.completions, 'create').mockResolvedValue(
-        mockStream as any,
-      );
-
+    it('should save user message and delegate to LlmStreamService', async () => {
       const gen = service.sendMessageAndStream(
         '507f1f77bcf86cd799439011',
         { content: 'Test message' },
@@ -317,240 +270,48 @@ describe('ChatService', () => {
       );
       const events = await collectEvents(gen);
 
-      expect(events).toEqual([
-        { type: 'content', content: 'Hello' },
-        { type: 'content', content: ' world' },
-        {
-          type: 'done',
-          usage: {
-            promptTokens: 10,
-            completionTokens: 5,
-            totalTokens: 15,
-          },
-        },
-      ]);
-    });
-
-    it('should save user and assistant messages to the database with token usage', async () => {
-      const mockChunks = [
-        { choices: [{ delta: { content: 'Response' } }] },
-        {
-          choices: [],
-          usage: {
-            prompt_tokens: 20,
-            completion_tokens: 8,
-            total_tokens: 28,
-          },
-        },
-      ];
-      const mockStream = {
-        [Symbol.asyncIterator]: async function* () {
-          for (const chunk of mockChunks) {
-            yield chunk;
-          }
-        },
-        controller: { abort: vi.fn() },
-      };
-      vi.spyOn(service['openai'].chat.completions, 'create').mockResolvedValue(
-        mockStream as any,
-      );
-
-      const gen = service.sendMessageAndStream(
-        '507f1f77bcf86cd799439011',
-        { content: 'Hello' },
-        mockUserId,
-      );
-      await collectEvents(gen);
-
-      // First call saves user message, second saves assistant message
-      expect(mockMessagesCollection.insertOne).toHaveBeenCalledTimes(2);
-      const assistantCall = mockMessagesCollection.insertOne.mock.calls[1][0];
-      expect(assistantCall.role).toBe('assistant');
-      expect(assistantCall.content).toBe('Response');
-      expect(assistantCall.promptTokens).toBe(20);
-      expect(assistantCall.completionTokens).toBe(8);
-      expect(assistantCall.totalTokens).toBe(28);
-    });
-
-    it('should update user cumulative token usage', async () => {
-      const mockChunks = [
-        { choices: [{ delta: { content: 'Hi' } }] },
-        {
-          choices: [],
-          usage: {
-            prompt_tokens: 15,
-            completion_tokens: 3,
-            total_tokens: 18,
-          },
-        },
-      ];
-      const mockStream = {
-        [Symbol.asyncIterator]: async function* () {
-          for (const chunk of mockChunks) {
-            yield chunk;
-          }
-        },
-        controller: { abort: vi.fn() },
-      };
-      vi.spyOn(service['openai'].chat.completions, 'create').mockResolvedValue(
-        mockStream as any,
-      );
-
-      const gen = service.sendMessageAndStream(
-        '507f1f77bcf86cd799439011',
-        { content: 'Test' },
-        mockUserId,
-      );
-      await collectEvents(gen);
-
-      expect(mockUsersCollection.updateOne).toHaveBeenCalledWith(
-        { _id: mockUserId },
-        {
-          $inc: {
-            totalTokensUsed: 18,
-            totalPromptTokens: 15,
-            totalCompletionTokens: 3,
-          },
-        },
-      );
-    });
-
-    it('should skip empty delta content', async () => {
-      const mockChunks = [
-        { choices: [{ delta: {} }] },
-        { choices: [{ delta: { content: '' } }] },
-        { choices: [{ delta: { content: 'Real content' } }] },
-      ];
-      const mockStream = {
-        [Symbol.asyncIterator]: async function* () {
-          for (const chunk of mockChunks) {
-            yield chunk;
-          }
-        },
-        controller: { abort: vi.fn() },
-      };
-      vi.spyOn(service['openai'].chat.completions, 'create').mockResolvedValue(
-        mockStream as any,
-      );
-
-      const gen = service.sendMessageAndStream(
-        '507f1f77bcf86cd799439011',
-        { content: 'Test' },
-        mockUserId,
-      );
-      const events = await collectEvents(gen);
-
-      const contentEvents = events.filter((e) => e.type === 'content');
-      expect(contentEvents).toHaveLength(1);
-      expect(contentEvents[0]).toEqual({
-        type: 'content',
-        content: 'Real content',
-      });
-    });
-
-    it('should yield error event when LLM call fails', async () => {
-      vi.spyOn(service['openai'].chat.completions, 'create').mockRejectedValue(
-        new Error('API rate limit exceeded'),
-      );
-
-      const gen = service.sendMessageAndStream(
-        '507f1f77bcf86cd799439011',
-        { content: 'Test' },
-        mockUserId,
-      );
-      const events = await collectEvents(gen);
-
-      expect(events).toEqual([
-        {
-          type: 'error',
-          code: 'LLM_FAILURE',
-          message: 'API rate limit exceeded',
-        },
-      ]);
-    });
-
-    it('should abort LLM stream when abortSignal is triggered', async () => {
-      const abortFn = vi.fn();
-      const abortController = new AbortController();
-
-      const mockChunks = [
-        { choices: [{ delta: { content: 'First' } }] },
-        { choices: [{ delta: { content: 'Second' } }] },
-      ];
-      const mockStream = {
-        [Symbol.asyncIterator]: async function* () {
-          yield mockChunks[0];
-          // Abort after first chunk
-          abortController.abort();
-          yield mockChunks[1];
-        },
-        controller: { abort: abortFn },
-      };
-      vi.spyOn(service['openai'].chat.completions, 'create').mockResolvedValue(
-        mockStream as any,
-      );
-
-      const gen = service.sendMessageAndStream(
-        '507f1f77bcf86cd799439011',
-        { content: 'Test' },
-        mockUserId,
-        abortController.signal,
-      );
-      const events = await collectEvents(gen);
-
-      // Should have yielded the first chunk, then detected abort
-      expect(events[0]).toEqual({ type: 'content', content: 'First' });
-      expect(abortFn).toHaveBeenCalled();
-    });
-
-    it('should throw NotFoundException for non-existent conversation', async () => {
-      mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
-
-      const gen = service.sendMessageAndStream(
-        '507f1f77bcf86cd799439011',
-        { content: 'Test' },
-        mockUserId,
-      );
-
-      await expect(collectEvents(gen)).rejects.toThrow(NotFoundException);
-    });
-
-    it('should not save assistant message if stream yields no content', async () => {
-      const mockStream = {
-        [Symbol.asyncIterator]: async function* () {
-          // Empty stream - no chunks
-        },
-        controller: { abort: vi.fn() },
-      };
-      vi.spyOn(service['openai'].chat.completions, 'create').mockResolvedValue(
-        mockStream as any,
-      );
-
-      const gen = service.sendMessageAndStream(
-        '507f1f77bcf86cd799439011',
-        { content: 'Test' },
-        mockUserId,
-      );
-      await collectEvents(gen);
-
-      // Only user message saved, not assistant
       expect(mockMessagesCollection.insertOne).toHaveBeenCalledTimes(1);
       expect(mockMessagesCollection.insertOne.mock.calls[0][0].role).toBe(
         'user',
       );
+      expect(mockMessagesCollection.insertOne.mock.calls[0][0].content).toBe(
+        'Test message',
+      );
+      expect(mockLlmStreamService.stream).toHaveBeenCalledWith(
+        '507f1f77bcf86cd799439011',
+        'openrouter/free',
+        mockUserId,
+        undefined,
+      );
+      expect(events).toEqual(defaultStreamEvents);
+    });
+
+    it('should use dto model if provided', async () => {
+      const gen = service.sendMessageAndStream(
+        '507f1f77bcf86cd799439011',
+        { content: 'Test', model: 'custom-model' },
+        mockUserId,
+      );
+      await collectEvents(gen);
+      expect(mockLlmStreamService.stream).toHaveBeenCalledWith(
+        '507f1f77bcf86cd799439011',
+        'custom-model',
+        mockUserId,
+        undefined,
+      );
+    });
+
+    it('should throw NotFoundException for non-existent conversation', async () => {
+      mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
+      const gen = service.sendMessageAndStream(
+        '507f1f77bcf86cd799439011',
+        { content: 'Test' },
+        mockUserId,
+      );
+      await expect(collectEvents(gen)).rejects.toThrow(NotFoundException);
     });
 
     it('should include idempotencyKey in user message when provided', async () => {
-      const mockStream = {
-        [Symbol.asyncIterator]: async function* () {
-          yield { choices: [{ delta: { content: 'Hi' } }] };
-        },
-        controller: { abort: vi.fn() },
-      };
-      vi.spyOn(service['openai'].chat.completions, 'create').mockResolvedValue(
-        mockStream as any,
-      );
-
       const gen = service.sendMessageAndStream(
         '507f1f77bcf86cd799439011',
         { content: 'Test' },
@@ -559,29 +320,17 @@ describe('ChatService', () => {
         'test-key-123',
       );
       await collectEvents(gen);
-
       const userInsert = mockMessagesCollection.insertOne.mock.calls[0][0];
       expect(userInsert.idempotencyKey).toBe('test-key-123');
     });
 
     it('should not include idempotencyKey when not provided', async () => {
-      const mockStream = {
-        [Symbol.asyncIterator]: async function* () {
-          yield { choices: [{ delta: { content: 'Hi' } }] };
-        },
-        controller: { abort: vi.fn() },
-      };
-      vi.spyOn(service['openai'].chat.completions, 'create').mockResolvedValue(
-        mockStream as any,
-      );
-
       const gen = service.sendMessageAndStream(
         '507f1f77bcf86cd799439011',
         { content: 'Test' },
         mockUserId,
       );
       await collectEvents(gen);
-
       const userInsert = mockMessagesCollection.insertOne.mock.calls[0][0];
       expect(userInsert).not.toHaveProperty('idempotencyKey');
     });
@@ -594,7 +343,6 @@ describe('ChatService', () => {
       mockMessagesCollection.insertOne = vi
         .fn()
         .mockRejectedValue(duplicateError);
-
       const gen = service.sendMessageAndStream(
         '507f1f77bcf86cd799439011',
         { content: 'Test' },
@@ -602,7 +350,6 @@ describe('ChatService', () => {
         undefined,
         'duplicate-key',
       );
-
       await expect(collectEvents(gen)).rejects.toThrow(ConflictException);
     });
 
@@ -610,7 +357,6 @@ describe('ChatService', () => {
       mockMessagesCollection.insertOne = vi
         .fn()
         .mockRejectedValue(new Error('Connection lost'));
-
       const gen = service.sendMessageAndStream(
         '507f1f77bcf86cd799439011',
         { content: 'Test' },
@@ -618,8 +364,158 @@ describe('ChatService', () => {
         undefined,
         'some-key',
       );
-
       await expect(collectEvents(gen)).rejects.toThrow('Connection lost');
+    });
+  });
+
+  describe('editMessageAndStream', () => {
+    it('should update user message content and set isEdited', async () => {
+      const gen = service.editMessageAndStream(
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+        { content: 'Updated content' },
+        mockUserId,
+      );
+      await collectEvents(gen);
+      expect(mockMessagesCollection.findOneAndUpdate).toHaveBeenCalledWith(
+        { _id: new ObjectId('507f1f77bcf86cd799439012') },
+        {
+          $set: {
+            content: 'Updated content',
+            isEdited: true,
+            updatedAt: expect.any(Date),
+          },
+        },
+      );
+    });
+
+    it('should delete messages after the edited message', async () => {
+      const gen = service.editMessageAndStream(
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+        { content: 'Updated content' },
+        mockUserId,
+      );
+      await collectEvents(gen);
+      expect(mockMessagesCollection.deleteMany).toHaveBeenCalledWith({
+        conversationId: new ObjectId('507f1f77bcf86cd799439011'),
+        createdAt: { $gt: mockMessage.createdAt },
+      });
+    });
+
+    it('should stream a new AI response after editing', async () => {
+      const gen = service.editMessageAndStream(
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+        { content: 'Updated content' },
+        mockUserId,
+      );
+      const events = await collectEvents(gen);
+      expect(events).toEqual(defaultStreamEvents);
+      expect(mockLlmStreamService.stream).toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException for non-existent message', async () => {
+      mockMessagesCollection.findOne = vi.fn().mockResolvedValue(null);
+      const gen = service.editMessageAndStream(
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+        { content: 'Updated' },
+        mockUserId,
+      );
+      await expect(collectEvents(gen)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw NotFoundException for assistant message (cannot edit)', async () => {
+      mockMessagesCollection.findOne = vi.fn().mockImplementation((query) => {
+        if (query.role === 'user') return Promise.resolve(null);
+        return Promise.resolve(mockMessage);
+      });
+      const gen = service.editMessageAndStream(
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+        { content: 'Updated' },
+        mockUserId,
+      );
+      await expect(collectEvents(gen)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('regenerateAndStream', () => {
+    const mockAssistantMessage = {
+      ...mockMessage,
+      _id: new ObjectId('507f1f77bcf86cd799439013'),
+      role: 'assistant',
+      content: 'Old response',
+    };
+
+    it('should delete the assistant message and subsequent messages', async () => {
+      mockMessagesCollection.findOne = vi.fn().mockImplementation((query) => {
+        if (query.role === 'assistant')
+          return Promise.resolve(mockAssistantMessage);
+        return Promise.resolve(null);
+      });
+      mockConversationsCollection.findOne = vi
+        .fn()
+        .mockResolvedValue(mockConversation);
+      const gen = service.regenerateAndStream(
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439013',
+        mockUserId,
+      );
+      await collectEvents(gen);
+      expect(mockMessagesCollection.deleteMany).toHaveBeenCalledWith({
+        conversationId: new ObjectId('507f1f77bcf86cd799439011'),
+        createdAt: { $gte: mockAssistantMessage.createdAt },
+      });
+    });
+
+    it('should stream a new AI response', async () => {
+      mockMessagesCollection.findOne = vi.fn().mockImplementation((query) => {
+        if (query.role === 'assistant')
+          return Promise.resolve(mockAssistantMessage);
+        return Promise.resolve(null);
+      });
+      mockConversationsCollection.findOne = vi
+        .fn()
+        .mockResolvedValue(mockConversation);
+      const gen = service.regenerateAndStream(
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439013',
+        mockUserId,
+      );
+      const events = await collectEvents(gen);
+      expect(events).toEqual(defaultStreamEvents);
+      expect(mockLlmStreamService.stream).toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException for non-existent message', async () => {
+      mockMessagesCollection.findOne = vi.fn().mockResolvedValue(null);
+      mockConversationsCollection.findOne = vi
+        .fn()
+        .mockResolvedValue(mockConversation);
+      const gen = service.regenerateAndStream(
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439013',
+        mockUserId,
+      );
+      await expect(collectEvents(gen)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw NotFoundException for user message (cannot regenerate)', async () => {
+      mockMessagesCollection.findOne = vi.fn().mockImplementation((query) => {
+        if (query.role === 'assistant') return Promise.resolve(null);
+        return Promise.resolve(mockMessage);
+      });
+      mockConversationsCollection.findOne = vi
+        .fn()
+        .mockResolvedValue(mockConversation);
+      const gen = service.regenerateAndStream(
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+        mockUserId,
+      );
+      await expect(collectEvents(gen)).rejects.toThrow(NotFoundException);
     });
   });
 });

@@ -1,7 +1,7 @@
 import { useRef, useMemo, useEffect, useCallback } from 'react';
 import { Box, CircularProgress } from '@mui/material';
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
-import type { Message } from '../../types';
+import type { Message, MessageId } from '../../types';
 import { asMessageId, asConversationId } from '../../types';
 import MessageBubble from './MessageBubble';
 import TypingIndicator from './TypingIndicator';
@@ -19,6 +19,8 @@ interface MessageListProps {
   loading: boolean;
   streaming: boolean;
   streamingContent: string;
+  onEditMessage?: (messageId: MessageId, content: string) => void;
+  onRegenerateMessage?: (messageId: MessageId) => void;
 }
 
 export default function MessageList({
@@ -26,6 +28,8 @@ export default function MessageList({
   loading,
   streaming,
   streamingContent,
+  onEditMessage,
+  onRegenerateMessage,
 }: MessageListProps) {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const isAtBottomRef = useRef(true);
@@ -117,7 +121,12 @@ export default function MessageList({
       increaseViewportBy={VIRTUOSO_VIEWPORT_INCREASE}
       itemContent={(_, message) => (
         <Box sx={{ px: { xs: 2, md: 3, lg: 4 }, pb: 2 }}>
-          <MessageBubble message={message} />
+          <MessageBubble
+            message={message}
+            onEdit={onEditMessage}
+            onRegenerate={onRegenerateMessage}
+            isStreaming={streaming && message._id === asMessageId('streaming')}
+          />
         </Box>
       )}
       components={{

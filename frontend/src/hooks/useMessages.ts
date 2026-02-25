@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Message, Attachment, ConversationId, ModelId } from '../types';
+import type { Message, Attachment, ConversationId, MessageId, ModelId } from '../types';
 import { asMessageId } from '../types';
 import * as api from '../api/client';
 import { getErrorMessage } from '../utils/getErrorMessage';
@@ -13,6 +13,8 @@ export interface UseMessagesReturn {
   error: string | null;
   fetchMessages: (conversationId: ConversationId) => Promise<void>;
   sendMessage: (conversationId: ConversationId, content: string, model?: ModelId, attachments?: Attachment[]) => Promise<void>;
+  editMessage: (conversationId: ConversationId, messageId: MessageId, content: string) => Promise<void>;
+  regenerateMessage: (conversationId: ConversationId, messageId: MessageId) => Promise<void>;
   stopStreaming: () => void;
   clear: () => void;
 }
@@ -132,6 +134,154 @@ export function useMessages(): UseMessagesReturn {
     [],
   );
 
+  const editMessage = useCallback(
+    async (
+      conversationId: ConversationId,
+      messageId: MessageId,
+      content: string,
+    ) => {
+      // Optimistically update message content and remove messages after it
+      setMessages((prev) => {
+        const idx = prev.findIndex((m) => m._id === messageId);
+        if (idx === -1) return prev;
+        const updated = prev.slice(0, idx + 1);
+        updated[idx] = { ...updated[idx], content, isEdited: true };
+        return updated;
+      });
+      setError(null);
+      setStreaming(true);
+      setStreamingContent('');
+
+      const abortController = new AbortController();
+      abortRef.current = abortController;
+      fullContentRef.current = '';
+      let completed = false;
+
+      try {
+        await api.editMessageStream(
+          conversationId,
+          messageId,
+          content,
+          (chunk) => {
+            fullContentRef.current += chunk;
+            setStreamingContent(fullContentRef.current);
+          },
+          () => {
+            completed = true;
+            const assistantMsg: Message = {
+              _id: asMessageId(crypto.randomUUID()),
+              conversationId,
+              role: 'assistant',
+              content: fullContentRef.current,
+              attachments: [],
+              createdAt: new Date().toISOString(),
+            };
+            setMessages((prev) => [...prev, assistantMsg]);
+          },
+          (streamError, code) => {
+            const i18nKey = code ? `errors.sse.${code}` : '';
+            const localizedMsg = i18nKey && tRef.current(i18nKey) !== i18nKey
+              ? tRef.current(i18nKey)
+              : streamError;
+            const errorMsg: Message = {
+              _id: asMessageId(crypto.randomUUID()),
+              conversationId,
+              role: 'assistant',
+              content: tRef.current('errors.streamErrorPrefix', { message: localizedMsg }),
+              attachments: [],
+              createdAt: new Date().toISOString(),
+            };
+            setMessages((prev) => [...prev, errorMsg]);
+          },
+          abortController.signal,
+        );
+      } catch (err) {
+        if (!completed) {
+          const msg = getErrorMessage(err, tRef.current('errors.editFailed'), tRef.current('errors.corsOrNetwork'));
+          setError(msg);
+        }
+      } finally {
+        setStreaming(false);
+        setStreamingContent('');
+        fullContentRef.current = '';
+        abortRef.current = null;
+      }
+    },
+    [],
+  );
+
+  const regenerateMessage = useCallback(
+    async (
+      conversationId: ConversationId,
+      messageId: MessageId,
+    ) => {
+      // Remove the target message and everything after it
+      setMessages((prev) => {
+        const idx = prev.findIndex((m) => m._id === messageId);
+        if (idx === -1) return prev;
+        return prev.slice(0, idx);
+      });
+      setError(null);
+      setStreaming(true);
+      setStreamingContent('');
+
+      const abortController = new AbortController();
+      abortRef.current = abortController;
+      fullContentRef.current = '';
+      let completed = false;
+
+      try {
+        await api.regenerateMessageStream(
+          conversationId,
+          messageId,
+          (chunk) => {
+            fullContentRef.current += chunk;
+            setStreamingContent(fullContentRef.current);
+          },
+          () => {
+            completed = true;
+            const assistantMsg: Message = {
+              _id: asMessageId(crypto.randomUUID()),
+              conversationId,
+              role: 'assistant',
+              content: fullContentRef.current,
+              attachments: [],
+              createdAt: new Date().toISOString(),
+            };
+            setMessages((prev) => [...prev, assistantMsg]);
+          },
+          (streamError, code) => {
+            const i18nKey = code ? `errors.sse.${code}` : '';
+            const localizedMsg = i18nKey && tRef.current(i18nKey) !== i18nKey
+              ? tRef.current(i18nKey)
+              : streamError;
+            const errorMsg: Message = {
+              _id: asMessageId(crypto.randomUUID()),
+              conversationId,
+              role: 'assistant',
+              content: tRef.current('errors.streamErrorPrefix', { message: localizedMsg }),
+              attachments: [],
+              createdAt: new Date().toISOString(),
+            };
+            setMessages((prev) => [...prev, errorMsg]);
+          },
+          abortController.signal,
+        );
+      } catch (err) {
+        if (!completed) {
+          const msg = getErrorMessage(err, tRef.current('errors.regenerateFailed'), tRef.current('errors.corsOrNetwork'));
+          setError(msg);
+        }
+      } finally {
+        setStreaming(false);
+        setStreamingContent('');
+        fullContentRef.current = '';
+        abortRef.current = null;
+      }
+    },
+    [],
+  );
+
   const clear = useCallback(() => {
     abortRef.current?.abort();
     setMessages([]);
@@ -149,6 +299,8 @@ export function useMessages(): UseMessagesReturn {
     error,
     fetchMessages,
     sendMessage,
+    editMessage,
+    regenerateMessage,
     stopStreaming,
     clear,
   };

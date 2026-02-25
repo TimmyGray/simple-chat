@@ -31,7 +31,12 @@
     "noConversationHint": "开始新聊天或选择已有对话",
     "attachFiles": "附加文件",
     "charCount": "{{current}} / {{max}}",
-    "typing": "AI 正在输入"
+    "typing": "AI 正在输入",
+    "editMessage": "编辑消息",
+    "regenerate": "重新生成",
+    "edited": "(已编辑)",
+    "saveEdit": "保存",
+    "cancelEdit": "取消"
   },
   "dialog": {
     "deleteTitle": "删除对话",
@@ -77,6 +82,8 @@
     "fetchModels": "获取模型失败",
     "filesNotAttached": "部分文件未能附加：",
     "streamErrorPrefix": "错误: {{message}}",
+    "editFailed": "编辑消息失败",
+    "regenerateFailed": "重新生成失败",
     "searchFailed": "搜索对话失败",
     "corsOrNetwork": "无法连接服务器。请检查后端是否正在运行以及 CORS 是否配置正确。",
     "sse": {
