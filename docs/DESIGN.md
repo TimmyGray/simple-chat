@@ -6,13 +6,28 @@ Design reference for the Simple Chat frontend. Use this when implementing new co
 
 **File:** `frontend/src/theme.ts`
 
-MUI 7 `createTheme` with `mode: 'dark'`.
+MUI 7 theme via `createAppTheme(mode: PaletteMode)` factory. Supports `'dark'` and `'light'` modes.
+
+**Mode management:** `useThemeMode` hook + `ThemeModeContext` + `ThemeToggle` component.
+- Persists to `localStorage` key `theme-mode` (values: `'light'`, `'dark'`, `'system'`)
+- System mode listens to `prefers-color-scheme` media query
+- Default: `'dark'` (original behavior)
 
 ---
 
 ## Color Palette
 
-### Primary
+### Mode-Specific Palettes
+
+| Token | Dark Mode | Light Mode |
+|---|---|---|
+| `background.default` | `#0a0a0f` | `#f5f5f8` |
+| `background.paper` | `#12121a` | `#ffffff` |
+| `text.primary` | `#e8e8ed` | `#1a1a2e` |
+| `text.secondary` | `#9090a0` | `#6b6b80` |
+| `divider` | `rgba(255, 255, 255, 0.08)` | `rgba(0, 0, 0, 0.12)` |
+
+### Primary (shared)
 
 | Token | Value | Usage |
 |---|---|---|
@@ -26,25 +41,9 @@ MUI 7 `createTheme` with `mode: 'dark'`.
 |---|---|---|
 | `secondary.main` | `#00e5ff` | Assistant avatar gradient start |
 
-### Background
+### Background, Text, Divider
 
-| Token | Value | Usage |
-|---|---|---|
-| `background.default` | `#0a0a0f` | Page background (very dark, near-black) |
-| `background.paper` | `#12121a` | Sidebar, cards, drawers |
-
-### Text
-
-| Token | Value | Usage |
-|---|---|---|
-| `text.primary` | `#e8e8ed` | Primary body text |
-| `text.secondary` | `#9090a0` | Muted labels, timestamps, captions |
-
-### Divider
-
-| Token | Value | Usage |
-|---|---|---|
-| `divider` | `rgba(255, 255, 255, 0.08)` | Borders between sections, drawer border |
+See **Mode-Specific Palettes** table above. These tokens adapt per theme mode.
 
 ### Semantic Colors (MUI defaults, dark mode)
 
@@ -214,7 +213,7 @@ Model tag:   caption, text.secondary, opacity 0.6
 ### Markdown Rendering (assistant only)
 
 - **Plugin stack:** remarkGfm + rehypeSanitize
-- **Code blocks:** Prism syntax highlighter with `oneDark` theme, 8px border radius
+- **Code blocks:** Prism syntax highlighter (`oneDark` in dark mode, `oneLight` in light mode), 8px border radius
 - **Inline code:** `rgba(255, 255, 255, 0.1)` background, 4px padding-x
 - **Links:** `primary.light` color (#b47cff)
 - **Tables:** collapsed borders, `rgba(255, 255, 255, 0.15)` border, alternating row tint

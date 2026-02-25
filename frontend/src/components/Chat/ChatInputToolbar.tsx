@@ -67,7 +67,7 @@ export default function ChatInputToolbar({
             disabled={disabled || !canSend}
             sx={{
               bgcolor: 'primary.main',
-              color: 'white',
+              color: 'common.white',
               '&:hover': { bgcolor: 'primary.dark' },
               '&.Mui-disabled': {
                 bgcolor: 'action.disabledBackground',

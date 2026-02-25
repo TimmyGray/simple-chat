@@ -1,5 +1,5 @@
 import { createTheme } from '@mui/material/styles';
-import type { PaletteMode } from '@mui/material';
+import type { PaletteMode, Theme } from '@mui/material';
 
 declare module '@mui/material/styles' {
   interface Palette {
@@ -64,7 +64,7 @@ const sharedComponents = {
   },
   MuiDrawer: {
     styleOverrides: {
-      paper: ({ theme: t }: { theme: { palette: { divider: string } } }) => ({
+      paper: ({ theme: t }: { theme: Theme }) => ({
         borderRight: `1px solid ${t.palette.divider}`,
       }),
     },
