@@ -2,7 +2,16 @@
   "permissions": {
     "allow": [
       "Bash(mongod:*)",
-      "Bash(mongosh:*)"
+      "Bash(mongosh:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git status:*)",
+      "Bash(git checkout:*)",
+      "Bash(git branch:*)",
+      "Bash(gh:*)"
     ]
   }
 }
