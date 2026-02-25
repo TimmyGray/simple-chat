@@ -45,6 +45,7 @@ npm test                 # Run all tests
 | `/doc-garden` | Auto: runs with audit (or manual) |
 | `/retrospective` | Auto: every 10 features (or manual) |
 | `/i18n-dev` | When adding user-facing strings |
+| `/update-roadmap` | Quarterly: strategic roadmap refresh with web research |
 
 ## Key Rules (Non-Negotiable)
 

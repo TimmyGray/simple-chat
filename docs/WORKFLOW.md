@@ -34,6 +34,7 @@ User idea → /add-feature → tech-debt-tracker.md → /develop-feature → /va
 | `/doc-garden` | Documentation freshness scan | Auto: runs with audit (or manual) |
 | `/sweep` | Golden principles enforcement | Auto: every 3 features (or manual) |
 | `/i18n-dev` | i18n development guidelines | When adding user-facing strings |
+| `/update-roadmap` | Strategic roadmap refresh | Quarterly or when roadmap feels stale |
 
 ## Cadence
 
@@ -45,6 +46,7 @@ User idea → /add-feature → tech-debt-tracker.md → /develop-feature → /va
 | `/doc-garden` | After every audit | Auto: runs with audit in Phase 12 |
 | `/audit-service` | Every 5 features | Auto: Phase 12 of develop-feature |
 | `/retrospective` | Every 10 features | Auto: Phase 12 of develop-feature |
+| `/update-roadmap` | Quarterly (manual) | Human triggers after phase completion or market shift |
 
 ## Parallel Execution
 
