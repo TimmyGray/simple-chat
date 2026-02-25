@@ -3,10 +3,12 @@ import { ObjectId } from 'mongodb';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
+import { SearchService } from './search.service';
 
 describe('ChatController', () => {
   let controller: ChatController;
   let chatService: any;
+  let searchService: any;
 
   const mockUserId = new ObjectId('607f1f77bcf86cd799439099');
   const mockUser = {
@@ -47,12 +49,20 @@ describe('ChatController', () => {
       sendMessageAndStream: vi.fn().mockResolvedValue(undefined),
     };
 
+    searchService = {
+      searchConversations: vi.fn().mockResolvedValue([]),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ChatController],
       providers: [
         {
           provide: ChatService,
           useValue: chatService,
+        },
+        {
+          provide: SearchService,
+          useValue: searchService,
         },
       ],
     }).compile();

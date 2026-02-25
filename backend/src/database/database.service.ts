@@ -27,6 +27,10 @@ export class DatabaseService implements OnModuleInit {
       { unique: true, sparse: true },
     );
     await this.conversations().createIndex({ userId: 1, updatedAt: -1 });
+    await this.conversations().createIndex(
+      { title: 'text' },
+      { name: 'title_text' },
+    );
     await this.users().createIndex({ email: 1 }, { unique: true });
   }
 

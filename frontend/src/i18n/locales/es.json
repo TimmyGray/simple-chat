@@ -52,6 +52,12 @@
     "dark": "Oscuro",
     "system": "Sistema"
   },
+  "search": {
+    "placeholder": "Buscar conversaciones...",
+    "noResults": "No se encontraron conversaciones",
+    "hint": "Buscar por título o contenido de mensajes",
+    "shortcut": "Buscar"
+  },
   "models": {
     "free": "Gratis",
     "selectModel": "Seleccionar modelo"
@@ -71,6 +77,7 @@
     "fetchModels": "Error al obtener los modelos",
     "filesNotAttached": "Algunos archivos no se adjuntaron:",
     "streamErrorPrefix": "Error: {{message}}",
+    "searchFailed": "Error al buscar conversaciones",
     "corsOrNetwork": "No se puede conectar al servidor. Verifica que el backend esté en ejecución y que CORS esté configurado correctamente.",
     "sse": {
       "STREAM_TIMEOUT": "La respuesta tardó demasiado y se agotó el tiempo.",

@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   Req,
   Res,
   Logger,
@@ -21,9 +22,11 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import type { Request, Response } from 'express';
 import { ChatService } from './chat.service';
+import { SearchService } from './search.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { SendMessageDto } from './dto/send-message.dto';
+import { SearchConversationsDto } from './dto/search-conversations.dto';
 import {
   SSE_ERROR_CODE,
   type StreamEvent,
@@ -41,13 +44,25 @@ const uploadLogger = new Logger('FileUpload');
 export class ChatController {
   private readonly logger = new Logger(ChatController.name);
 
-  constructor(private readonly chatService: ChatService) {}
+  constructor(
+    private readonly chatService: ChatService,
+    private readonly searchService: SearchService,
+  ) {}
 
   // Conversations
   @Get('conversations')
   getConversations(@CurrentUser() user: AuthUser) {
     this.logger.debug('GET /conversations');
     return this.chatService.getConversations(user._id);
+  }
+
+  @Get('conversations/search')
+  searchConversations(
+    @CurrentUser() user: AuthUser,
+    @Query() dto: SearchConversationsDto,
+  ) {
+    this.logger.debug(`GET /conversations/search?q=${dto.q}`);
+    return this.searchService.searchConversations(dto, user._id);
   }
 
   @Post('conversations')

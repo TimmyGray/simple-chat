@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, List, Typography, Divider, CircularProgress, IconButton, Tooltip } from '@mui/material';
+import { Box, List, Typography, Divider, CircularProgress, IconButton, Tooltip, Button } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
+import SearchIcon from '@mui/icons-material/Search';
 import type { ConversationId } from '../../types';
 import { useChatApp } from '../../contexts/ChatAppContext';
 import NewChatButton from './NewChatButton';
@@ -36,6 +37,7 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
     selectConversation,
     newChat,
     deleteConversation,
+    openSearch,
     logout,
   } = useChatApp();
 
@@ -71,6 +73,39 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
       </Typography>
 
       <NewChatButton onClick={handleNewChat} />
+
+      <Button
+        fullWidth
+        variant="outlined"
+        startIcon={<SearchIcon />}
+        onClick={openSearch}
+        sx={{
+          mt: 1,
+          justifyContent: 'flex-start',
+          color: 'text.secondary',
+          borderColor: 'divider',
+          textTransform: 'none',
+          fontWeight: 400,
+          fontSize: '0.85rem',
+          '&:hover': {
+            borderColor: 'text.secondary',
+          },
+        }}
+      >
+        {t('search.shortcut')}
+        <Typography
+          component="span"
+          variant="caption"
+          sx={{
+            ml: 'auto',
+            color: 'text.secondary',
+            opacity: 0.7,
+            fontSize: '0.7rem',
+          }}
+        >
+          {navigator.platform.includes('Mac') ? '\u2318K' : 'Ctrl+K'}
+        </Typography>
+      </Button>
 
       <Divider sx={{ my: 1 }} />
 
