@@ -1,14 +1,14 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-24 (sweep #13)
+> Last updated: 2026-02-25 (sweep #14)
 
 ## Test Summary
 
 | Area | Test Files | Tests | Pass Rate |
 |------|-----------|-------|-----------|
-| Backend | 14 | 135 | 100% |
-| Frontend | 16 | 151 | 100% |
-| **Total** | **30** | **286** | **100%** |
+| Backend | 16 | 153 | 100% |
+| Frontend | 17 | 166 | 100% |
+| **Total** | **33** | **319** | **100%** |
 
 ## Lint Status
 
@@ -44,16 +44,60 @@
 | Frontend | ~20 | 8 (3 patch, 2 minor, 3 major) | 11 (1 moderate, 10 high — all in eslint/minimatch transitive deps) |
 
 ## Bundle Size
-- Backend: 892 KB (dist/)
-- Frontend: 1.4 MB (dist/) — initial load 316 KB + 299 KB vendor-mui + 63 KB vendor-i18n + 796 KB lazy markdown chunk
+- Backend: 952 KB (dist/)
+- Frontend: 1.5 MB (dist/) — initial load 327 KB + 303 KB vendor-mui + 63 KB vendor-i18n + 808 KB lazy markdown chunk
 
 ## Tech Debt
 - Critical: 0 todo, 4 done (JWT authentication completed)
 - High: 0 todo, 7 done — all high-priority items completed
-- Medium: 0 todo, 30 done, 1 wont-fix — all medium items done
-- Low: 3 todo, 12 done (F-L1 PR #74, F-L2 PR #75 completed since audit #11)
-- Features: 12 todo, 2 done (FEAT-5 subtasks expanded)
+- Medium: 0 todo, 31 done, 1 wont-fix — all medium items done
+- Low: 0 todo, 15 done — all low-priority items completed
+- Features: 9 todo, 5 done (FEAT-2, FEAT-3, FEAT-8 completed)
 - Total tracked: 72 (see `docs/exec-plans/tech-debt-tracker.md`)
+
+## Sweep #14 Findings
+- All validation passing: lint 0 errors, typecheck 0 errors, 319 tests passing, build passing
+- Backend tests: 135 -> 153 (+18, 16 files — new search.service.spec.ts, llm-stream.service.spec.ts grew, chat.service.spec.ts grew, chat.controller.spec.ts grew)
+- Frontend tests: 151 -> 166 (+15, 16->17 files — new SearchDialog.test.tsx, MessageBubble.test.tsx grew)
+- Total tests: 286 -> 319 (+33, target: 100+ sustained, comfortably exceeded)
+- Completed since last sweep: FEAT-2 (Conversation Search, PR #80), FEAT-3 (Message Editing & Regeneration, PR #81), FEAT-8 (Theme Toggle, PR #79), F-L4 (hook return types, PR #76), F-L5 (tablet layout, PR #78), F-L6 (source maps, PR #77)
+- Fixed: Low tech debt count was stale (was 3 todo/12 done, actually 0 todo/15 done — F-L4, F-L5, F-L6 all completed)
+- Fixed: Features count was stale (was 12 todo/2 done, actually 9 todo/5 done — FEAT-2, FEAT-3, FEAT-8 completed)
+- Fixed: Medium tech debt count was stale (was 30 done, actually 31 done — B-M11 was uncounted)
+- Fixed: Backend bundle size was stale (was 892 KB, actually 952 KB — search service and llm-stream growth)
+- Fixed: Frontend bundle was stale (was 316 KB index, actually 327 KB — new search/edit components)
+- No auto-fixable code violations found (codebase is clean)
+- No console.log/warn/error in source (clean)
+- No dangerouslySetInnerHTML (clean)
+- No hardcoded secrets (clean)
+- No `any` types in non-test source files (clean)
+- No hardcoded user-facing strings in .tsx files (all use t())
+- No TODO/FIXME/HACK comments in source (clean)
+- i18n: all 4 locales in sync (71 leaf keys each, up from 55 — 16 new keys from FEAT-2 search, FEAT-3 editing, FEAT-8 theme)
+- All cross-module imports follow approved patterns (chat->auth for guards/decorators only)
+- No services importing Express types (clean)
+- No direct MongoDB collection access outside DatabaseService (clean)
+- No files exceed 300-line limit (largest: MessageBubble.tsx at 255, chat.controller.ts at 247, chat.service.ts at 235)
+- All hex/rgba/gradient colors in theme.ts only (exempt per convention)
+- No window.alert() in source (clean)
+- No hardcoded hex colors outside theme.ts (clean)
+- Backend `instanceof Error` pattern: RESOLVED — 0 inline occurrences (canonical utilities in place, ESLint enforced)
+- Frontend `instanceof Error` pattern: 1 occurrence in getErrorMessage.ts utility only (exempt per convention)
+- Frontend bundle: 327 KB index + 303 KB vendor-mui + 63 KB vendor-i18n + 808 KB lazy markdown (1.5 MB total, slight growth from new features)
+- Backend bundle: 952 KB (up from 892 KB — LlmStreamService extraction, SearchService, new DTOs)
+- New components from FEAT-3: MessageActions.tsx (71 lines), MessageEditForm.tsx (72 lines) — well-decomposed
+- New hook from FEAT-2: useSearch.ts (92 lines) — follows existing hook patterns (tRef, getErrorMessage, abort)
+- New service from FEAT-2: search.service.ts (80 lines) — clean, uses DatabaseService, proper DTO validation
+- New DTOs validated: EditMessageDto (content + optional model), SearchConversationsDto (q + optional limit)
+- All new endpoints properly guarded (JwtAuthGuard), rate-limited (Throttle), and ObjectId-validated
+- chat.controller.ts: handleSseStream method extracted to DRY up 3 SSE endpoints (send, edit, regenerate) — good pattern
+- All low-priority tech debt is now complete (0 todo)
+- All medium-priority tech debt is now complete (0 todo)
+- Existing tracked observations:
+  - 1 backend function borderline over 50-line limit: refreshModels at 52 lines (not tracked separately, only 2 lines over)
+  - Frontend components exceed 50-line function limit: MessageBubble (223), useMessages (198), ChatInput (185), SearchDialog (176), Sidebar (174), AuthPage (156), ChatApp (148) — React components with JSX, expected for React
+  - stream.ts has 3 hardcoded English fallback strings ('Generation stopped', 'Stream timeout', 'Stream failed') in a plain .ts file — per convention, plain .ts files without React hooks cannot use t(); these are fallback error messages that pass through onError callbacks to useMessages which wraps them with i18n. Acceptable per current convention.
+- 95 non-test source files scanned (51 backend + 44 frontend), 33 test files scanned
 
 ## Sweep #13 Findings
 - All validation passing: lint 0 errors, typecheck 0 errors, 286 tests passing, build passing
@@ -551,10 +595,11 @@
 - 5 frontend functions exceed 50-line limit (React components/hooks, tracked as F-L2)
 
 ## Targets
-- Test count: 100+ (achieved — currently 286)
+- Test count: 100+ (achieved — currently 319)
 - Coverage: 80%+ (currently 60%/50% thresholds)
 - Lint errors: 0 (achieved)
 - Type errors: 0 (achieved)
 - Critical tech debt: 0 (achieved)
 - High tech debt: 0 (achieved)
 - Medium tech debt: 0 (achieved — all medium items complete)
+- Low tech debt: 0 (achieved — all low items complete)
