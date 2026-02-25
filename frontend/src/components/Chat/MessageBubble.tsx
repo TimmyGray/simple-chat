@@ -1,12 +1,8 @@
 import { lazy, memo, Suspense, useState, useCallback } from 'react';
-import { Box, Typography, Paper, Chip, IconButton, TextField } from '@mui/material';
+import { Box, Typography, Paper, Chip } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import PersonIcon from '@mui/icons-material/Person';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
-import EditOutlined from '@mui/icons-material/EditOutlined';
-import RefreshOutlined from '@mui/icons-material/RefreshOutlined';
-import CheckOutlined from '@mui/icons-material/CheckOutlined';
-import CloseOutlined from '@mui/icons-material/CloseOutlined';
 import { useTranslation } from 'react-i18next';
 import type { Message, MessageId } from '../../types';
 import {
@@ -19,9 +15,9 @@ import {
   MODEL_TAG_OPACITY,
   BLOCKQUOTE_OPACITY,
   CODE_FONT_SIZE,
-  MESSAGE_ACTION_ICON_SIZE,
-  MESSAGE_ACTION_BUTTON_SIZE,
 } from '../../constants';
+import MessageActions from './MessageActions';
+import MessageEditForm from './MessageEditForm';
 
 const LazyMarkdownRenderer = lazy(() => import('./MarkdownRenderer'));
 
@@ -120,60 +116,11 @@ function MessageBubble({ message, onEdit, onRegenerate, isStreaming }: MessageBu
       >
         {/* Action buttons (hover overlay) */}
         {showActions && (
-          <Box
-            className="message-actions"
-            sx={{
-              position: 'absolute',
-              top: -4,
-              [isUser ? 'left' : 'right']: -4,
-              opacity: 0,
-              transition: 'opacity 0.2s',
-              zIndex: 1,
-              display: 'flex',
-              gap: 0.25,
-            }}
-          >
-            {isUser && onEdit && (
-              <IconButton
-                size="small"
-                onClick={handleStartEdit}
-                aria-label={t('chat.editMessage')}
-                sx={{
-                  width: MESSAGE_ACTION_BUTTON_SIZE,
-                  height: MESSAGE_ACTION_BUTTON_SIZE,
-                  backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.9),
-                  backdropFilter: 'blur(4px)',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  '&:hover': {
-                    backgroundColor: 'action.hover',
-                  },
-                }}
-              >
-                <EditOutlined sx={{ fontSize: MESSAGE_ACTION_ICON_SIZE }} />
-              </IconButton>
-            )}
-            {!isUser && onRegenerate && (
-              <IconButton
-                size="small"
-                onClick={handleRegenerate}
-                aria-label={t('chat.regenerate')}
-                sx={{
-                  width: MESSAGE_ACTION_BUTTON_SIZE,
-                  height: MESSAGE_ACTION_BUTTON_SIZE,
-                  backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.9),
-                  backdropFilter: 'blur(4px)',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  '&:hover': {
-                    backgroundColor: 'action.hover',
-                  },
-                }}
-              >
-                <RefreshOutlined sx={{ fontSize: MESSAGE_ACTION_ICON_SIZE }} />
-              </IconButton>
-            )}
-          </Box>
+          <MessageActions
+            isUser={isUser}
+            onEdit={onEdit ? handleStartEdit : undefined}
+            onRegenerate={onRegenerate ? handleRegenerate : undefined}
+          />
         )}
 
         <Paper
@@ -211,47 +158,13 @@ function MessageBubble({ message, onEdit, onRegenerate, isStreaming }: MessageBu
 
           {/* Content */}
           {editing ? (
-            <Box>
-              <TextField
-                multiline
-                fullWidth
-                size="small"
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                onKeyDown={handleEditKeyDown}
-                autoFocus
-                sx={{
-                  '& .MuiInputBase-root': {
-                    fontSize: '0.875rem',
-                  },
-                }}
-              />
-              <Box sx={{ display: 'flex', gap: 0.5, mt: 1, justifyContent: 'flex-end' }}>
-                <IconButton
-                  size="small"
-                  onClick={handleCancelEdit}
-                  aria-label={t('chat.cancelEdit')}
-                  sx={{
-                    width: MESSAGE_ACTION_BUTTON_SIZE,
-                    height: MESSAGE_ACTION_BUTTON_SIZE,
-                  }}
-                >
-                  <CloseOutlined sx={{ fontSize: MESSAGE_ACTION_ICON_SIZE }} />
-                </IconButton>
-                <IconButton
-                  size="small"
-                  onClick={handleSaveEdit}
-                  aria-label={t('chat.saveEdit')}
-                  color="primary"
-                  sx={{
-                    width: MESSAGE_ACTION_BUTTON_SIZE,
-                    height: MESSAGE_ACTION_BUTTON_SIZE,
-                  }}
-                >
-                  <CheckOutlined sx={{ fontSize: MESSAGE_ACTION_ICON_SIZE }} />
-                </IconButton>
-              </Box>
-            </Box>
+            <MessageEditForm
+              editContent={editContent}
+              onEditContentChange={setEditContent}
+              onSave={handleSaveEdit}
+              onCancel={handleCancelEdit}
+              onKeyDown={handleEditKeyDown}
+            />
           ) : isUser ? (
             <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
               {message.content}

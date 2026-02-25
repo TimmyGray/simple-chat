@@ -198,9 +198,10 @@ export class ChatService {
       conversationId: convId,
       createdAt: { $gt: message.createdAt },
     });
+    const model = dto.model || conversation.model;
     yield* this.llmStreamService.stream(
       conversationId,
-      conversation.model,
+      model,
       userId,
       abortSignal,
     );
