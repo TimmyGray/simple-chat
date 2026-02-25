@@ -98,7 +98,7 @@ Each task has:
 |----|------|------|--------|--------|-------|
 | FEAT-1 | User Authentication & Multi-Tenancy | fullstack | 5d | done | JWT auth + userId-scoped data via B-C1 |
 | FEAT-2 | Conversation Search (Cmd+K) | fullstack | 2d | done | PR #80 merged. SearchService + SearchDialog + Cmd+K shortcut. |
-| FEAT-3 | Message Editing & Regeneration | fullstack | 3d | todo | Edit sent messages, regenerate responses |
+| FEAT-3 | Message Editing & Regeneration | fullstack | 3d | done | PR #81 merged. Edit/regenerate endpoints, LlmStreamService extraction, frontend inline edit UI. |
 | FEAT-4 | Conversation Export (Markdown/PDF/JSON) | fullstack | 2d | todo | Data portability |
 | FEAT-5 | System Prompt Templates: template library with 8-10 defaults, admin CRUD, conversation selector. Future: per-user custom templates. | fullstack | 3d | todo | Replaces basic system prompt. Admin role required for global template management. |
 | FEAT-5a | Backend templates module: collection, CRUD endpoints, seed 8-10 default templates | backend | 1d | todo | Templates collection with name, content, category, isDefault fields. |
