@@ -62,7 +62,8 @@ AppModule
 │   ├── AuthController (register, login, profile)
 │   ├── AuthService (JWT issuance, bcrypt password hashing)
 │   ├── JwtStrategy (token validation, user lookup)
-│   └── JwtAuthGuard (route protection)
+│   ├── JwtAuthGuard (route protection)
+│   └── AdminGuard (admin-only route protection)
 ├── ChatModule (imports AuthModule)
 │   ├── ChatController (REST + SSE endpoints, JWT-protected)
 │   ├── ChatService (conversations CRUD, userId-scoped)
@@ -162,6 +163,7 @@ The project uses the **MongoDB native driver** (not Mongoose). `DatabaseModule` 
 | `_id`                   | ObjectId | Primary key                              |
 | `email`                 | string   | User email (unique)                      |
 | `password`              | string   | bcrypt-hashed password                   |
+| `isAdmin`               | boolean  | Admin flag (default: false)              |
 | `totalTokensUsed`       | number   | Cumulative total tokens consumed         |
 | `totalPromptTokens`     | number   | Cumulative prompt tokens consumed        |
 | `totalCompletionTokens` | number   | Cumulative completion tokens consumed    |
@@ -196,6 +198,11 @@ All routes are prefixed with `/api`.
 | `POST`   | `/conversations/:id/messages/:msgId/regenerate` | **10/min** | JWT | Regenerate assistant response (SSE) |
 | `GET`    | `/conversations/search`             | **30/min**   | JWT      | Search conversations and messages |
 | `GET`    | `/conversations/:id/export`         | **10/min**   | JWT      | Export conversation (Markdown/JSON/PDF) |
+| `GET`    | `/templates`                        | 60/min       | JWT      | List all system prompt templates         |
+| `GET`    | `/templates/:id`                    | 60/min       | JWT      | Get a single template                    |
+| `POST`   | `/templates`                        | **10/min**   | JWT+Admin| Create a template (admin only)           |
+| `PATCH`  | `/templates/:id`                    | **10/min**   | JWT+Admin| Update a template (admin only)           |
+| `DELETE` | `/templates/:id`                    | **10/min**   | JWT+Admin| Delete a template (admin only)           |
 | `POST`   | `/upload`                           | **20/min**   | JWT      | Upload files (multipart, max 5 files, 10MB each) |
 | `GET`    | `/models`                           | 60/min       | No       | List available LLM models                |
 | `GET`    | `/health`                           | none         | No       | Health check (skips throttler)           |

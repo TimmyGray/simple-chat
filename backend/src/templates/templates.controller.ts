@@ -17,6 +17,7 @@ import { CreateTemplateDto } from './dto/create-template.dto';
 import { UpdateTemplateDto } from './dto/update-template.dto';
 import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
 
 @Controller('api/templates')
 @UseGuards(JwtAuthGuard)
@@ -38,6 +39,7 @@ export class TemplatesController {
   }
 
   @Post()
+  @UseGuards(AdminGuard)
   @HttpCode(HttpStatus.CREATED)
   @Throttle({ default: { ttl: 60000, limit: 10 } })
   createTemplate(@Body() dto: CreateTemplateDto) {
@@ -46,6 +48,7 @@ export class TemplatesController {
   }
 
   @Patch(':id')
+  @UseGuards(AdminGuard)
   @Throttle({ default: { ttl: 60000, limit: 10 } })
   updateTemplate(
     @Param('id', ParseObjectIdPipe) id: string,
@@ -56,6 +59,7 @@ export class TemplatesController {
   }
 
   @Delete(':id')
+  @UseGuards(AdminGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Throttle({ default: { ttl: 60000, limit: 10 } })
   deleteTemplate(@Param('id', ParseObjectIdPipe) id: string) {

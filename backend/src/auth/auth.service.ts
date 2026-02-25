@@ -33,6 +33,7 @@ export class AuthService {
       const result = await this.databaseService.users().insertOne({
         email: dto.email,
         password: hashedPassword,
+        isAdmin: false,
         totalTokensUsed: 0,
         totalPromptTokens: 0,
         totalCompletionTokens: 0,
@@ -87,6 +88,7 @@ export class AuthService {
     UserDoc,
     | '_id'
     | 'email'
+    | 'isAdmin'
     | 'totalTokensUsed'
     | 'totalPromptTokens'
     | 'totalCompletionTokens'
@@ -109,6 +111,7 @@ export class AuthService {
     return {
       _id: user._id,
       email: user.email,
+      isAdmin: user.isAdmin ?? false,
       totalTokensUsed: user.totalTokensUsed ?? 0,
       totalPromptTokens: user.totalPromptTokens ?? 0,
       totalCompletionTokens: user.totalCompletionTokens ?? 0,
