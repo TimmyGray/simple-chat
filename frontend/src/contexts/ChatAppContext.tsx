@@ -14,6 +14,7 @@ export interface ChatAppContextValue {
   newChat: () => void;
   deleteConversation: (id: ConversationId) => void;
   onConversationUpdate: () => void;
+  onTemplatesChanged: () => void;
   openSearch: () => void;
   logout: () => void;
 }

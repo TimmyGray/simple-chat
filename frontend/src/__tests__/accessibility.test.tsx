@@ -71,6 +71,7 @@ const defaultChatContext: ChatAppContextValue = {
   newChat: vi.fn(),
   deleteConversation: vi.fn(),
   onConversationUpdate: vi.fn(),
+  onTemplatesChanged: vi.fn(),
   openSearch: vi.fn(),
   logout: vi.fn(),
 };

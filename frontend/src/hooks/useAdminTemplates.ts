@@ -25,6 +25,7 @@ export function useAdminTemplates(): UseAdminTemplatesReturn {
   const [error, setError] = useState<string | null>(null);
 
   const fetchTemplates = useCallback(async () => {
+    setError(null);
     setLoading(true);
     try {
       const data = await api.getTemplates();
@@ -37,6 +38,7 @@ export function useAdminTemplates(): UseAdminTemplatesReturn {
   }, []);
 
   const create = useCallback(async (dto: CreateTemplateDto): Promise<Template | null> => {
+    setError(null);
     try {
       const created = await api.createTemplate(dto);
       setTemplates((prev) => [...prev, created]);
@@ -52,6 +54,7 @@ export function useAdminTemplates(): UseAdminTemplatesReturn {
   }, []);
 
   const update = useCallback(async (id: TemplateId, dto: UpdateTemplateDto): Promise<Template | null> => {
+    setError(null);
     try {
       const updated = await api.updateTemplate(id, dto);
       setTemplates((prev) => prev.map((t) => (t._id === id ? updated : t)));
@@ -67,6 +70,7 @@ export function useAdminTemplates(): UseAdminTemplatesReturn {
   }, []);
 
   const remove = useCallback(async (id: TemplateId): Promise<boolean> => {
+    setError(null);
     try {
       await api.deleteTemplate(id);
       setTemplates((prev) => prev.filter((t) => t._id !== id));

@@ -30,9 +30,10 @@ import { ICON_SIZE_SM, LOADING_SPINNER_LG, ERROR_SNACKBAR_AUTO_HIDE_MS } from '.
 interface AdminTemplatePanelProps {
   open: boolean;
   onClose: () => void;
+  onTemplatesChanged: () => void;
 }
 
-export default function AdminTemplatePanel({ open, onClose }: AdminTemplatePanelProps) {
+export default function AdminTemplatePanel({ open, onClose, onTemplatesChanged }: AdminTemplatePanelProps) {
   const { t } = useTranslation();
   const { templates, loading, error, clearError, fetchTemplates, create, update, remove } = useAdminTemplates();
 
@@ -57,20 +58,27 @@ export default function AdminTemplatePanel({ open, onClose }: AdminTemplatePanel
   }, []);
 
   const handleFormSave = useCallback(async (dto: CreateTemplateDto): Promise<boolean> => {
+    let result: Template | null;
     if (editingTemplate) {
-      const result = await update(editingTemplate._id, dto);
-      return result !== null;
+      result = await update(editingTemplate._id, dto);
+    } else {
+      result = await create(dto);
     }
-    const result = await create(dto);
+    if (result) {
+      onTemplatesChanged();
+    }
     return result !== null;
-  }, [editingTemplate, create, update]);
+  }, [editingTemplate, create, update, onTemplatesChanged]);
 
   const handleDeleteConfirm = useCallback(async () => {
     if (deleteTarget) {
-      await remove(deleteTarget._id);
-      setDeleteTarget(null);
+      const success = await remove(deleteTarget._id);
+      if (success) {
+        setDeleteTarget(null);
+        onTemplatesChanged();
+      }
     }
-  }, [deleteTarget, remove]);
+  }, [deleteTarget, remove, onTemplatesChanged]);
 
   return (
     <>

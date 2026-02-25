@@ -9,6 +9,7 @@ export interface UseTemplatesReturn {
   loading: boolean;
   error: string | null;
   clearError: () => void;
+  refresh: () => Promise<void>;
 }
 
 export function useTemplates(): UseTemplatesReturn {
@@ -43,5 +44,5 @@ export function useTemplates(): UseTemplatesReturn {
 
   const clearError = useCallback(() => setError(null), []);
 
-  return { templates, loading, error, clearError };
+  return { templates, loading, error, clearError, refresh: fetchTemplates };
 }

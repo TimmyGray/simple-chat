@@ -53,14 +53,17 @@ export default function TemplateFormDialog({
   const handleSave = async () => {
     if (!validate()) return;
     setSaving(true);
-    const success = await onSave({
-      name: name.trim(),
-      content: content.trim(),
-      ...(category.trim() ? { category: category.trim() } : {}),
-    });
-    setSaving(false);
-    if (success) {
-      onCancel();
+    try {
+      const success = await onSave({
+        name: name.trim(),
+        content: content.trim(),
+        ...(category.trim() ? { category: category.trim() } : {}),
+      });
+      if (success) {
+        onCancel();
+      }
+    } finally {
+      setSaving(false);
     }
   };
 

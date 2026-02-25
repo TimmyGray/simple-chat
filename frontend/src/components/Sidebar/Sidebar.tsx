@@ -40,6 +40,7 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
     selectConversation,
     newChat,
     deleteConversation,
+    onTemplatesChanged,
     openSearch,
     logout,
   } = useChatApp();
@@ -230,6 +231,7 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
         <AdminTemplatePanel
           open={adminPanelOpen}
           onClose={() => setAdminPanelOpen(false)}
+          onTemplatesChanged={onTemplatesChanged}
         />
       )}
     </Box>

@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
@@ -102,6 +103,15 @@ export class TemplatesService implements OnModuleInit {
     id: string,
     dto: UpdateTemplateDto,
   ): Promise<TemplateDoc> {
+    const existing = await this.databaseService
+      .templates()
+      .findOne({ _id: new ObjectId(id) });
+    if (!existing) {
+      throw new NotFoundException('Template not found');
+    }
+    if (existing.isDefault) {
+      throw new ForbiddenException('Default templates cannot be modified');
+    }
     const updateFields: Record<string, unknown> = { updatedAt: new Date() };
     if (dto.name !== undefined) updateFields.name = dto.name;
     if (dto.content !== undefined) updateFields.content = dto.content;
@@ -131,6 +141,15 @@ export class TemplatesService implements OnModuleInit {
   }
 
   async deleteTemplate(id: string): Promise<void> {
+    const existing = await this.databaseService
+      .templates()
+      .findOne({ _id: new ObjectId(id) });
+    if (!existing) {
+      throw new NotFoundException('Template not found');
+    }
+    if (existing.isDefault) {
+      throw new ForbiddenException('Default templates cannot be deleted');
+    }
     const result = await this.databaseService
       .templates()
       .findOneAndDelete({ _id: new ObjectId(id) });
