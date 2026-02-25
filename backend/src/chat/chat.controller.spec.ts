@@ -83,6 +83,36 @@ describe('ChatController', () => {
     controller = module.get<ChatController>(ChatController);
   });
 
+  describe('exportConversation', () => {
+    it('should set download headers and send buffer', async () => {
+      const mockRes = {
+        setHeader: vi.fn(),
+        end: vi.fn(),
+      } as any;
+
+      await controller.exportConversation(
+        mockUser,
+        '507f1f77bcf86cd799439011',
+        { format: 'markdown' as const },
+        mockRes,
+      );
+
+      expect(mockRes.setHeader).toHaveBeenCalledWith(
+        'Content-Type',
+        'text/markdown',
+      );
+      expect(mockRes.setHeader).toHaveBeenCalledWith(
+        'Content-Disposition',
+        expect.stringContaining('attachment'),
+      );
+      expect(mockRes.setHeader).toHaveBeenCalledWith(
+        'Content-Length',
+        expect.any(Number),
+      );
+      expect(mockRes.end).toHaveBeenCalledWith(expect.any(Buffer));
+    });
+  });
+
   describe('searchConversations', () => {
     it('should delegate to searchService with dto and userId', async () => {
       searchService.searchConversations.mockResolvedValue([mockConversation]);

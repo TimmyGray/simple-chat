@@ -111,6 +111,7 @@ export async function searchConversations(query: string, signal?: AbortSignal): 
 
 export { sendMessageStream, editMessageStream, regenerateMessageStream } from './stream';
 
+// SYNC: Keep ExportFormat in sync with backend/src/chat/dto/export-conversation.dto.ts
 export type ExportFormat = 'markdown' | 'pdf' | 'json';
 
 export async function exportConversation(

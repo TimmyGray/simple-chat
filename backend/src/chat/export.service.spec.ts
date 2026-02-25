@@ -37,7 +37,14 @@ describe('ExportService', () => {
       role: 'assistant' as const,
       content: 'I am doing well, thank you!',
       model: 'openrouter/free',
-      attachments: [{ fileName: 'doc.pdf', fileType: 'application/pdf', filePath: '/uploads/doc.pdf', fileSize: 1024 }],
+      attachments: [
+        {
+          fileName: 'doc.pdf',
+          fileType: 'application/pdf',
+          filePath: '/uploads/doc.pdf',
+          fileSize: 1024,
+        },
+      ],
       promptTokens: 10,
       completionTokens: 8,
       totalTokens: 18,
@@ -53,7 +60,9 @@ describe('ExportService', () => {
     const mockMessagesCollection = {
       find: vi.fn().mockReturnValue({
         sort: vi.fn().mockReturnValue({
-          toArray: vi.fn().mockResolvedValue(mockMessages),
+          limit: vi.fn().mockReturnValue({
+            toArray: vi.fn().mockResolvedValue(mockMessages),
+          }),
         }),
       }),
     };

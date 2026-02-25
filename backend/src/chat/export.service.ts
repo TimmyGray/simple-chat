@@ -2,9 +2,23 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ObjectId } from 'mongodb';
 import PDFDocument from 'pdfkit';
 import { DatabaseService } from '../database/database.service';
+import { getErrorMessage } from '../common/utils/get-error-message';
 import type { ConversationDoc } from './interfaces/conversation.interface';
 import type { MessageDoc } from './interfaces/message.interface';
+// SYNC: Keep ExportFormat in sync with frontend/src/api/client.ts
 import type { ExportFormat } from './dto/export-conversation.dto';
+
+const MAX_EXPORT_MESSAGES = 10_000;
+
+const PDF_COLORS = {
+  metadata: '#666666',
+  separator: '#cccccc',
+  userRole: '#7c4dff',
+  assistantRole: '#00bfa5',
+  timestamp: '#999999',
+  content: '#333333',
+  attachment: '#888888',
+} as const;
 
 interface ExportResult {
   buffer: Buffer;
@@ -56,15 +70,18 @@ export class ExportService {
       .messages()
       .find({ conversationId: new ObjectId(conversationId) })
       .sort({ createdAt: 1 })
+      .limit(MAX_EXPORT_MESSAGES)
       .toArray();
   }
 
   private sanitizeFileName(title: string): string {
-    return title
-      .replace(/[^a-zA-Z0-9\s-_]/g, '')
+    const sanitized = title
+      .replace(/[^a-zA-Z0-9\s\-_]/g, '')
       .replace(/\s+/g, '-')
       .substring(0, 50)
-      .toLowerCase();
+      .toLowerCase()
+      .replace(/^-+|-+$/g, '');
+    return sanitized || 'conversation';
   }
 
   private formatDate(date: Date): string {
@@ -182,58 +199,66 @@ export class ExportService {
       });
       doc.on('error', reject);
 
-      // Title
-      doc.fontSize(20).text(conversation.title, { align: 'center' });
-      doc.moveDown(0.5);
+      try {
+        // Title
+        doc.fontSize(20).text(conversation.title, { align: 'center' });
+        doc.moveDown(0.5);
 
-      // Metadata
-      doc
-        .fontSize(10)
-        .fillColor('#666666')
-        .text(`Model: ${conversation.model}`, { align: 'center' });
-      doc.text(`Created: ${this.formatDate(conversation.createdAt)}`, {
-        align: 'center',
-      });
-      doc.text(`Messages: ${messages.length}`, { align: 'center' });
-      doc.moveDown(1);
-
-      // Separator
-      doc.strokeColor('#cccccc').moveTo(50, doc.y).lineTo(545, doc.y).stroke();
-      doc.moveDown(0.5);
-
-      // Messages
-      for (const msg of messages) {
-        const isUser = msg.role === 'user';
-        const role = isUser ? 'User' : 'Assistant';
-        const time = this.formatDate(msg.createdAt);
-
-        // Role header
+        // Metadata
         doc
-          .fontSize(12)
-          .fillColor(isUser ? '#7c4dff' : '#00bfa5')
-          .text(role, { continued: true });
-        doc.fontSize(8).fillColor('#999999').text(`  ${time}`);
-
-        // Content
-        doc.fontSize(10).fillColor('#333333').text(msg.content, {
-          width: 495,
-          lineGap: 2,
+          .fontSize(10)
+          .fillColor(PDF_COLORS.metadata)
+          .text(`Model: ${conversation.model}`, { align: 'center' });
+        doc.text(`Created: ${this.formatDate(conversation.createdAt)}`, {
+          align: 'center',
         });
+        doc.text(`Messages: ${messages.length}`, { align: 'center' });
+        doc.moveDown(1);
 
-        // Attachments
-        if (msg.attachments?.length) {
+        // Separator
+        doc
+          .strokeColor(PDF_COLORS.separator)
+          .moveTo(50, doc.y)
+          .lineTo(545, doc.y)
+          .stroke();
+        doc.moveDown(0.5);
+
+        // Messages
+        for (const msg of messages) {
+          const isUser = msg.role === 'user';
+          const role = isUser ? 'User' : 'Assistant';
+          const time = this.formatDate(msg.createdAt);
+
+          // Role header
           doc
-            .fontSize(8)
-            .fillColor('#888888')
-            .text(
-              `Attachments: ${msg.attachments.map((a) => a.fileName).join(', ')}`,
-            );
+            .fontSize(12)
+            .fillColor(isUser ? PDF_COLORS.userRole : PDF_COLORS.assistantRole)
+            .text(role, { continued: true });
+          doc.fontSize(8).fillColor(PDF_COLORS.timestamp).text(`  ${time}`);
+
+          // Content
+          doc.fontSize(10).fillColor(PDF_COLORS.content).text(msg.content, {
+            width: 495,
+            lineGap: 2,
+          });
+
+          // Attachments
+          if (msg.attachments?.length) {
+            doc
+              .fontSize(8)
+              .fillColor(PDF_COLORS.attachment)
+              .text(
+                `Attachments: ${msg.attachments.map((a) => a.fileName).join(', ')}`,
+              );
+          }
+
+          doc.moveDown(0.5);
         }
 
-        doc.moveDown(0.5);
+        doc.end();
+      } catch (err) {
+        reject(new Error(getErrorMessage(err)));
       }
-
-      doc.end();
     });
   }
 }

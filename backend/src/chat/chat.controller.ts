@@ -104,6 +104,7 @@ export class ChatController {
   }
 
   @Get('conversations/:id/export')
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
   async exportConversation(
     @CurrentUser() user: AuthUser,
     @Param('id', ParseObjectIdPipe) id: string,
@@ -116,10 +117,11 @@ export class ChatController {
       user._id,
       dto.format,
     );
+    const encoded = encodeURIComponent(result.fileName);
     res.setHeader('Content-Type', result.contentType);
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename="${result.fileName}"`,
+      `attachment; filename="${result.fileName}"; filename*=UTF-8''${encoded}`,
     );
     res.setHeader('Content-Length', result.buffer.length);
     res.end(result.buffer);
