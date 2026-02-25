@@ -99,7 +99,7 @@ Each task has:
 | FEAT-1 | User Authentication & Multi-Tenancy | fullstack | 5d | done | JWT auth + userId-scoped data via B-C1 |
 | FEAT-2 | Conversation Search (Cmd+K) | fullstack | 2d | done | PR #80 merged. SearchService + SearchDialog + Cmd+K shortcut. |
 | FEAT-3 | Message Editing & Regeneration | fullstack | 3d | done | PR #81 merged. Edit/regenerate endpoints, LlmStreamService extraction, frontend inline edit UI. |
-| FEAT-4 | Conversation Export (Markdown/PDF/JSON) | fullstack | 2d | todo | Data portability |
+| FEAT-4 | Conversation Export (Markdown/PDF/JSON) | fullstack | 2d | done | PR #83 merged. ExportService (MD/JSON/PDF), ExportMenu component, rate-limited. |
 | FEAT-5 | System Prompt Templates: template library with 8-10 defaults, admin CRUD, conversation selector. Future: per-user custom templates. | fullstack | 3d | todo | Replaces basic system prompt. Admin role required for global template management. |
 | FEAT-5a | Backend templates module: collection, CRUD endpoints, seed 8-10 default templates | backend | 1d | todo | Templates collection with name, content, category, isDefault fields. |
 | FEAT-5b | Admin role system: isAdmin flag on user doc, AdminGuard for protected routes | backend | 0.5d | todo | Minimal RBAC — single admin boolean, not full role system. |
@@ -191,3 +191,4 @@ Each task has:
 | F-L6 | Configure and document production source maps (PR #77) | 2026-02-24 |
 | FEAT-8 | Dark/Light Theme Toggle (PR #79) | 2026-02-25 |
 | FEAT-7 | Streaming Response Controls — stop/copy (PR #82) | 2026-02-25 |
+| FEAT-4 | Conversation Export — Markdown/PDF/JSON (PR #83) | 2026-02-25 |
