@@ -49,18 +49,6 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
     selectedTemplateRef.current = selectedTemplateId;
   }, [selectedTemplateId]);
 
-  // Cmd+K / Ctrl+K keyboard shortcut for search
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setSearchOpen((prev) => !prev);
-      }
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, []);
-
   // Select conversation and sync template selector to match
   const handleSelectConversation = useCallback((id: ConversationId | null) => {
     setSelectedId(id);
@@ -94,6 +82,23 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
       setLocalError(t('errors.createConversation'));
     }
   }, [create, handleSelectConversation, t]);
+
+  // Global keyboard shortcuts: Cmd+K (search), Cmd+N (new chat)
+  // Cmd+N overrides browser "new window" — matches Slack/Notion convention
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey)) return;
+      if (e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen((prev) => !prev);
+      } else if (e.key === 'n') {
+        e.preventDefault();
+        void handleNewChat();
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [handleNewChat]);
 
   const handleDelete = useCallback(
     async (id: ConversationId) => {

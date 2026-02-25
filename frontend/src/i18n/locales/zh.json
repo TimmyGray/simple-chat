@@ -98,6 +98,10 @@
     "free": "免费",
     "selectModel": "选择模型"
   },
+  "shortcuts": {
+    "newChatHint": "{{shortcut}} 新建聊天",
+    "searchHint": "{{shortcut}} 搜索"
+  },
   "errors": {
     "createConversation": "创建对话失败",
     "deleteConversation": "删除对话失败",

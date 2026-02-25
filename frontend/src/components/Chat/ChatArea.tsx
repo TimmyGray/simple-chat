@@ -38,6 +38,19 @@ export default function ChatArea() {
 
   const [exportError, setExportError] = useState<string | null>(null);
 
+  // Escape key stops streaming when active
+  useEffect(() => {
+    if (!streaming) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        stopStreaming();
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [streaming, stopStreaming]);
+
   // Depend on conversation ID (not object reference) to avoid
   // re-fetching messages when the conversation list refreshes
   // but the selected conversation hasn't actually changed.

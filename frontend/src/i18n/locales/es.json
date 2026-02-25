@@ -98,6 +98,10 @@
     "free": "Gratis",
     "selectModel": "Seleccionar modelo"
   },
+  "shortcuts": {
+    "newChatHint": "{{shortcut}} Nuevo chat",
+    "searchHint": "{{shortcut}} Buscar"
+  },
   "errors": {
     "createConversation": "Error al crear la conversación",
     "deleteConversation": "Error al eliminar la conversación",

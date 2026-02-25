@@ -236,6 +236,27 @@ describe('ChatInput', () => {
     expect(input).toHaveFocus();
   });
 
+  it('blurs input on Escape key', async () => {
+    const user = userEvent.setup();
+
+    renderWithTheme(
+      <ChatInput
+        models={mockModels}
+        selectedModel={asModelId('openrouter/free')}
+        onModelChange={vi.fn()}
+        {...templateProps}
+        onSend={vi.fn()}
+      />,
+    );
+
+    const input = screen.getByPlaceholderText('Type your message...');
+    await user.click(input);
+    expect(input).toHaveFocus();
+
+    await user.keyboard('{Escape}');
+    expect(input).not.toHaveFocus();
+  });
+
   it('refocuses input when re-enabled after streaming', () => {
     const props = {
       models: mockModels,
