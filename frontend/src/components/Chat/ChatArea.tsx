@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { Box } from '@mui/material';
-import type { Attachment } from '../../types';
+import type { Attachment, MessageId } from '../../types';
 import { useChatApp } from '../../contexts/ChatAppContext';
 import { useModel } from '../../contexts/ModelContext';
 import { useMessages } from '../../hooks/useMessages';
@@ -16,8 +16,17 @@ export default function ChatArea() {
   } = useChatApp();
   const { models, selectedModel, changeModel } = useModel();
 
-  const { messages, loading, streaming, streamingContent, fetchMessages, sendMessage, clear } =
-    useMessages();
+  const {
+    messages,
+    loading,
+    streaming,
+    streamingContent,
+    fetchMessages,
+    sendMessage,
+    editMessage,
+    regenerateMessage,
+    clear,
+  } = useMessages();
 
   // Depend on conversation ID (not object reference) to avoid
   // re-fetching messages when the conversation list refreshes
@@ -46,6 +55,24 @@ export default function ChatArea() {
     [conversation, selectedModel, sendMessage, onConversationUpdate],
   );
 
+  const handleEditMessage = useCallback(
+    async (messageId: MessageId, content: string) => {
+      if (!conversation) return;
+      await editMessage(conversation._id, messageId, content);
+      onConversationUpdate();
+    },
+    [conversation, editMessage, onConversationUpdate],
+  );
+
+  const handleRegenerateMessage = useCallback(
+    async (messageId: MessageId) => {
+      if (!conversation) return;
+      await regenerateMessage(conversation._id, messageId);
+      onConversationUpdate();
+    },
+    [conversation, regenerateMessage, onConversationUpdate],
+  );
+
   if (!conversation) {
     return <EmptyState />;
   }
@@ -64,6 +91,8 @@ export default function ChatArea() {
         loading={loading}
         streaming={streaming}
         streamingContent={streamingContent}
+        onEditMessage={handleEditMessage}
+        onRegenerateMessage={handleRegenerateMessage}
       />
       <ChatInput
         key={conversation._id}

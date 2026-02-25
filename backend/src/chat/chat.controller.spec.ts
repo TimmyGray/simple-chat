@@ -47,6 +47,8 @@ describe('ChatController', () => {
       deleteConversation: vi.fn().mockResolvedValue(undefined),
       getMessages: vi.fn().mockResolvedValue(mockMessages),
       sendMessageAndStream: vi.fn().mockResolvedValue(undefined),
+      editMessageAndStream: vi.fn().mockResolvedValue(undefined),
+      regenerateAndStream: vi.fn().mockResolvedValue(undefined),
     };
 
     searchService = {
@@ -340,6 +342,127 @@ describe('ChatController', () => {
         mockUserId,
         expect.any(AbortSignal),
         'test-uuid-123',
+      );
+    });
+  });
+
+  describe('editMessage', () => {
+    it('should set SSE headers, consume stream, and end response', async () => {
+      const dto = { content: 'Updated content' };
+      const mockReq = { on: vi.fn(), headers: {} } as any;
+      const written: string[] = [];
+      const mockRes = {
+        setHeader: vi.fn(),
+        write: vi.fn((data: string) => written.push(data)),
+        end: vi.fn(),
+        writableEnded: false,
+      } as any;
+
+      async function* mockGenerator() {
+        yield { type: 'content' as const, content: 'Edited reply' };
+        yield { type: 'done' as const };
+      }
+      chatService.editMessageAndStream = vi
+        .fn()
+        .mockReturnValue(mockGenerator());
+
+      await controller.editMessage(
+        mockUser,
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+        dto,
+        mockReq,
+        mockRes,
+      );
+
+      // Verify SSE headers
+      expect(mockRes.setHeader).toHaveBeenCalledWith(
+        'Content-Type',
+        'text/event-stream',
+      );
+      expect(mockRes.setHeader).toHaveBeenCalledWith(
+        'Cache-Control',
+        'no-cache',
+      );
+      expect(mockRes.setHeader).toHaveBeenCalledWith(
+        'Connection',
+        'keep-alive',
+      );
+      expect(mockRes.setHeader).toHaveBeenCalledWith('X-Accel-Buffering', 'no');
+
+      // Verify SSE wire format
+      expect(written).toContain('data: {"content":"Edited reply"}\n\n');
+      expect(written).toContain('data: [DONE]\n\n');
+
+      // Verify response ended
+      expect(mockRes.end).toHaveBeenCalled();
+
+      // Verify service was called with correct params
+      expect(chatService.editMessageAndStream).toHaveBeenCalledWith(
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+        dto,
+        mockUserId,
+        expect.any(AbortSignal),
+      );
+    });
+  });
+
+  describe('regenerateMessage', () => {
+    it('should set SSE headers, consume stream, and end response', async () => {
+      const mockReq = { on: vi.fn(), headers: {} } as any;
+      const written: string[] = [];
+      const mockRes = {
+        setHeader: vi.fn(),
+        write: vi.fn((data: string) => written.push(data)),
+        end: vi.fn(),
+        writableEnded: false,
+      } as any;
+
+      async function* mockGenerator() {
+        yield { type: 'content' as const, content: 'Regenerated reply' };
+        yield { type: 'done' as const };
+      }
+      chatService.regenerateAndStream = vi
+        .fn()
+        .mockReturnValue(mockGenerator());
+
+      await controller.regenerateMessage(
+        mockUser,
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+        mockReq,
+        mockRes,
+      );
+
+      // Verify SSE headers
+      expect(mockRes.setHeader).toHaveBeenCalledWith(
+        'Content-Type',
+        'text/event-stream',
+      );
+      expect(mockRes.setHeader).toHaveBeenCalledWith(
+        'Cache-Control',
+        'no-cache',
+      );
+      expect(mockRes.setHeader).toHaveBeenCalledWith(
+        'Connection',
+        'keep-alive',
+      );
+      expect(mockRes.setHeader).toHaveBeenCalledWith('X-Accel-Buffering', 'no');
+
+      // Verify SSE wire format
+      expect(written).toContain('data: {"content":"Regenerated reply"}\n\n');
+      expect(written).toContain('data: [DONE]\n\n');
+
+      // Verify response ended
+      expect(mockRes.end).toHaveBeenCalled();
+
+      // Verify service was called with correct params
+      expect(chatService.regenerateAndStream).toHaveBeenCalledWith(
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+        mockUserId,
+        expect.any(AbortSignal),
       );
     });
   });

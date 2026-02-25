@@ -4,48 +4,25 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { ObjectId, MongoServerError } from 'mongodb';
-import OpenAI from 'openai';
 import { DatabaseService } from '../database/database.service';
-import type { TokenUsage } from '../types/documents';
-import { FileExtractionService } from './file-extraction.service';
+import { LlmStreamService } from './llm-stream.service';
 import { ConversationDoc } from './interfaces/conversation.interface';
 import { MessageDoc } from './interfaces/message.interface';
-import {
-  SSE_ERROR_CODE,
-  type StreamEvent,
-} from './interfaces/stream-event.interface';
+import type { StreamEvent } from './interfaces/stream-event.interface';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { SendMessageDto } from './dto/send-message.dto';
-import {
-  getErrorMessage,
-  getErrorStack,
-} from '../common/utils/get-error-message';
+import { EditMessageDto } from './dto/edit-message.dto';
 
 @Injectable()
 export class ChatService {
   private readonly logger = new Logger(ChatService.name);
-  private openai: OpenAI;
 
   constructor(
     private readonly databaseService: DatabaseService,
-    private readonly fileExtractionService: FileExtractionService,
-    private configService: ConfigService,
-  ) {
-    this.openai = new OpenAI({
-      apiKey: this.configService.get<string>('openrouter.apiKey'),
-      baseURL: this.configService.get<string>('openrouter.baseUrl'),
-      defaultHeaders: {
-        'HTTP-Referer': this.configService.get<string>('corsOrigin'),
-        'X-Title': 'Simple Chat',
-      },
-    });
-    this.logger.log(
-      `OpenAI client initialized with baseURL: ${this.configService.get<string>('openrouter.baseUrl')}`,
-    );
-  }
+    private readonly llmStreamService: LlmStreamService,
+  ) {}
 
   async createConversation(
     dto: CreateConversationDto,
@@ -66,12 +43,11 @@ export class ChatService {
   }
 
   async getConversations(userId: ObjectId): Promise<ConversationDoc[]> {
-    const conversations = await this.databaseService
+    return this.databaseService
       .conversations()
       .find({ userId })
       .sort({ updatedAt: -1 })
       .toArray();
-    return conversations;
   }
 
   async getConversation(
@@ -146,8 +122,6 @@ export class ChatService {
   ): AsyncGenerator<StreamEvent> {
     const conversation = await this.getConversation(conversationId, userId);
     const model = dto.model || conversation.model;
-
-    // Save user message (with optional idempotency key for duplicate detection)
     const now = new Date();
     try {
       await this.databaseService.messages().insertOne({
@@ -173,8 +147,6 @@ export class ChatService {
       throw error;
     }
     this.logger.debug(`User message saved for conversation ${conversationId}`);
-
-    // Auto-title: use first message as conversation title
     const messageCount = await this.databaseService
       .messages()
       .countDocuments({ conversationId: new ObjectId(conversationId) });
@@ -193,107 +165,71 @@ export class ChatService {
         `Auto-titled conversation ${conversationId}: "${title}"`,
       );
     }
+    yield* this.llmStreamService.stream(
+      conversationId,
+      model,
+      userId,
+      abortSignal,
+    );
+  }
 
-    // Build message history for LLM
-    const messages = await this.databaseService
-      .messages()
-      .find({ conversationId: new ObjectId(conversationId) })
-      .sort({ createdAt: 1 })
-      .toArray();
-    const llmMessages =
-      await this.fileExtractionService.buildLlmMessages(messages);
+  async *editMessageAndStream(
+    conversationId: string,
+    messageId: string,
+    dto: EditMessageDto,
+    userId: ObjectId,
+    abortSignal?: AbortSignal,
+  ): AsyncGenerator<StreamEvent> {
+    const conversation = await this.getConversation(conversationId, userId);
+    const convId = new ObjectId(conversationId);
+    const message = await this.databaseService.messages().findOne({
+      _id: new ObjectId(messageId),
+      conversationId: convId,
+      role: 'user',
+    });
+    if (!message) throw new NotFoundException('Message not found');
+    await this.databaseService.messages().findOneAndUpdate(
+      { _id: new ObjectId(messageId) },
+      {
+        $set: { content: dto.content, isEdited: true, updatedAt: new Date() },
+      },
+    );
+    await this.databaseService.messages().deleteMany({
+      conversationId: convId,
+      createdAt: { $gt: message.createdAt },
+    });
+    const model = dto.model || conversation.model;
+    yield* this.llmStreamService.stream(
+      conversationId,
+      model,
+      userId,
+      abortSignal,
+    );
+  }
 
-    let fullContent = '';
-    let usage: TokenUsage | undefined;
-
-    try {
-      this.logger.log(
-        `Starting LLM stream: model="${model}", messages=${llmMessages.length}, conversation=${conversationId}`,
-      );
-      const stream = await this.openai.chat.completions.create({
-        model,
-        messages: llmMessages,
-        stream: true,
-        stream_options: { include_usage: true },
-      });
-
-      for await (const chunk of stream) {
-        if (abortSignal?.aborted) {
-          this.logger.log(
-            `Client disconnected during stream for conversation ${conversationId}`,
-          );
-          stream.controller.abort();
-          break;
-        }
-
-        const content = chunk.choices[0]?.delta?.content || '';
-        if (content) {
-          fullContent += content;
-          yield { type: 'content', content };
-        }
-
-        // Extract token usage from the final chunk
-        if (chunk.usage) {
-          usage = {
-            promptTokens: chunk.usage.prompt_tokens,
-            completionTokens: chunk.usage.completion_tokens,
-            totalTokens: chunk.usage.total_tokens,
-          };
-        }
-      }
-
-      // Save assistant message if we got any content
-      if (fullContent.length > 0) {
-        const assistantNow = new Date();
-        await this.databaseService.messages().insertOne({
-          conversationId: new ObjectId(conversationId),
-          role: 'assistant',
-          content: fullContent,
-          model,
-          attachments: [],
-          ...(usage
-            ? {
-                promptTokens: usage.promptTokens,
-                completionTokens: usage.completionTokens,
-                totalTokens: usage.totalTokens,
-              }
-            : {}),
-          createdAt: assistantNow,
-          updatedAt: assistantNow,
-        });
-      }
-
-      // Update user cumulative token usage
-      if (usage) {
-        await this.databaseService.users().updateOne(
-          { _id: userId },
-          {
-            $inc: {
-              totalTokensUsed: usage.totalTokens,
-              totalPromptTokens: usage.promptTokens,
-              totalCompletionTokens: usage.completionTokens,
-            },
-          },
-        );
-        this.logger.debug(
-          `Token usage for conversation ${conversationId}: prompt=${usage.promptTokens}, completion=${usage.completionTokens}, total=${usage.totalTokens}`,
-        );
-      }
-
-      this.logger.log(
-        `Stream complete for conversation ${conversationId}: ${fullContent.length} chars`,
-      );
-      yield { type: 'done', usage };
-    } catch (error) {
-      this.logger.error(
-        `LLM stream failed for conversation ${conversationId}: ${getErrorMessage(error)}`,
-        getErrorStack(error),
-      );
-      yield {
-        type: 'error',
-        code: SSE_ERROR_CODE.LLM_FAILURE,
-        message: getErrorMessage(error),
-      };
-    }
+  async *regenerateAndStream(
+    conversationId: string,
+    messageId: string,
+    userId: ObjectId,
+    abortSignal?: AbortSignal,
+  ): AsyncGenerator<StreamEvent> {
+    const conversation = await this.getConversation(conversationId, userId);
+    const convId = new ObjectId(conversationId);
+    const message = await this.databaseService.messages().findOne({
+      _id: new ObjectId(messageId),
+      conversationId: convId,
+      role: 'assistant',
+    });
+    if (!message) throw new NotFoundException('Message not found');
+    await this.databaseService.messages().deleteMany({
+      conversationId: convId,
+      createdAt: { $gte: message.createdAt },
+    });
+    yield* this.llmStreamService.stream(
+      conversationId,
+      conversation.model,
+      userId,
+      abortSignal,
+    );
   }
 }

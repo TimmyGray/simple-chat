@@ -31,7 +31,12 @@
     "noConversationHint": "Start a new chat or select an existing one",
     "attachFiles": "Attach files",
     "charCount": "{{current}} / {{max}}",
-    "typing": "AI is typing"
+    "typing": "AI is typing",
+    "editMessage": "Edit message",
+    "regenerate": "Regenerate response",
+    "edited": "(edited)",
+    "saveEdit": "Save",
+    "cancelEdit": "Cancel"
   },
   "dialog": {
     "deleteTitle": "Delete conversation",
@@ -77,6 +82,8 @@
     "fetchModels": "Failed to fetch models",
     "filesNotAttached": "Some files were not attached:",
     "streamErrorPrefix": "Error: {{message}}",
+    "editFailed": "Failed to edit message",
+    "regenerateFailed": "Failed to regenerate response",
     "searchFailed": "Failed to search conversations",
     "corsOrNetwork": "Cannot reach the server. Check that the backend is running and CORS is configured correctly.",
     "sse": {

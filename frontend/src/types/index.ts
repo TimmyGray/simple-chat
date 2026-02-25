@@ -49,6 +49,7 @@ export interface Message {
   content: string;
   model?: ModelId;
   attachments: Attachment[];
+  isEdited?: boolean;
   createdAt: string;
 }
 

@@ -28,6 +28,7 @@ export interface MessageDoc {
   role: 'user' | 'assistant';
   content: string;
   model?: string;
+  isEdited?: boolean;
   idempotencyKey?: string;
   attachments: AttachmentDoc[];
   promptTokens?: number;

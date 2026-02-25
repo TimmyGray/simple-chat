@@ -13,19 +13,15 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
-  UseInterceptors,
-  UploadedFiles,
 } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
 import { Throttle } from '@nestjs/throttler';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
 import type { Request, Response } from 'express';
 import { ChatService } from './chat.service';
 import { SearchService } from './search.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { SendMessageDto } from './dto/send-message.dto';
+import { EditMessageDto } from './dto/edit-message.dto';
 import { SearchConversationsDto } from './dto/search-conversations.dto';
 import {
   SSE_ERROR_CODE,
@@ -37,8 +33,6 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { AuthUser } from '../auth/interfaces/auth-user.interface';
 import { getErrorMessage } from '../common/utils/get-error-message';
 
-const uploadLogger = new Logger('FileUpload');
-
 @Controller('api')
 @UseGuards(JwtAuthGuard)
 export class ChatController {
@@ -49,7 +43,6 @@ export class ChatController {
     private readonly searchService: SearchService,
   ) {}
 
-  // Conversations
   @Get('conversations')
   getConversations(@CurrentUser() user: AuthUser) {
     this.logger.debug('GET /conversations');
@@ -98,7 +91,6 @@ export class ChatController {
     return this.chatService.deleteConversation(id, user._id);
   }
 
-  // Messages
   @Get('conversations/:id/messages')
   getMessages(
     @CurrentUser() user: AuthUser,
@@ -124,20 +116,78 @@ export class ChatController {
     this.logger.log(
       `Starting SSE stream for conversation ${id}, model="${dto.model || 'default'}", attachments=${dto.attachments?.length || 0}`,
     );
+    await this.handleSseStream(req, res, `conversation ${id}`, (signal) =>
+      this.chatService.sendMessageAndStream(
+        id,
+        dto,
+        user._id,
+        signal,
+        idempotencyKey,
+      ),
+    );
+  }
 
-    // SSE headers (transport concern)
+  @Post('conversations/:id/messages/:messageId/edit')
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
+  async editMessage(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Param('messageId', ParseObjectIdPipe) messageId: string,
+    @Body() dto: EditMessageDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    this.logger.log(`Editing message ${messageId} in conversation ${id}`);
+    await this.handleSseStream(
+      req,
+      res,
+      `edit message ${messageId}`,
+      (signal) =>
+        this.chatService.editMessageAndStream(
+          id,
+          messageId,
+          dto,
+          user._id,
+          signal,
+        ),
+    );
+  }
+
+  @Post('conversations/:id/messages/:messageId/regenerate')
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
+  async regenerateMessage(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Param('messageId', ParseObjectIdPipe) messageId: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    this.logger.log(`Regenerating message ${messageId} in conversation ${id}`);
+    await this.handleSseStream(
+      req,
+      res,
+      `regenerate message ${messageId}`,
+      (signal) =>
+        this.chatService.regenerateAndStream(id, messageId, user._id, signal),
+    );
+  }
+
+  private async handleSseStream(
+    req: Request,
+    res: Response,
+    logContext: string,
+    createStream: (signal: AbortSignal) => AsyncGenerator<StreamEvent>,
+  ): Promise<void> {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.setHeader('X-Accel-Buffering', 'no');
 
-    // Disconnect detection via AbortController
     const abortController = new AbortController();
     req.on('close', () => abortController.abort());
 
-    // Stream timeout guard
     const streamTimeout = setTimeout(() => {
-      this.logger.warn(`Stream timeout for conversation ${id}`);
+      this.logger.warn(`Stream timeout for ${logContext}`);
       if (!res.writableEnded) {
         this.writeSseError(
           res,
@@ -150,19 +200,11 @@ export class ChatController {
     }, ChatController.STREAM_TIMEOUT_MS);
 
     try {
-      const stream = this.chatService.sendMessageAndStream(
-        id,
-        dto,
-        user._id,
-        abortController.signal,
-        idempotencyKey,
-      );
+      const stream = createStream(abortController.signal);
       await this.consumeStreamAsSSE(stream, res);
     } catch (error) {
       const errorMessage = getErrorMessage(error);
-      this.logger.error(
-        `SSE stream failed for conversation ${id}: ${errorMessage}`,
-      );
+      this.logger.error(`SSE stream failed for ${logContext}: ${errorMessage}`);
       if (!res.writableEnded) {
         this.writeSseError(res, errorMessage, SSE_ERROR_CODE.INTERNAL_ERROR);
       }
@@ -201,53 +243,5 @@ export class ChatController {
   private writeSseError(res: Response, msg: string, code: string): void {
     const payload = { error: msg, code };
     res.write(`data: ${JSON.stringify(payload)}\n\n`);
-  }
-
-  // File upload
-  @Post('upload')
-  @HttpCode(HttpStatus.CREATED)
-  @Throttle({ default: { ttl: 60000, limit: 20 } })
-  @UseInterceptors(
-    FilesInterceptor('files', 5, {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (_req, file, cb) => {
-          const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-          const ext = extname(file.originalname);
-          cb(null, `${uniqueSuffix}${ext}`);
-        },
-      }),
-      fileFilter: (_req, file, cb) => {
-        const allowedMimes = [
-          'application/pdf',
-          'text/plain',
-          'text/markdown',
-          'text/csv',
-          'image/png',
-          'image/jpeg',
-          'image/gif',
-          'image/webp',
-        ];
-        const allowed = allowedMimes.includes(file.mimetype);
-        if (!allowed) {
-          uploadLogger.warn(
-            `Rejected file "${file.originalname}" with mime type "${file.mimetype}"`,
-          );
-        }
-        cb(null, allowed);
-      },
-      limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
-    }),
-  )
-  uploadFiles(@UploadedFiles() files: Express.Multer.File[]) {
-    this.logger.log(
-      `Uploaded ${files.length} file(s): ${files.map((f) => `${f.originalname} (${(f.size / 1024).toFixed(1)}KB)`).join(', ')}`,
-    );
-    return files.map((file) => ({
-      fileName: file.originalname,
-      fileType: file.mimetype,
-      filePath: file.path,
-      fileSize: file.size,
-    }));
   }
 }

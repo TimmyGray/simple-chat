@@ -59,6 +59,10 @@ export const CODE_FONT_SIZE = '0.85rem';
 export const SEARCH_DIALOG_WIDTH = 560;
 export const SEARCH_RESULT_MAX_HEIGHT = 400;
 
+// ─── Message Actions ────────────────────────────────────────
+export const MESSAGE_ACTION_ICON_SIZE = 16;
+export const MESSAGE_ACTION_BUTTON_SIZE = 28;
+
 // ─── Snackbar ───────────────────────────────────────────────
 export const SNACKBAR_AUTO_HIDE_MS = 6000;
 export const ERROR_SNACKBAR_AUTO_HIDE_MS = 4000;

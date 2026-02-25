@@ -109,7 +109,7 @@ export async function searchConversations(query: string, signal?: AbortSignal): 
   return data;
 }
 
-export { sendMessageStream } from './stream';
+export { sendMessageStream, editMessageStream, regenerateMessageStream } from './stream';
 
 export async function uploadFiles(files: File[]): Promise<Attachment[]> {
   const formData = new FormData();

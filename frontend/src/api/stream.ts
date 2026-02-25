@@ -1,19 +1,17 @@
-import type { Attachment, ConversationId, ModelId } from '../types';
+import type { Attachment, ConversationId, MessageId, ModelId } from '../types';
 import { getStoredToken, clearStoredToken, BASE_URL } from './client';
 import { getErrorMessage, isAbortError } from '../utils/getErrorMessage';
 
 const STREAM_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
-export async function sendMessageStream(
-  conversationId: ConversationId,
-  content: string,
-  model?: ModelId,
-  attachments?: Attachment[],
+async function streamFromEndpoint(
+  url: string,
+  body: Record<string, unknown>,
   onChunk?: (text: string) => void,
   onDone?: () => void,
   onError?: (error: string, code?: string) => void,
   abortSignal?: AbortSignal,
-  idempotencyKey?: string,
+  headers?: Record<string, string>,
 ): Promise<void> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), STREAM_TIMEOUT_MS);
@@ -26,24 +24,21 @@ export async function sendMessageStream(
   let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
 
   try {
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const requestHeaders: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...headers,
+    };
     const token = getStoredToken();
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    if (idempotencyKey) {
-      headers['Idempotency-Key'] = idempotencyKey;
+      requestHeaders['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(
-      `${BASE_URL}/conversations/${conversationId}/messages`,
-      {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ content, model, attachments }),
-        signal: controller.signal,
-      },
-    );
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: requestHeaders,
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
 
     if (!response.ok || !response.body) {
       if (response.status === 401 && getStoredToken()) {
@@ -102,4 +97,68 @@ export async function sendMessageStream(
     clearTimeout(timeout);
     reader?.cancel().catch(() => {});
   }
+}
+
+export async function sendMessageStream(
+  conversationId: ConversationId,
+  content: string,
+  model?: ModelId,
+  attachments?: Attachment[],
+  onChunk?: (text: string) => void,
+  onDone?: () => void,
+  onError?: (error: string, code?: string) => void,
+  abortSignal?: AbortSignal,
+  idempotencyKey?: string,
+): Promise<void> {
+  const headers: Record<string, string> = {};
+  if (idempotencyKey) {
+    headers['Idempotency-Key'] = idempotencyKey;
+  }
+
+  return streamFromEndpoint(
+    `${BASE_URL}/conversations/${conversationId}/messages`,
+    { content, model, attachments },
+    onChunk,
+    onDone,
+    onError,
+    abortSignal,
+    headers,
+  );
+}
+
+export async function editMessageStream(
+  conversationId: ConversationId,
+  messageId: MessageId,
+  content: string,
+  onChunk?: (text: string) => void,
+  onDone?: () => void,
+  onError?: (error: string, code?: string) => void,
+  abortSignal?: AbortSignal,
+): Promise<void> {
+  return streamFromEndpoint(
+    `${BASE_URL}/conversations/${conversationId}/messages/${messageId}/edit`,
+    { content },
+    onChunk,
+    onDone,
+    onError,
+    abortSignal,
+  );
+}
+
+export async function regenerateMessageStream(
+  conversationId: ConversationId,
+  messageId: MessageId,
+  onChunk?: (text: string) => void,
+  onDone?: () => void,
+  onError?: (error: string, code?: string) => void,
+  abortSignal?: AbortSignal,
+): Promise<void> {
+  return streamFromEndpoint(
+    `${BASE_URL}/conversations/${conversationId}/messages/${messageId}/regenerate`,
+    {},
+    onChunk,
+    onDone,
+    onError,
+    abortSignal,
+  );
 }
