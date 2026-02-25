@@ -101,7 +101,7 @@ Each task has:
 | FEAT-3 | Message Editing & Regeneration | fullstack | 3d | done | PR #81 merged. Edit/regenerate endpoints, LlmStreamService extraction, frontend inline edit UI. |
 | FEAT-4 | Conversation Export (Markdown/PDF/JSON) | fullstack | 2d | done | PR #83 merged. ExportService (MD/JSON/PDF), ExportMenu component, rate-limited. |
 | FEAT-5 | System Prompt Templates: template library with 8-10 defaults, admin CRUD, conversation selector. Future: per-user custom templates. | fullstack | 3d | todo | Replaces basic system prompt. Admin role required for global template management. |
-| FEAT-5a | Backend templates module: collection, CRUD endpoints, seed 8-10 default templates | backend | 1d | todo | Templates collection with name, content, category, isDefault fields. |
+| FEAT-5a | Backend templates module: collection, CRUD endpoints, seed 8-10 default templates | backend | 1d | done | PR #85 merged. TemplatesModule with CRUD, 10 seed templates, 15 tests. |
 | FEAT-5b | Admin role system: isAdmin flag on user doc, AdminGuard for protected routes | backend | 0.5d | todo | Minimal RBAC — single admin boolean, not full role system. |
 | FEAT-5c | Frontend template selector in conversation + active template indicator | frontend | 1d | todo | Dropdown/dialog to pick template when creating/editing conversation. Show active template chip. |
 | FEAT-5d | Frontend admin panel for template CRUD management | frontend | 0.5d | todo | Admin-only page: list, create, edit, delete global templates. |
@@ -192,3 +192,4 @@ Each task has:
 | FEAT-8 | Dark/Light Theme Toggle (PR #79) | 2026-02-25 |
 | FEAT-7 | Streaming Response Controls — stop/copy (PR #82) | 2026-02-25 |
 | FEAT-4 | Conversation Export — Markdown/PDF/JSON (PR #83) | 2026-02-25 |
+| FEAT-5a | Backend templates module — CRUD + seed (PR #85) | 2026-02-25 |
