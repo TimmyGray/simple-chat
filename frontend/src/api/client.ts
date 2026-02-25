@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Conversation, Message, ModelInfo, Attachment, AuthResponse, User, ConversationId, ModelId } from '../types';
+import type { Conversation, Message, ModelInfo, Attachment, AuthResponse, User, ConversationId, ModelId, Template, TemplateId } from '../types';
 
 export const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -81,7 +81,7 @@ export async function getConversations(): Promise<Conversation[]> {
 }
 
 export async function createConversation(
-  body?: { title?: string; model?: ModelId },
+  body?: { title?: string; model?: ModelId; templateId?: TemplateId },
 ): Promise<Conversation> {
   const { data } = await api.post('/conversations', body || {});
   return data;
@@ -136,5 +136,10 @@ export async function uploadFiles(files: File[]): Promise<Attachment[]> {
 
 export async function getModels(): Promise<ModelInfo[]> {
   const { data } = await api.get('/models');
+  return data;
+}
+
+export async function getTemplates(): Promise<Template[]> {
+  const { data } = await api.get('/templates');
   return data;
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Conversation, ConversationId, ModelId } from '../types';
+import type { Conversation, ConversationId, ModelId, TemplateId } from '../types';
 import * as api from '../api/client';
 import { useFocusRevalidation } from './useFocusRevalidation';
 import { getErrorMessage } from '../utils/getErrorMessage';
@@ -11,7 +11,7 @@ export interface UseConversationsReturn {
   error: string | null;
   clearError: () => void;
   refresh: () => Promise<void>;
-  create: (model?: ModelId) => Promise<Conversation>;
+  create: (model?: ModelId, templateId?: TemplateId | null) => Promise<Conversation>;
   update: (id: ConversationId, body: { title?: string; model?: ModelId }) => Promise<Conversation>;
   remove: (id: ConversationId) => Promise<void>;
 }
@@ -59,9 +59,12 @@ export function useConversations(): UseConversationsReturn {
   useFocusRevalidation(fetchConversations);
 
   const create = useCallback(
-    async (model?: ModelId) => {
+    async (model?: ModelId, templateId?: TemplateId | null) => {
       try {
-        const conversation = await api.createConversation({ model });
+        const conversation = await api.createConversation({
+          model,
+          ...(templateId ? { templateId } : {}),
+        });
         setConversations((prev) => [conversation, ...prev]);
         return conversation;
       } catch (err) {

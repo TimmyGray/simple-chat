@@ -20,6 +20,14 @@ const mockModels = [
   },
 ];
 
+import type { Template, TemplateId } from '../types';
+
+const templateProps = {
+  templates: [] as Template[],
+  selectedTemplateId: null as TemplateId | null,
+  onTemplateChange: vi.fn(),
+};
+
 describe('ChatInput', () => {
   it('renders text input and send button', () => {
     renderWithTheme(
@@ -27,6 +35,7 @@ describe('ChatInput', () => {
         models={mockModels}
         selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
+        {...templateProps}
         onSend={vi.fn()}
       />,
     );
@@ -44,6 +53,7 @@ describe('ChatInput', () => {
         models={mockModels}
         selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
+        {...templateProps}
         onSend={onSend}
       />,
     );
@@ -66,6 +76,7 @@ describe('ChatInput', () => {
         models={mockModels}
         selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
+        {...templateProps}
         onSend={onSend}
       />,
     );
@@ -85,6 +96,7 @@ describe('ChatInput', () => {
         models={mockModels}
         selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
+        {...templateProps}
         onSend={onSend}
       />,
     );
@@ -101,6 +113,7 @@ describe('ChatInput', () => {
         models={mockModels}
         selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
+        {...templateProps}
         onSend={vi.fn()}
         disabled
       />,
@@ -116,6 +129,7 @@ describe('ChatInput', () => {
         models={mockModels}
         selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
+        {...templateProps}
         onSend={vi.fn()}
       />,
     );
@@ -132,6 +146,7 @@ describe('ChatInput', () => {
         models={mockModels}
         selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
+        {...templateProps}
         onSend={vi.fn()}
       />,
     );
@@ -152,6 +167,7 @@ describe('ChatInput', () => {
         models={mockModels}
         selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
+        {...templateProps}
         onSend={onSend}
       />,
     );
@@ -169,6 +185,7 @@ describe('ChatInput', () => {
         models={mockModels}
         selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
+        {...templateProps}
         onSend={vi.fn()}
       />,
     );
@@ -188,6 +205,7 @@ describe('ChatInput', () => {
         models={mockModels}
         selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
+        {...templateProps}
         onSend={onSend}
       />,
     );
@@ -207,6 +225,7 @@ describe('ChatInput', () => {
         models={mockModels}
         selectedModel={asModelId('openrouter/free')}
         onModelChange={vi.fn()}
+        {...templateProps}
         onSend={onSend}
       />,
     );
@@ -222,6 +241,7 @@ describe('ChatInput', () => {
       models: mockModels,
       selectedModel: asModelId('openrouter/free'),
       onModelChange: vi.fn(),
+      ...templateProps,
       onSend: vi.fn(),
     };
 

@@ -33,6 +33,7 @@ export class ChatService {
       userId,
       title: dto.title || 'New Chat',
       model: dto.model || 'openrouter/free',
+      ...(dto.templateId ? { templateId: new ObjectId(dto.templateId) } : {}),
       createdAt: now,
       updatedAt: now,
     };

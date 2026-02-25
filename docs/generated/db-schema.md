@@ -12,6 +12,7 @@
 | userId | ObjectId | yes | Reference to users._id (owner) |
 | title | string | yes | Conversation title (auto-generated from first message, max 50 chars + "...") |
 | model | string | yes | LLM model identifier (default: "openrouter/free") |
+| templateId | ObjectId | no | Reference to templates._id (system prompt template) |
 | createdAt | Date | yes | Creation timestamp |
 | updatedAt | Date | yes | Last update timestamp |
 

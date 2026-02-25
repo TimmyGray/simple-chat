@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, TextField, Paper, Chip, Typography, Snackbar, Alert } from '@mui/material';
 import { alpha } from '@mui/material/styles';
-import type { ModelInfo, Attachment, ModelId } from '../../types';
+import type { ModelInfo, Attachment, ModelId, Template, TemplateId } from '../../types';
 import ChatInputToolbar from './ChatInputToolbar';
 import * as api from '../../api/client';
 import { ATTACHMENT_CHIP_MAX_WIDTH, SNACKBAR_AUTO_HIDE_MS, INPUT_FONT_SIZE } from '../../constants';
@@ -13,6 +13,9 @@ interface ChatInputProps {
   models: ModelInfo[];
   selectedModel: ModelId;
   onModelChange: (model: ModelId) => void;
+  templates: Template[];
+  selectedTemplateId: TemplateId | null;
+  onTemplateChange: (templateId: TemplateId | null) => void;
   onSend: (content: string, attachments: Attachment[]) => void;
   disabled?: boolean;
 }
@@ -21,6 +24,9 @@ export default function ChatInput({
   models,
   selectedModel,
   onModelChange,
+  templates,
+  selectedTemplateId,
+  onTemplateChange,
   onSend,
   disabled,
 }: ChatInputProps) {
@@ -181,6 +187,9 @@ export default function ChatInput({
           models={models}
           selectedModel={selectedModel}
           onModelChange={onModelChange}
+          templates={templates}
+          selectedTemplateId={selectedTemplateId}
+          onTemplateChange={onTemplateChange}
           onAttach={handleAttach}
           onAttachError={handleFileError}
           onSend={handleSend}

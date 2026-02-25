@@ -11,6 +11,8 @@ describe('LlmStreamService', () => {
   let service: LlmStreamService;
   let mockMessagesCollection: any;
   let mockUsersCollection: any;
+  let mockConversationsCollection: any;
+  let mockTemplatesCollection: any;
 
   const mockObjectId = new ObjectId('507f1f77bcf86cd799439011');
   const mockUserId = new ObjectId('607f1f77bcf86cd799439099');
@@ -36,6 +38,12 @@ describe('LlmStreamService', () => {
     mockUsersCollection = {
       updateOne: vi.fn().mockResolvedValue({ modifiedCount: 1 }),
     };
+    mockConversationsCollection = {
+      findOne: vi.fn().mockResolvedValue({ _id: mockObjectId }),
+    };
+    mockTemplatesCollection = {
+      findOne: vi.fn().mockResolvedValue(null),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -45,6 +53,8 @@ describe('LlmStreamService', () => {
           useValue: {
             messages: vi.fn().mockReturnValue(mockMessagesCollection),
             users: vi.fn().mockReturnValue(mockUsersCollection),
+            conversations: vi.fn().mockReturnValue(mockConversationsCollection),
+            templates: vi.fn().mockReturnValue(mockTemplatesCollection),
           },
         },
         {
@@ -228,5 +238,49 @@ describe('LlmStreamService', () => {
       service.stream('507f1f77bcf86cd799439011', 'openrouter/free', mockUserId),
     );
     expect(mockMessagesCollection.insertOne).not.toHaveBeenCalled();
+  });
+
+  it('should prepend system prompt when conversation has templateId', async () => {
+    const templateId = new ObjectId('707f1f77bcf86cd799439033');
+    mockConversationsCollection.findOne.mockResolvedValue({
+      _id: mockObjectId,
+      templateId,
+    });
+    mockTemplatesCollection.findOne.mockResolvedValue({
+      _id: templateId,
+      name: 'Code Reviewer',
+      content: 'You are a code reviewer.',
+      category: 'development',
+      isDefault: true,
+    });
+
+    mockOpenAiStream([
+      { choices: [{ delta: { content: 'Review' } }] },
+    ]);
+    await collectEvents(
+      service.stream('507f1f77bcf86cd799439011', 'openrouter/free', mockUserId),
+    );
+
+    const createCall = vi.spyOn(service['openai'].chat.completions, 'create').mock.calls[0];
+    const messages = (createCall[0] as any).messages;
+    expect(messages[0]).toEqual({ role: 'system', content: 'You are a code reviewer.' });
+    expect(messages[1]).toEqual({ role: 'user', content: 'Hello' });
+  });
+
+  it('should not prepend system prompt when conversation has no templateId', async () => {
+    mockConversationsCollection.findOne.mockResolvedValue({
+      _id: mockObjectId,
+    });
+
+    mockOpenAiStream([
+      { choices: [{ delta: { content: 'Hi' } }] },
+    ]);
+    await collectEvents(
+      service.stream('507f1f77bcf86cd799439011', 'openrouter/free', mockUserId),
+    );
+
+    const createCall = vi.spyOn(service['openai'].chat.completions, 'create').mock.calls[0];
+    const messages = (createCall[0] as any).messages;
+    expect(messages).toEqual([{ role: 'user', content: 'Hello' }]);
   });
 });
