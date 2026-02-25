@@ -186,7 +186,7 @@ describe('TemplatesService', () => {
     });
 
     it('should throw NotFoundException if template not found', async () => {
-      mockTemplatesCollection.findOne.mockResolvedValue(null);
+      mockTemplatesCollection.findOneAndDelete.mockResolvedValue(null);
       await expect(
         service.deleteTemplate(String(mockTemplateId)),
       ).rejects.toThrow(NotFoundException);

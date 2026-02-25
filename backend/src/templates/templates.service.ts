@@ -39,8 +39,18 @@ export class TemplatesService implements OnModuleInit {
       updatedAt: now,
     }));
 
-    await this.databaseService.templates().insertMany(docs);
-    this.logger.log(`Seeded ${docs.length} default templates`);
+    try {
+      await this.databaseService.templates().insertMany(docs);
+      this.logger.log(`Seeded ${docs.length} default templates`);
+    } catch (error) {
+      if (error instanceof MongoServerError && error.code === 11000) {
+        this.logger.debug(
+          'Seed templates already exist (concurrent insert), skipping',
+        );
+        return;
+      }
+      throw error;
+    }
   }
 
   async getTemplates(): Promise<TemplateDoc[]> {
@@ -68,7 +78,7 @@ export class TemplatesService implements OnModuleInit {
       name: dto.name,
       content: dto.content,
       category: dto.category || 'general',
-      isDefault: dto.isDefault ?? false,
+      isDefault: false,
       createdAt: now,
       updatedAt: now,
     };
@@ -96,8 +106,6 @@ export class TemplatesService implements OnModuleInit {
     if (dto.name !== undefined) updateFields.name = dto.name;
     if (dto.content !== undefined) updateFields.content = dto.content;
     if (dto.category !== undefined) updateFields.category = dto.category;
-    if (dto.isDefault !== undefined) updateFields.isDefault = dto.isDefault;
-
     try {
       const template = await this.databaseService
         .templates()
@@ -123,16 +131,13 @@ export class TemplatesService implements OnModuleInit {
   }
 
   async deleteTemplate(id: string): Promise<void> {
-    const template = await this.databaseService
+    const result = await this.databaseService
       .templates()
-      .findOne({ _id: new ObjectId(id) });
-    if (!template) {
+      .findOneAndDelete({ _id: new ObjectId(id) });
+    if (!result) {
       this.logger.warn(`Template not found for deletion: ${id}`);
       throw new NotFoundException('Template not found');
     }
-    await this.databaseService
-      .templates()
-      .findOneAndDelete({ _id: new ObjectId(id) });
     this.logger.log(`Template deleted: ${id}`);
   }
 }

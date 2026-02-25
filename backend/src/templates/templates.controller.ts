@@ -11,6 +11,7 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { TemplatesService } from './templates.service';
 import { CreateTemplateDto } from './dto/create-template.dto';
 import { UpdateTemplateDto } from './dto/update-template.dto';
@@ -38,12 +39,14 @@ export class TemplatesController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
   createTemplate(@Body() dto: CreateTemplateDto) {
     this.logger.log(`Creating template: name="${dto.name}"`);
     return this.templatesService.createTemplate(dto);
   }
 
   @Patch(':id')
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
   updateTemplate(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() dto: UpdateTemplateDto,
@@ -54,6 +57,7 @@ export class TemplatesController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
   deleteTemplate(@Param('id', ParseObjectIdPipe) id: string) {
     this.logger.log(`Deleting template ${id}`);
     return this.templatesService.deleteTemplate(id);

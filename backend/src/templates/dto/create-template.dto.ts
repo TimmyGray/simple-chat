@@ -1,10 +1,4 @@
-import {
-  IsBoolean,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  MaxLength,
-} from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class CreateTemplateDto {
   @IsString()
@@ -21,8 +15,4 @@ export class CreateTemplateDto {
   @IsString()
   @MaxLength(50)
   category?: string;
-
-  @IsOptional()
-  @IsBoolean()
-  isDefault?: boolean;
 }
