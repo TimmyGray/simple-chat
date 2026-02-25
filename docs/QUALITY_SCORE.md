@@ -1,14 +1,14 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-25 (sweep #15)
+> Last updated: 2026-02-26 (sweep #16)
 
 ## Test Summary
 
 | Area | Test Files | Tests | Pass Rate |
 |------|-----------|-------|-----------|
-| Backend | 18 | 178 | 100% |
+| Backend | 19 | 186 | 100% |
 | Frontend | 18 | 174 | 100% |
-| **Total** | **36** | **352** | **100%** |
+| **Total** | **37** | **360** | **100%** |
 
 ## Lint Status
 
@@ -45,15 +45,48 @@
 
 ## Bundle Size
 - Backend: 1.1 MB (dist/)
-- Frontend: 1.5 MB (dist/) — initial load 331 KB + 305 KB vendor-mui + 63 KB vendor-i18n + 808 KB lazy markdown chunk
+- Frontend: 1.5 MB (dist/) — initial load 344 KB + 308 KB vendor-mui + 63 KB vendor-i18n + 808 KB lazy markdown chunk
 
 ## Tech Debt
 - Critical: 0 todo, 4 done (JWT authentication completed)
 - High: 0 todo, 7 done — all high-priority items completed
 - Medium: 0 todo, 31 done, 1 wont-fix — all medium items done
 - Low: 0 todo, 15 done — all low-priority items completed
-- Features: 6 todo, 8 done (FEAT-5a completed since last audit)
-- Total tracked: 72 (see `docs/exec-plans/tech-debt-tracker.md`)
+- Features: 6 todo, 11 done (FEAT-5 all subtasks completed since last sweep)
+- Total tracked: 76 (see `docs/exec-plans/tech-debt-tracker.md`)
+
+## Sweep #16 Findings
+- All validation passing: lint 0 errors, typecheck 0 errors, 360 tests passing, build passing
+- Backend tests: 178 -> 186 (+8, 18->19 files — new admin.guard.spec.ts from FEAT-5b, +llm-stream tests grew for template system prompt injection)
+- Frontend tests: 174 (18 files, unchanged)
+- Total tests: 352 -> 360 (+8, target: 100+ sustained, comfortably exceeded)
+- Completed since last sweep: FEAT-5b (Admin role system, PR #88), FEAT-5c (Frontend template selector, PR #89), FEAT-5d (Frontend admin template panel, PR #91), FEAT-5 parent (all subtasks complete)
+- i18n: all 4 locales in sync (103 leaf keys each, up from 80 — 23 new keys from FEAT-5b/5c/5d template management, admin panel, form validation)
+- Frontend bundle: index 344 KB (+13 KB from template components), vendor-mui 308 KB (+3 KB), vendor-i18n 63 KB, markdown 808 KB (unchanged)
+- No auto-fixable code violations found (codebase is clean)
+- No console.log/warn/error in source (clean)
+- No dangerouslySetInnerHTML (clean)
+- No hardcoded secrets (clean)
+- No `any` types in non-test source files (clean)
+- No hardcoded user-facing strings in .tsx files (all use t())
+- i18n: all 4 locales in sync (103 leaf keys each)
+- All cross-module imports follow approved patterns (chat->auth for guards/decorators, templates->auth for guards, all modules->database for DatabaseService)
+- No services importing Express types (clean)
+- No direct MongoDB collection access outside DatabaseService (clean)
+- No files exceed 300-line limit in production code (test files exempted per convention)
+- All hex/rgba/gradient colors in theme.ts only (exempt per convention)
+- No window.alert() in source (clean)
+- No hardcoded hex colors outside theme.ts (clean)
+- New FEAT-5 code review (admin template panel, template selector, useAdminTemplates, useTemplates):
+  - All MUI components (no raw HTML), all strings use t(), proper error handling with getErrorMessage utility
+  - AdminTemplatePanel: well-structured at 210 lines, uses ConfirmDialog for deletes, Snackbar for errors
+  - TemplateFormDialog: 125 lines, proper validation, uses constants for maxLength
+  - useAdminTemplates: proper error handling, 409 conflict handling for duplicate names
+  - useTemplates: dedup with fetchingRef, tRef pattern for i18n in callbacks
+  - TemplateSelector: 137 lines, clean groupByCategory utility, proper truncation
+  - Backend templates: TemplatesService 162 lines, TemplatesController 69 lines, proper DTOs, AdminGuard on write routes
+- 150 total files scanned (backend/src + frontend/src), 37 test files
+- No new tasks to add to tracker — codebase is clean
 
 ## Sweep #15 Findings
 - All validation passing: lint 0 errors, typecheck 0 errors, 352 tests passing, build passing
