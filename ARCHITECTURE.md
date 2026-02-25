@@ -65,7 +65,10 @@ AppModule
 │   └── JwtAuthGuard (route protection)
 ├── ChatModule (imports AuthModule)
 │   ├── ChatController (REST + SSE endpoints, JWT-protected)
-│   ├── ChatService (conversations CRUD, message streaming, userId-scoped)
+│   ├── ChatService (conversations CRUD, userId-scoped)
+│   ├── LlmStreamService (LLM streaming via OpenAI SDK + OpenRouter)
+│   ├── SearchService (full-text conversation/message search)
+│   ├── ExportService (conversation export: Markdown, JSON, PDF)
 │   └── FileExtractionService (PDF/text/CSV file content extraction)
 ├── ModelsModule
 │   ├── ModelsController (GET /api/models)
@@ -80,9 +83,10 @@ AppModule
 Global middleware applied to all routes:
 - **CorrelationIdMiddleware** -- assigns or validates a UUID `x-correlation-id` header on every request/response.
 
-Global providers set in `main.ts`:
+Global providers set in `main.ts` and `app.module.ts`:
 - **AllExceptionsFilter** -- catches all unhandled exceptions, logs with correlation ID, returns structured JSON errors.
 - **ValidationPipe** -- `whitelist: true, transform: true` using class-validator DTOs.
+- **TransformResponseInterceptor** -- wraps all responses in `{ data: T }` envelope (APP_INTERCEPTOR).
 
 ### Data Flow (Message Sending)
 
@@ -141,6 +145,7 @@ The project uses the **MongoDB native driver** (not Mongoose). `DatabaseModule` 
 | `role`             | `'user'` \| `'assistant'`      | Message author                 |
 | `content`          | string                         | Message text                   |
 | `model`            | string (optional)              | Model used (assistant messages)|
+| `isEdited`         | boolean (optional)             | Whether message has been edited |
 | `idempotencyKey`   | string (optional)              | Client UUID for dedup (user messages) |
 | `attachments`      | `AttachmentDoc[]`              | File metadata array            |
 | `promptTokens`     | number (optional)              | LLM prompt tokens consumed (assistant messages) |
@@ -187,6 +192,10 @@ All routes are prefixed with `/api`.
 | `DELETE` | `/conversations/:id`                | 60/min       | JWT      | Delete conversation and all its messages  |
 | `GET`    | `/conversations/:id/messages`       | 60/min       | JWT      | List messages for a conversation (sorted by createdAt asc) |
 | `POST`   | `/conversations/:id/messages`       | **10/min**   | JWT      | Send message + stream LLM response (SSE) |
+| `POST`   | `/conversations/:id/messages/:msgId/edit` | **10/min** | JWT   | Edit message + re-stream LLM response (SSE) |
+| `POST`   | `/conversations/:id/messages/:msgId/regenerate` | **10/min** | JWT | Regenerate assistant response (SSE) |
+| `GET`    | `/conversations/search`             | **30/min**   | JWT      | Search conversations and messages |
+| `GET`    | `/conversations/:id/export`         | **10/min**   | JWT      | Export conversation (Markdown/JSON/PDF) |
 | `POST`   | `/upload`                           | **20/min**   | JWT      | Upload files (multipart, max 5 files, 10MB each) |
 | `GET`    | `/models`                           | 60/min       | No       | List available LLM models                |
 | `GET`    | `/health`                           | none         | No       | Health check (skips throttler)           |
@@ -229,8 +238,12 @@ App (useAuth hook)
 │       │   │           │   └── User email + Logout button
 │       │   │           └── ChatArea (reads from ChatAppContext + ModelContext)
 │       │   │               ├── ModelSelector (reads from ModelContext)
+│       │   │               ├── SearchDialog (Cmd+K full-text search)
+│       │   │               ├── ExportMenu (Markdown/JSON/PDF export)
 │       │   │               ├── MessageList
 │       │   │               │   ├── MessageBubble[] (lazy-loads MarkdownRenderer)
+│       │   │               │   │   ├── MessageActions (copy, edit, regenerate)
+│       │   │               │   │   └── MessageEditForm (inline edit UI)
 │       │   │               │   └── TypingIndicator (during streaming)
 │       │   │               ├── EmptyState (no conversation selected)
 │       │   │               └── ChatInput
@@ -254,6 +267,8 @@ Custom hooks with two React Contexts (`ChatAppContext`, `ModelContext`). No Redu
 | `useModels`        | Fetch available models on mount. Error state.                       |
 | `useFocusRevalidation` | Shared hook: refetches data on window focus/visibility change. Throttled (default 30s). Used by `useConversations` and `useModels`. |
 | `useOnlineStatus`  | Detects browser online/offline state. Returns `isOnline` boolean. Drives offline Snackbar and ChatInput disabled state. |
+| `useSearch`        | Manages search state for Cmd+K dialog. Debounced query, results, loading state. |
+| `useThemeMode`     | Dark/light/system theme mode toggle. Persists preference to localStorage. |
 
 State coordination happens in `ChatApp` (within `App.tsx`), which assembles the `ChatAppContext` value from `useConversations` and local state (`selectedId`), and a separate `ModelContext` value from `useModels` and `selectedModel`. `Layout` is a pure layout component with no data props.
 
@@ -309,6 +324,7 @@ Language detection order: `localStorage` then `navigator`. Fallback: English. Th
 | `LLM_URL_KEY`        | No       | `https://openrouter.ai/api/v1`             | Override LLM base URL              |
 | `CORS_ORIGIN`        | No       | `http://localhost:5173`                    | Allowed CORS origin                |
 | `UPLOAD_TTL_HOURS`   | No       | `24`                                       | Hours before uploaded files are cleaned up |
+| `JWT_EXPIRATION_SECONDS` | No   | `900`                                      | JWT token expiration in seconds    |
 | `LOG_LEVEL`          | No       | `info`                                     | Pino log level (fatal..trace)      |
 | `NODE_ENV`           | No       | `development`                              | Environment mode                   |
 
