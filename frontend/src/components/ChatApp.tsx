@@ -29,7 +29,7 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
   const { t } = useTranslation();
   const { conversations, loading: convsLoading, error: convsError, clearError: clearConvsError, refresh, create, remove } = useConversations();
   const { models, error: modelsError, clearError: clearModelsError } = useModels();
-  const { templates, error: templatesError, clearError: clearTemplatesError } = useTemplates();
+  const { templates, error: templatesError, clearError: clearTemplatesError, refresh: refreshTemplates } = useTemplates();
   const isOnline = useOnlineStatus();
 
   const [selectedId, setSelectedId] = useState<ConversationId | null>(null);
@@ -116,6 +116,10 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
 
   const handleOpenSearch = useCallback(() => setSearchOpen(true), []);
 
+  const handleTemplatesChanged = useCallback(() => {
+    void refreshTemplates();
+  }, [refreshTemplates]);
+
   const chatContextValue = useMemo<ChatAppContextValue>(
     () => ({
       conversations,
@@ -123,11 +127,13 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
       selectedConversation,
       userEmail: user.email,
       tokenUsage: user.totalTokensUsed,
+      isAdmin: !!user.isAdmin,
       isOnline,
       selectConversation: handleSelectConversation,
       newChat: handleNewChat,
       deleteConversation: handleDelete,
       onConversationUpdate: handleConversationUpdate,
+      onTemplatesChanged: handleTemplatesChanged,
       openSearch: handleOpenSearch,
       logout: onLogout,
     }),
@@ -137,11 +143,13 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
       selectedConversation,
       user.email,
       user.totalTokensUsed,
+      user.isAdmin,
       isOnline,
       handleSelectConversation,
       handleNewChat,
       handleDelete,
       handleConversationUpdate,
+      handleTemplatesChanged,
       handleOpenSearch,
       onLogout,
     ],

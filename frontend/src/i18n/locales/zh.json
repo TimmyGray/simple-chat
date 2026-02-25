@@ -76,7 +76,23 @@
   "templates": {
     "selectTemplate": "系统提示模板",
     "none": "无模板",
-    "activeTemplate": "模板: {{name}}"
+    "activeTemplate": "模板: {{name}}",
+    "adminTitle": "管理模板",
+    "adminButton": "管理模板",
+    "create": "创建模板",
+    "editTitle": "编辑模板",
+    "createTitle": "新建模板",
+    "deleteTitle": "删除模板？",
+    "deleteMessage": "将永久删除模板\"{{name}}\"。",
+    "name": "名称",
+    "content": "内容",
+    "category": "分类",
+    "defaultBadge": "默认",
+    "noTemplates": "暂无模板",
+    "save": "保存",
+    "nameRequired": "模板名称不能为空",
+    "contentRequired": "模板内容不能为空",
+    "duplicateName": "已存在同名模板"
   },
   "models": {
     "free": "免费",
@@ -102,6 +118,9 @@
     "searchFailed": "搜索对话失败",
     "exportFailed": "导出对话失败",
     "fetchTemplates": "获取模板失败",
+    "createTemplate": "创建模板失败",
+    "updateTemplate": "更新模板失败",
+    "deleteTemplate": "删除模板失败",
     "corsOrNetwork": "无法连接服务器。请检查后端是否正在运行以及 CORS 是否配置正确。",
     "sse": {
       "STREAM_TIMEOUT": "响应时间过长，已超时。",

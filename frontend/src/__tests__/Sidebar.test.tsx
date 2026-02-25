@@ -32,11 +32,13 @@ const defaultContext: ChatAppContextValue = {
   selectedConversation: null,
   userEmail: undefined,
   tokenUsage: undefined,
+  isAdmin: false,
   isOnline: true,
   selectConversation: vi.fn(),
   newChat: vi.fn(),
   deleteConversation: vi.fn(),
   onConversationUpdate: vi.fn(),
+  onTemplatesChanged: vi.fn(),
   openSearch: vi.fn(),
   logout: vi.fn(),
 };

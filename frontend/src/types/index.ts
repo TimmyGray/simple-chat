@@ -20,9 +20,22 @@ export const asTemplateId = (s: string): TemplateId => s as TemplateId;
 export interface User {
   _id: string;
   email: string;
+  isAdmin?: boolean;
   totalTokensUsed: number;
   totalPromptTokens: number;
   totalCompletionTokens: number;
+}
+
+export interface CreateTemplateDto {
+  name: string;
+  content: string;
+  category?: string;
+}
+
+export interface UpdateTemplateDto {
+  name?: string;
+  content?: string;
+  category?: string;
 }
 
 export interface AuthResponse {
