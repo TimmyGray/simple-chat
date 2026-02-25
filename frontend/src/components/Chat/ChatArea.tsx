@@ -25,6 +25,7 @@ export default function ChatArea() {
     sendMessage,
     editMessage,
     regenerateMessage,
+    stopStreaming,
     clear,
   } = useMessages();
 
@@ -93,6 +94,7 @@ export default function ChatArea() {
         streamingContent={streamingContent}
         onEditMessage={handleEditMessage}
         onRegenerateMessage={handleRegenerateMessage}
+        onStopStreaming={stopStreaming}
       />
       <ChatInput
         key={conversation._id}

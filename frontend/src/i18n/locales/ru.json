@@ -36,7 +36,10 @@
     "regenerate": "Сгенерировать заново",
     "edited": "(изменено)",
     "saveEdit": "Сохранить",
-    "cancelEdit": "Отмена"
+    "cancelEdit": "Отмена",
+    "stopGenerating": "Остановить генерацию",
+    "copyMessage": "Копировать сообщение",
+    "copied": "Скопировано!"
   },
   "dialog": {
     "deleteTitle": "Удалить диалог",

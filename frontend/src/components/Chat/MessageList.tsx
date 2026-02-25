@@ -21,6 +21,7 @@ interface MessageListProps {
   streamingContent: string;
   onEditMessage?: (messageId: MessageId, content: string) => void;
   onRegenerateMessage?: (messageId: MessageId) => void;
+  onStopStreaming?: () => void;
 }
 
 export default function MessageList({
@@ -30,6 +31,7 @@ export default function MessageList({
   streamingContent,
   onEditMessage,
   onRegenerateMessage,
+  onStopStreaming,
 }: MessageListProps) {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const isAtBottomRef = useRef(true);
@@ -125,6 +127,7 @@ export default function MessageList({
             message={message}
             onEdit={onEditMessage}
             onRegenerate={onRegenerateMessage}
+            onStop={onStopStreaming}
             isStreaming={streaming && message._id === asMessageId('streaming')}
           />
         </Box>

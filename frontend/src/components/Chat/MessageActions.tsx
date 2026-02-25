@@ -1,17 +1,25 @@
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Box, IconButton } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import EditOutlined from '@mui/icons-material/EditOutlined';
 import RefreshOutlined from '@mui/icons-material/RefreshOutlined';
+import StopOutlined from '@mui/icons-material/StopOutlined';
+import ContentCopyOutlined from '@mui/icons-material/ContentCopyOutlined';
+import CheckOutlined from '@mui/icons-material/CheckOutlined';
 import { useTranslation } from 'react-i18next';
 import {
   MESSAGE_ACTION_ICON_SIZE,
   MESSAGE_ACTION_BUTTON_SIZE,
+  COPIED_FEEDBACK_MS,
 } from '../../constants';
 
 interface MessageActionsProps {
   isUser: boolean;
+  isStreaming?: boolean;
   onEdit?: () => void;
   onRegenerate?: () => void;
+  onStop?: () => void;
+  onCopy?: () => void;
 }
 
 const actionButtonSx = {
@@ -27,8 +35,57 @@ const actionButtonSx = {
   },
 } as const;
 
-function MessageActions({ isUser, onEdit, onRegenerate }: MessageActionsProps) {
+function MessageActions({
+  isUser,
+  isStreaming,
+  onEdit,
+  onRegenerate,
+  onStop,
+  onCopy,
+}: MessageActionsProps) {
   const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  const handleCopy = useCallback(() => {
+    onCopy?.();
+    setCopied(true);
+    timerRef.current = setTimeout(() => setCopied(false), COPIED_FEEDBACK_MS);
+  }, [onCopy]);
+
+  if (isStreaming) {
+    return (
+      <Box
+        className="message-actions"
+        sx={{
+          position: 'absolute',
+          top: -4,
+          right: -4,
+          opacity: 1,
+          zIndex: 1,
+          display: 'flex',
+          gap: 0.25,
+        }}
+      >
+        {onStop && (
+          <IconButton
+            size="small"
+            onClick={onStop}
+            aria-label={t('chat.stopGenerating')}
+            sx={actionButtonSx}
+          >
+            <StopOutlined sx={{ fontSize: MESSAGE_ACTION_ICON_SIZE }} />
+          </IconButton>
+        )}
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -62,6 +119,20 @@ function MessageActions({ isUser, onEdit, onRegenerate }: MessageActionsProps) {
           sx={actionButtonSx}
         >
           <RefreshOutlined sx={{ fontSize: MESSAGE_ACTION_ICON_SIZE }} />
+        </IconButton>
+      )}
+      {onCopy && (
+        <IconButton
+          size="small"
+          onClick={handleCopy}
+          aria-label={copied ? t('chat.copied') : t('chat.copyMessage')}
+          sx={actionButtonSx}
+        >
+          {copied ? (
+            <CheckOutlined sx={{ fontSize: MESSAGE_ACTION_ICON_SIZE, color: 'success.main' }} />
+          ) : (
+            <ContentCopyOutlined sx={{ fontSize: MESSAGE_ACTION_ICON_SIZE }} />
+          )}
         </IconButton>
       )}
     </Box>
