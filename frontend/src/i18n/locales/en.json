@@ -52,6 +52,12 @@
     "dark": "Dark",
     "system": "System"
   },
+  "search": {
+    "placeholder": "Search conversations...",
+    "noResults": "No conversations found",
+    "hint": "Search by title or message content",
+    "shortcut": "Search"
+  },
   "models": {
     "free": "Free",
     "selectModel": "Select model"
@@ -71,6 +77,7 @@
     "fetchModels": "Failed to fetch models",
     "filesNotAttached": "Some files were not attached:",
     "streamErrorPrefix": "Error: {{message}}",
+    "searchFailed": "Failed to search conversations",
     "corsOrNetwork": "Cannot reach the server. Check that the backend is running and CORS is configured correctly.",
     "sse": {
       "STREAM_TIMEOUT": "The response took too long and timed out.",

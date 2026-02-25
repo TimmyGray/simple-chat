@@ -104,6 +104,11 @@ export async function getMessages(conversationId: ConversationId): Promise<Messa
   return data;
 }
 
+export async function searchConversations(query: string, signal?: AbortSignal): Promise<Conversation[]> {
+  const { data } = await api.get('/conversations/search', { params: { q: query }, signal });
+  return data;
+}
+
 export { sendMessageStream } from './stream';
 
 export async function uploadFiles(files: File[]): Promise<Attachment[]> {

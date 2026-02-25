@@ -8,6 +8,7 @@ import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { ChatAppProvider } from '../contexts/ChatAppContext';
 import { ModelProvider } from '../contexts/ModelContext';
 import Layout from './Layout';
+import SearchDialog from './common/SearchDialog';
 import { ERROR_SNACKBAR_AUTO_HIDE_MS } from '../constants';
 
 import type { User, ConversationId, ModelId } from '../types';
@@ -30,12 +31,29 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
   const [selectedId, setSelectedId] = useState<ConversationId | null>(null);
   const [selectedModel, setSelectedModel] = useState<ModelId>(asModelId('openrouter/free'));
   const [localError, setLocalError] = useState<string | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   // Ref keeps handleNewChat stable when only selectedModel changes
   const selectedModelRef = useRef(selectedModel);
   useEffect(() => {
     selectedModelRef.current = selectedModel;
   }, [selectedModel]);
+
+  // Cmd+K / Ctrl+K keyboard shortcut for search
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen((prev) => !prev);
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
+
+  const handleSearchSelect = useCallback((id: ConversationId) => {
+    setSelectedId(id);
+  }, []);
 
   const error = convsError || modelsError || localError;
 
@@ -78,6 +96,8 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
     void onRefreshUser();
   }, [refresh, onRefreshUser]);
 
+  const handleOpenSearch = useCallback(() => setSearchOpen(true), []);
+
   const chatContextValue = useMemo<ChatAppContextValue>(
     () => ({
       conversations,
@@ -90,6 +110,7 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
       newChat: handleNewChat,
       deleteConversation: handleDelete,
       onConversationUpdate: handleConversationUpdate,
+      openSearch: handleOpenSearch,
       logout: onLogout,
     }),
     [
@@ -102,6 +123,7 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
       handleNewChat,
       handleDelete,
       handleConversationUpdate,
+      handleOpenSearch,
       onLogout,
     ],
   );
@@ -122,6 +144,11 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
           <Layout />
         </ModelProvider>
       </ChatAppProvider>
+      <SearchDialog
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onSelect={handleSearchSelect}
+      />
       <Snackbar
         open={!isOnline}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}

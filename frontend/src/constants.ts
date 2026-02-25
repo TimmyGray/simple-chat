@@ -55,6 +55,10 @@ export const LOADING_SPINNER_LG = 32;
 export const CODE_BLOCK_BORDER_RADIUS = 8;
 export const CODE_FONT_SIZE = '0.85rem';
 
+// ─── Search Dialog ──────────────────────────────────────────
+export const SEARCH_DIALOG_WIDTH = 560;
+export const SEARCH_RESULT_MAX_HEIGHT = 400;
+
 // ─── Snackbar ───────────────────────────────────────────────
 export const SNACKBAR_AUTO_HIDE_MS = 6000;
 export const ERROR_SNACKBAR_AUTO_HIDE_MS = 4000;

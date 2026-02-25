@@ -13,6 +13,7 @@ export interface ChatAppContextValue {
   newChat: () => void;
   deleteConversation: (id: ConversationId) => void;
   onConversationUpdate: () => void;
+  openSearch: () => void;
   logout: () => void;
 }
 
