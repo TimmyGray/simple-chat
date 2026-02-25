@@ -70,6 +70,10 @@ export const COPIED_FEEDBACK_MS = 2000;
 export const TEMPLATE_MENU_MAX_HEIGHT = 360;
 export const TEMPLATE_CONTENT_PREVIEW_LENGTH = 60;
 
+// ─── Shortcut Hints ──────────────────────────────────────────
+export const SHORTCUT_HINT_FONT_SIZE = '0.7rem';
+export const SHORTCUT_HINT_OPACITY = 0.7;
+
 // ─── Snackbar ───────────────────────────────────────────────
 export const SNACKBAR_AUTO_HIDE_MS = 6000;
 export const ERROR_SNACKBAR_AUTO_HIDE_MS = 4000;

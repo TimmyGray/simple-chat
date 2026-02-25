@@ -60,6 +60,8 @@ export default function ChatInput({
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
+    } else if (e.key === 'Escape') {
+      inputRef.current?.blur();
     }
   };
 

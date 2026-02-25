@@ -1,6 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import { Button } from '@mui/material';
+import { Button, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import { SHORTCUT_HINT_FONT_SIZE, SHORTCUT_HINT_OPACITY } from '../../constants';
+
+const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
 
 interface NewChatButtonProps {
   onClick: () => void;
@@ -24,6 +27,17 @@ export default function NewChatButton({ onClick }: NewChatButtonProps) {
       }}
     >
       {t('sidebar.newChat')}
+      <Typography
+        component="span"
+        variant="caption"
+        sx={{
+          ml: 'auto',
+          opacity: SHORTCUT_HINT_OPACITY,
+          fontSize: SHORTCUT_HINT_FONT_SIZE,
+        }}
+      >
+        {isMac ? '\u2318N' : 'Ctrl+N'}
+      </Typography>
     </Button>
   );
 }

@@ -12,7 +12,7 @@ import ConfirmDialog from '../common/ConfirmDialog';
 import AdminTemplatePanel from '../Admin/AdminTemplatePanel';
 import LanguageSwitcher from '../common/LanguageSwitcher';
 import ThemeToggle from '../common/ThemeToggle';
-import { ICON_SIZE_SM, LOADING_SPINNER_SM } from '../../constants';
+import { ICON_SIZE_SM, LOADING_SPINNER_SM, SHORTCUT_HINT_FONT_SIZE, SHORTCUT_HINT_OPACITY } from '../../constants';
 
 function formatTokenCount(tokens: number): string {
   if (tokens >= 1_000_000) {
@@ -104,8 +104,8 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
           sx={{
             ml: 'auto',
             color: 'text.secondary',
-            opacity: 0.7,
-            fontSize: '0.7rem',
+            opacity: SHORTCUT_HINT_OPACITY,
+            fontSize: SHORTCUT_HINT_FONT_SIZE,
           }}
         >
           {/Mac|iPhone|iPad|iPod/.test(navigator.userAgent) ? '\u2318K' : 'Ctrl+K'}

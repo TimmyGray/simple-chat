@@ -16,4 +16,16 @@ describe('EmptyState', () => {
       screen.getByText('Start a new chat or select an existing one'),
     ).toBeInTheDocument();
   });
+
+  it('renders keyboard shortcut hints', () => {
+    render(
+      <ThemeProvider theme={theme}>
+        <EmptyState />
+      </ThemeProvider>,
+    );
+    // Shortcut hints should contain both N and K references
+    const hintText = screen.getByText(/New chat/);
+    expect(hintText).toBeInTheDocument();
+    expect(hintText.textContent).toContain('Search');
+  });
 });

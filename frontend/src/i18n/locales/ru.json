@@ -98,6 +98,10 @@
     "free": "Бесплатно",
     "selectModel": "Выбрать модель"
   },
+  "shortcuts": {
+    "newChatHint": "{{shortcut}} Новый чат",
+    "searchHint": "{{shortcut}} Поиск"
+  },
   "errors": {
     "createConversation": "Не удалось создать диалог",
     "deleteConversation": "Не удалось удалить диалог",
