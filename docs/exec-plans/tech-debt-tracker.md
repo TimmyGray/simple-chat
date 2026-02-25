@@ -106,7 +106,7 @@ Each task has:
 | FEAT-5c | Frontend template selector in conversation + active template indicator | frontend | 1d | todo | Dropdown/dialog to pick template when creating/editing conversation. Show active template chip. |
 | FEAT-5d | Frontend admin panel for template CRUD management | frontend | 0.5d | todo | Admin-only page: list, create, edit, delete global templates. |
 | FEAT-6 | Token Usage & Cost Tracking | fullstack | 2d | done | PR #28 merged. stream_options usage extraction, per-message + cumulative tracking. |
-| FEAT-7 | Streaming Response Controls (stop/copy/retry) | frontend | 1d | todo | AbortController for stop exists |
+| FEAT-7 | Streaming Response Controls (stop/copy/retry) | frontend | 1d | done | PR #82 merged. Stop button during streaming, copy-to-clipboard on all messages, 4 new tests. |
 | FEAT-8 | Dark/Light Theme Toggle | frontend | 1d | done | PR #79 merged. useThemeMode hook, ThemeModeProvider, ThemeToggle component, light/dark/system modes. |
 | FEAT-9 | Keyboard Shortcuts | frontend | 1d | todo | Cmd+N, Cmd+K, Escape, etc. |
 | FEAT-10 | Real-Time Collaboration | fullstack | 5d | todo | WebSocket, shared conversations |
@@ -190,3 +190,4 @@ Each task has:
 | F-L5 | Optimize tablet layout with responsive breakpoints (PR #78) | 2026-02-24 |
 | F-L6 | Configure and document production source maps (PR #77) | 2026-02-24 |
 | FEAT-8 | Dark/Light Theme Toggle (PR #79) | 2026-02-25 |
+| FEAT-7 | Streaming Response Controls — stop/copy (PR #82) | 2026-02-25 |
