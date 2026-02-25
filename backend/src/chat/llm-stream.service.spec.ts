@@ -11,7 +11,6 @@ describe('LlmStreamService', () => {
   let service: LlmStreamService;
   let mockMessagesCollection: any;
   let mockUsersCollection: any;
-  let mockConversationsCollection: any;
   let mockTemplatesCollection: any;
 
   const mockObjectId = new ObjectId('507f1f77bcf86cd799439011');
@@ -38,9 +37,6 @@ describe('LlmStreamService', () => {
     mockUsersCollection = {
       updateOne: vi.fn().mockResolvedValue({ modifiedCount: 1 }),
     };
-    mockConversationsCollection = {
-      findOne: vi.fn().mockResolvedValue({ _id: mockObjectId }),
-    };
     mockTemplatesCollection = {
       findOne: vi.fn().mockResolvedValue(null),
     };
@@ -53,7 +49,6 @@ describe('LlmStreamService', () => {
           useValue: {
             messages: vi.fn().mockReturnValue(mockMessagesCollection),
             users: vi.fn().mockReturnValue(mockUsersCollection),
-            conversations: vi.fn().mockReturnValue(mockConversationsCollection),
             templates: vi.fn().mockReturnValue(mockTemplatesCollection),
           },
         },

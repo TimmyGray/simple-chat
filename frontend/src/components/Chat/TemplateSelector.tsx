@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   IconButton,
@@ -44,7 +44,7 @@ export default function TemplateSelector({
     handleClose();
   };
 
-  const categories = groupByCategory(templates);
+  const categories = useMemo(() => groupByCategory(templates), [templates]);
   const hasSelection = selectedTemplateId !== null;
 
   return (

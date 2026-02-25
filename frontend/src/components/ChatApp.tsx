@@ -61,9 +61,16 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
     return () => document.removeEventListener('keydown', handler);
   }, []);
 
-  const handleSearchSelect = useCallback((id: ConversationId) => {
+  // Select conversation and sync template selector to match
+  const handleSelectConversation = useCallback((id: ConversationId | null) => {
     setSelectedId(id);
-  }, []);
+    const conv = id ? conversations.find((c) => c._id === id) : null;
+    setSelectedTemplateId(conv?.templateId ?? null);
+  }, [conversations]);
+
+  const handleSearchSelect = useCallback((id: ConversationId) => {
+    handleSelectConversation(id);
+  }, [handleSelectConversation]);
 
   const error = convsError || modelsError || templatesError || localError;
 
@@ -82,24 +89,24 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
   const handleNewChat = useCallback(async () => {
     try {
       const conv = await create(selectedModelRef.current, selectedTemplateRef.current);
-      setSelectedId(conv._id);
+      handleSelectConversation(conv._id);
     } catch {
       setLocalError(t('errors.createConversation'));
     }
-  }, [create, t]);
+  }, [create, handleSelectConversation, t]);
 
   const handleDelete = useCallback(
     async (id: ConversationId) => {
       try {
         await remove(id);
         if (selectedId === id) {
-          setSelectedId(null);
+          handleSelectConversation(null);
         }
       } catch {
         setLocalError(t('errors.deleteConversation'));
       }
     },
-    [remove, selectedId, t],
+    [remove, selectedId, handleSelectConversation, t],
   );
 
   const handleConversationUpdate = useCallback(() => {
@@ -117,7 +124,7 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
       userEmail: user.email,
       tokenUsage: user.totalTokensUsed,
       isOnline,
-      selectConversation: setSelectedId,
+      selectConversation: handleSelectConversation,
       newChat: handleNewChat,
       deleteConversation: handleDelete,
       onConversationUpdate: handleConversationUpdate,
@@ -131,6 +138,7 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
       user.email,
       user.totalTokensUsed,
       isOnline,
+      handleSelectConversation,
       handleNewChat,
       handleDelete,
       handleConversationUpdate,
