@@ -1,12 +1,14 @@
-import { useEffect, useCallback } from 'react';
-import { Box } from '@mui/material';
+import { useState, useEffect, useCallback } from 'react';
+import { Box, Snackbar, Alert } from '@mui/material';
 import type { Attachment, MessageId } from '../../types';
 import { useChatApp } from '../../contexts/ChatAppContext';
 import { useModel } from '../../contexts/ModelContext';
 import { useMessages } from '../../hooks/useMessages';
 import MessageList from './MessageList';
 import ChatInput from './ChatInput';
+import ExportMenu from './ExportMenu';
 import EmptyState from '../common/EmptyState';
+import { ERROR_SNACKBAR_AUTO_HIDE_MS } from '../../constants';
 
 export default function ChatArea() {
   const {
@@ -28,6 +30,8 @@ export default function ChatArea() {
     stopStreaming,
     clear,
   } = useMessages();
+
+  const [exportError, setExportError] = useState<string | null>(null);
 
   // Depend on conversation ID (not object reference) to avoid
   // re-fetching messages when the conversation list refreshes
@@ -87,6 +91,9 @@ export default function ChatArea() {
         pb: 0.5,
       }}
     >
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', px: 1, pt: 0.5 }}>
+        <ExportMenu conversationId={conversation._id} onError={setExportError} />
+      </Box>
       <MessageList
         messages={messages}
         loading={loading}
@@ -104,6 +111,16 @@ export default function ChatArea() {
         onSend={handleSend}
         disabled={streaming || !isOnline}
       />
+      <Snackbar
+        open={!!exportError}
+        autoHideDuration={ERROR_SNACKBAR_AUTO_HIDE_MS}
+        onClose={() => setExportError(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="error" onClose={() => setExportError(null)}>
+          {exportError}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

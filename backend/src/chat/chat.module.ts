@@ -5,6 +5,7 @@ import { UploadController } from './upload.controller';
 import { ChatService } from './chat.service';
 import { LlmStreamService } from './llm-stream.service';
 import { SearchService } from './search.service';
+import { ExportService } from './export.service';
 import { FileExtractionService } from './file-extraction.service';
 
 @Module({
@@ -14,6 +15,7 @@ import { FileExtractionService } from './file-extraction.service';
     ChatService,
     LlmStreamService,
     SearchService,
+    ExportService,
     FileExtractionService,
   ],
 })

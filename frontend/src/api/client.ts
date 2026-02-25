@@ -111,6 +111,20 @@ export async function searchConversations(query: string, signal?: AbortSignal): 
 
 export { sendMessageStream, editMessageStream, regenerateMessageStream } from './stream';
 
+// SYNC: Keep ExportFormat in sync with backend/src/chat/dto/export-conversation.dto.ts
+export type ExportFormat = 'markdown' | 'pdf' | 'json';
+
+export async function exportConversation(
+  conversationId: ConversationId,
+  format: ExportFormat,
+): Promise<Blob> {
+  const response = await api.get(
+    `/conversations/${conversationId}/export`,
+    { params: { format }, responseType: 'blob' },
+  );
+  return response.data as Blob;
+}
+
 export async function uploadFiles(files: File[]): Promise<Attachment[]> {
   const formData = new FormData();
   files.forEach((file) => formData.append('files', file));

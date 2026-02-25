@@ -66,6 +66,13 @@
     "hint": "Buscar por título o contenido de mensajes",
     "shortcut": "Buscar"
   },
+  "export": {
+    "button": "Exportar",
+    "markdown": "Markdown (.md)",
+    "pdf": "PDF (.pdf)",
+    "json": "JSON (.json)",
+    "exporting": "Exportando..."
+  },
   "models": {
     "free": "Gratis",
     "selectModel": "Seleccionar modelo"
@@ -88,6 +95,7 @@
     "editFailed": "Error al editar el mensaje",
     "regenerateFailed": "Error al regenerar la respuesta",
     "searchFailed": "Error al buscar conversaciones",
+    "exportFailed": "Error al exportar la conversación",
     "corsOrNetwork": "No se puede conectar al servidor. Verifica que el backend esté en ejecución y que CORS esté configurado correctamente.",
     "sse": {
       "STREAM_TIMEOUT": "La respuesta tardó demasiado y se agotó el tiempo.",

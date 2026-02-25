@@ -4,6 +4,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
 import { SearchService } from './search.service';
+import { ExportService } from './export.service';
 
 describe('ChatController', () => {
   let controller: ChatController;
@@ -66,10 +67,50 @@ describe('ChatController', () => {
           provide: SearchService,
           useValue: searchService,
         },
+        {
+          provide: ExportService,
+          useValue: {
+            exportConversation: vi.fn().mockResolvedValue({
+              buffer: Buffer.from('test'),
+              contentType: 'text/markdown',
+              fileName: 'test.md',
+            }),
+          },
+        },
       ],
     }).compile();
 
     controller = module.get<ChatController>(ChatController);
+  });
+
+  describe('exportConversation', () => {
+    it('should set download headers and send buffer', async () => {
+      const mockRes = {
+        setHeader: vi.fn(),
+        end: vi.fn(),
+      } as any;
+
+      await controller.exportConversation(
+        mockUser,
+        '507f1f77bcf86cd799439011',
+        { format: 'markdown' as const },
+        mockRes,
+      );
+
+      expect(mockRes.setHeader).toHaveBeenCalledWith(
+        'Content-Type',
+        'text/markdown',
+      );
+      expect(mockRes.setHeader).toHaveBeenCalledWith(
+        'Content-Disposition',
+        expect.stringContaining('attachment'),
+      );
+      expect(mockRes.setHeader).toHaveBeenCalledWith(
+        'Content-Length',
+        expect.any(Number),
+      );
+      expect(mockRes.end).toHaveBeenCalledWith(expect.any(Buffer));
+    });
   });
 
   describe('searchConversations', () => {
