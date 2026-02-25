@@ -103,7 +103,7 @@ Each task has:
 | FEAT-5 | System Prompt Templates: template library with 8-10 defaults, admin CRUD, conversation selector. Future: per-user custom templates. | fullstack | 3d | todo | Replaces basic system prompt. Admin role required for global template management. |
 | FEAT-5a | Backend templates module: collection, CRUD endpoints, seed 8-10 default templates | backend | 1d | done | PR #85 merged. TemplatesModule with CRUD, 10 seed templates, 15 tests. |
 | FEAT-5b | Admin role system: isAdmin flag on user doc, AdminGuard for protected routes | backend | 0.5d | done | PR #88 merged. isAdmin on UserDoc, AdminGuard on template write routes. |
-| FEAT-5c | Frontend template selector in conversation + active template indicator | frontend | 1d | todo | Dropdown/dialog to pick template when creating/editing conversation. Show active template chip. |
+| FEAT-5c | Frontend template selector in conversation + active template indicator | frontend | 1d | done | PR #89 merged. TemplateSelector dropdown with categories, TemplateContext, useTemplates hook, conversation sync. |
 | FEAT-5d | Frontend admin panel for template CRUD management | frontend | 0.5d | todo | Admin-only page: list, create, edit, delete global templates. |
 | FEAT-6 | Token Usage & Cost Tracking | fullstack | 2d | done | PR #28 merged. stream_options usage extraction, per-message + cumulative tracking. |
 | FEAT-7 | Streaming Response Controls (stop/copy/retry) | frontend | 1d | done | PR #82 merged. Stop button during streaming, copy-to-clipboard on all messages, 4 new tests. |
@@ -198,3 +198,4 @@ Each task has:
 | FEAT-4 | Conversation Export — Markdown/PDF/JSON (PR #83) | 2026-02-25 |
 | FEAT-5a | Backend templates module — CRUD + seed (PR #85) | 2026-02-25 |
 | FEAT-5b | Admin role system — isAdmin + AdminGuard (PR #88) | 2026-02-25 |
+| FEAT-5c | Frontend template selector — dropdown + conversation sync (PR #89) | 2026-02-26 |
