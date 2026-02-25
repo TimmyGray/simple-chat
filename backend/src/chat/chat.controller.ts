@@ -18,11 +18,13 @@ import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { ChatService } from './chat.service';
 import { SearchService } from './search.service';
+import { ExportService } from './export.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 import { EditMessageDto } from './dto/edit-message.dto';
 import { SearchConversationsDto } from './dto/search-conversations.dto';
+import { ExportConversationDto } from './dto/export-conversation.dto';
 import {
   SSE_ERROR_CODE,
   type StreamEvent,
@@ -41,6 +43,7 @@ export class ChatController {
   constructor(
     private readonly chatService: ChatService,
     private readonly searchService: SearchService,
+    private readonly exportService: ExportService,
   ) {}
 
   @Get('conversations')
@@ -98,6 +101,28 @@ export class ChatController {
   ) {
     this.logger.debug(`GET /conversations/${id}/messages`);
     return this.chatService.getMessages(id, user._id);
+  }
+
+  @Get('conversations/:id/export')
+  async exportConversation(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Query() dto: ExportConversationDto,
+    @Res() res: Response,
+  ) {
+    this.logger.log(`Exporting conversation ${id} as ${dto.format}`);
+    const result = await this.exportService.exportConversation(
+      id,
+      user._id,
+      dto.format,
+    );
+    res.setHeader('Content-Type', result.contentType);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${result.fileName}"`,
+    );
+    res.setHeader('Content-Length', result.buffer.length);
+    res.end(result.buffer);
   }
 
   private static readonly STREAM_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes

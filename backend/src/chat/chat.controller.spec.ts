@@ -4,6 +4,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
 import { SearchService } from './search.service';
+import { ExportService } from './export.service';
 
 describe('ChatController', () => {
   let controller: ChatController;
@@ -65,6 +66,16 @@ describe('ChatController', () => {
         {
           provide: SearchService,
           useValue: searchService,
+        },
+        {
+          provide: ExportService,
+          useValue: {
+            exportConversation: vi.fn().mockResolvedValue({
+              buffer: Buffer.from('test'),
+              contentType: 'text/markdown',
+              fileName: 'test.md',
+            }),
+          },
         },
       ],
     }).compile();
