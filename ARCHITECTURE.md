@@ -74,6 +74,9 @@ AppModule
 ├── ModelsModule
 │   ├── ModelsController (GET /api/models)
 │   └── ModelsService (fetches from OpenRouter, hourly refresh, fallback defaults)
+├── TemplatesModule (imports AuthModule)
+│   ├── TemplatesController (CRUD endpoints, admin-protected writes)
+│   └── TemplatesService (template CRUD, seed defaults on startup)
 ├── HealthModule
 │   ├── HealthController (GET /api/health)
 │   └── MongoHealthIndicator (ping check)
@@ -135,6 +138,7 @@ The project uses the **MongoDB native driver** (not Mongoose). `DatabaseModule` 
 | `userId`    | ObjectId | Owner (reference to users._id)   |
 | `title`     | string   | Display name (auto-set from first message) |
 | `model`     | string   | Default LLM model ID             |
+| `templateId`| ObjectId (optional) | Reference to templates._id (system prompt template) |
 | `createdAt` | Date     | Creation timestamp               |
 | `updatedAt` | Date     | Last modification timestamp      |
 
@@ -227,51 +231,61 @@ All `:id` parameters are validated by `ParseObjectIdPipe` (returns 400 for inval
 ### Component Tree
 
 ```
-App (useAuth hook)
+App (useAuth + useThemeMode hooks)
 ├── ErrorBoundary
-│   └── ThemeProvider (MUI dark theme)
-│       ├── CssBaseline
-│       ├── AuthPage (login/register, shown when unauthenticated)
-│       │   ├── LanguageSwitcher
-│       │   └── Login/Register form
-│       ├── ChatApp (shown when authenticated)
-│       │   ├── ChatAppProvider (React Context for shared state)
-│       │   │   └── ModelProvider (React Context for model selection)
-│       │   │       └── Layout (pure layout, no data props)
-│       │   │           ├── Sidebar (reads from ChatAppContext)
-│       │   │           │   ├── LanguageSwitcher
-│       │   │           │   ├── NewChatButton
-│       │   │           │   ├── ConversationItem[] (list with delete)
-│       │   │           │   └── User email + Logout button
-│       │   │           └── ChatArea (reads from ChatAppContext + ModelContext)
-│       │   │               ├── ModelSelector (reads from ModelContext)
-│       │   │               ├── SearchDialog (Cmd+K full-text search)
-│       │   │               ├── ExportMenu (Markdown/JSON/PDF export)
-│       │   │               ├── MessageList
-│       │   │               │   ├── MessageBubble[] (lazy-loads MarkdownRenderer)
-│       │   │               │   │   ├── MessageActions (copy, edit, regenerate)
-│       │   │               │   │   └── MessageEditForm (inline edit UI)
-│       │   │               │   └── TypingIndicator (during streaming)
-│       │   │               ├── EmptyState (no conversation selected)
-│       │   │               └── ChatInput
-│       │   │                   └── FileAttachment (upload UI)
-│       │   └── ConfirmDialog (shared delete confirmation)
-│       │   └── Snackbar + Alert (error display, auto-dismiss 4s)
-│       └── Loading spinner (during auth session restore)
+│   └── ThemeModeProvider (dark/light/system)
+│       └── ThemeProvider (MUI theme from resolved mode)
+│           ├── CssBaseline
+│           ├── AuthPage (login/register, shown when unauthenticated)
+│           │   ├── LanguageSwitcher
+│           │   ├── ThemeToggle
+│           │   └── Login/Register form
+│           ├── ChatApp (shown when authenticated)
+│           │   ├── ChatAppProvider (React Context for shared state)
+│           │   │   └── ModelProvider (React Context for model selection)
+│           │   │       └── TemplateProvider (React Context for template selection)
+│           │   │           └── Layout (pure layout, no data props)
+│           │   │               ├── Sidebar (reads from ChatAppContext)
+│           │   │               │   ├── LanguageSwitcher
+│           │   │               │   ├── ThemeToggle
+│           │   │               │   ├── NewChatButton
+│           │   │               │   ├── ConversationItem[] (list with delete)
+│           │   │               │   └── User email + Logout button
+│           │   │               └── ChatArea (reads from ChatAppContext + ModelContext + TemplateContext)
+│           │   │                   ├── ModelSelector (reads from ModelContext)
+│           │   │                   ├── TemplateSelector (reads from TemplateContext)
+│           │   │                   ├── SearchDialog (Cmd+K full-text search)
+│           │   │                   ├── ExportMenu (Markdown/JSON/PDF export)
+│           │   │                   ├── AdminTemplatePanel (admin template CRUD)
+│           │   │                   ├── MessageList
+│           │   │                   │   ├── MessageBubble[] (lazy-loads MarkdownRenderer)
+│           │   │                   │   │   ├── MessageActions (copy, edit, regenerate)
+│           │   │                   │   │   └── MessageEditForm (inline edit UI)
+│           │   │                   │   └── TypingIndicator (during streaming)
+│           │   │                   ├── EmptyState (no conversation selected)
+│           │   │                   └── ChatInput
+│           │   │                       └── FileAttachment (upload UI)
+│           │   └── ConfirmDialog (shared delete confirmation)
+│           │   └── Snackbar + Alert (error display, auto-dismiss 4s)
+│           └── Loading spinner (during auth session restore)
 ```
 
 ### State Management
 
-Custom hooks with two React Contexts (`ChatAppContext`, `ModelContext`). No Redux, Zustand, or other external state library.
+Custom hooks with four React Contexts (`ChatAppContext`, `ModelContext`, `TemplateContext`, `ThemeModeContext`). No Redux, Zustand, or other external state library.
 
 | Hook / Context     | Responsibilities                                                    |
 |--------------------|---------------------------------------------------------------------|
 | `ChatAppContext`   | Shared state (conversations, selection, user info) + action callbacks. Provided by `ChatApp`, consumed by `Sidebar` and `ChatArea` via `useChatApp()`. |
 | `ModelContext`     | Model selection state (models list, selectedModel, changeModel). Split from ChatAppContext to prevent full-page re-renders on model change. Consumed via `useModel()`. |
+| `TemplateContext`  | Template selection state (templates list, selectedTemplateId, changeTemplate). Syncs template selection with conversations. Consumed via `useTemplate()`. |
+| `ThemeModeContext` | Dark/light/system theme mode. Wraps `useThemeMode` hook. Consumed via `useThemeModeContext()`. |
 | `useAuth`          | JWT token management (localStorage), login, register, logout, session restore on mount. |
 | `useConversations` | Fetch, create, update, delete conversations. Error state. Auto-fetch on mount. |
 | `useMessages`      | Fetch messages, send with SSE streaming, optimistic user message insertion, stop streaming. Manages `streaming`, `streamingContent`, abort controller. |
 | `useModels`        | Fetch available models on mount. Error state.                       |
+| `useTemplates`     | Fetch available templates on mount. Error state.                    |
+| `useAdminTemplates`| Admin template CRUD operations (create, update, delete). Used by `AdminTemplatePanel`. |
 | `useFocusRevalidation` | Shared hook: refetches data on window focus/visibility change. Throttled (default 30s). Used by `useConversations` and `useModels`. |
 | `useOnlineStatus`  | Detects browser online/offline state. Returns `isOnline` boolean. Drives offline Snackbar and ChatInput disabled state. |
 | `useSearch`        | Manages search state for Cmd+K dialog. Debounced query, results, loading state. |
