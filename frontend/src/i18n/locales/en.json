@@ -76,7 +76,23 @@
   "templates": {
     "selectTemplate": "System prompt template",
     "none": "No template",
-    "activeTemplate": "Template: {{name}}"
+    "activeTemplate": "Template: {{name}}",
+    "adminTitle": "Manage Templates",
+    "adminButton": "Manage templates",
+    "create": "Create Template",
+    "editTitle": "Edit Template",
+    "createTitle": "New Template",
+    "deleteTitle": "Delete template?",
+    "deleteMessage": "This will permanently delete the template \"{{name}}\".",
+    "name": "Name",
+    "content": "Content",
+    "category": "Category",
+    "defaultBadge": "Default",
+    "noTemplates": "No templates yet",
+    "save": "Save",
+    "nameRequired": "Template name is required",
+    "contentRequired": "Template content is required",
+    "duplicateName": "A template with this name already exists"
   },
   "models": {
     "free": "Free",
@@ -102,6 +118,9 @@
     "searchFailed": "Failed to search conversations",
     "exportFailed": "Failed to export conversation",
     "fetchTemplates": "Failed to fetch templates",
+    "createTemplate": "Failed to create template",
+    "updateTemplate": "Failed to update template",
+    "deleteTemplate": "Failed to delete template",
     "corsOrNetwork": "Cannot reach the server. Check that the backend is running and CORS is configured correctly.",
     "sse": {
       "STREAM_TIMEOUT": "The response took too long and timed out.",

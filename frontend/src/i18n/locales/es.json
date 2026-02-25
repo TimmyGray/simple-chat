@@ -76,7 +76,23 @@
   "templates": {
     "selectTemplate": "Plantilla de prompt del sistema",
     "none": "Sin plantilla",
-    "activeTemplate": "Plantilla: {{name}}"
+    "activeTemplate": "Plantilla: {{name}}",
+    "adminTitle": "Gestionar plantillas",
+    "adminButton": "Gestionar plantillas",
+    "create": "Crear plantilla",
+    "editTitle": "Editar plantilla",
+    "createTitle": "Nueva plantilla",
+    "deleteTitle": "¿Eliminar plantilla?",
+    "deleteMessage": "Se eliminará permanentemente la plantilla \"{{name}}\".",
+    "name": "Nombre",
+    "content": "Contenido",
+    "category": "Categoría",
+    "defaultBadge": "Predeterminada",
+    "noTemplates": "No hay plantillas aún",
+    "save": "Guardar",
+    "nameRequired": "El nombre de la plantilla es obligatorio",
+    "contentRequired": "El contenido de la plantilla es obligatorio",
+    "duplicateName": "Ya existe una plantilla con este nombre"
   },
   "models": {
     "free": "Gratis",
@@ -102,6 +118,9 @@
     "searchFailed": "Error al buscar conversaciones",
     "exportFailed": "Error al exportar la conversación",
     "fetchTemplates": "Error al obtener las plantillas",
+    "createTemplate": "Error al crear la plantilla",
+    "updateTemplate": "Error al actualizar la plantilla",
+    "deleteTemplate": "Error al eliminar la plantilla",
     "corsOrNetwork": "No se puede conectar al servidor. Verifica que el backend esté en ejecución y que CORS esté configurado correctamente.",
     "sse": {
       "STREAM_TIMEOUT": "La respuesta tardó demasiado y se agotó el tiempo.",

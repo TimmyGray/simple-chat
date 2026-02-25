@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Conversation, Message, ModelInfo, Attachment, AuthResponse, User, ConversationId, ModelId, Template, TemplateId } from '../types';
+import type { Conversation, Message, ModelInfo, Attachment, AuthResponse, User, ConversationId, ModelId, Template, TemplateId, CreateTemplateDto, UpdateTemplateDto } from '../types';
 
 export const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -142,4 +142,18 @@ export async function getModels(): Promise<ModelInfo[]> {
 export async function getTemplates(): Promise<Template[]> {
   const { data } = await api.get('/templates');
   return data;
+}
+
+export async function createTemplate(dto: CreateTemplateDto): Promise<Template> {
+  const { data } = await api.post('/templates', dto);
+  return data;
+}
+
+export async function updateTemplate(id: TemplateId, dto: UpdateTemplateDto): Promise<Template> {
+  const { data } = await api.patch(`/templates/${id}`, dto);
+  return data;
+}
+
+export async function deleteTemplate(id: TemplateId): Promise<void> {
+  await api.delete(`/templates/${id}`);
 }

@@ -65,6 +65,7 @@ const defaultChatContext: ChatAppContextValue = {
   selectedConversation: null,
   userEmail: 'user@example.com',
   tokenUsage: 1500,
+  isAdmin: false,
   isOnline: true,
   selectConversation: vi.fn(),
   newChat: vi.fn(),

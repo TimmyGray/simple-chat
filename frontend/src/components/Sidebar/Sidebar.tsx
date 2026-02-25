@@ -3,11 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { Box, List, Typography, Divider, CircularProgress, IconButton, Tooltip, Button } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SearchIcon from '@mui/icons-material/Search';
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import type { ConversationId } from '../../types';
 import { useChatApp } from '../../contexts/ChatAppContext';
 import NewChatButton from './NewChatButton';
 import ConversationItem from './ConversationItem';
 import ConfirmDialog from '../common/ConfirmDialog';
+import AdminTemplatePanel from '../Admin/AdminTemplatePanel';
 import LanguageSwitcher from '../common/LanguageSwitcher';
 import ThemeToggle from '../common/ThemeToggle';
 import { ICON_SIZE_SM, LOADING_SPINNER_SM } from '../../constants';
@@ -34,6 +36,7 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
     selectedConversation,
     userEmail,
     tokenUsage,
+    isAdmin,
     selectConversation,
     newChat,
     deleteConversation,
@@ -42,6 +45,7 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
   } = useChatApp();
 
   const [deleteTarget, setDeleteTarget] = useState<ConversationId | null>(null);
+  const [adminPanelOpen, setAdminPanelOpen] = useState(false);
 
   const selectedId = selectedConversation?._id ?? null;
 
@@ -139,6 +143,30 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
 
       <Divider sx={{ my: 1 }} />
       <ThemeToggle />
+      {isAdmin && (
+        <>
+          <Divider sx={{ my: 1 }} />
+          <Button
+            fullWidth
+            variant="outlined"
+            startIcon={<SettingsOutlinedIcon />}
+            onClick={() => setAdminPanelOpen(true)}
+            sx={{
+              justifyContent: 'flex-start',
+              color: 'text.secondary',
+              borderColor: 'divider',
+              textTransform: 'none',
+              fontWeight: 400,
+              fontSize: '0.85rem',
+              '&:hover': {
+                borderColor: 'text.secondary',
+              },
+            }}
+          >
+            {t('templates.adminButton')}
+          </Button>
+        </>
+      )}
       <Divider sx={{ my: 1 }} />
       <LanguageSwitcher />
 
@@ -197,6 +225,13 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
         }}
         onCancel={() => setDeleteTarget(null)}
       />
+
+      {isAdmin && (
+        <AdminTemplatePanel
+          open={adminPanelOpen}
+          onClose={() => setAdminPanelOpen(false)}
+        />
+      )}
     </Box>
   );
 }

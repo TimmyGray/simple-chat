@@ -8,6 +8,7 @@ export interface ChatAppContextValue {
   selectedConversation: Conversation | null;
   userEmail: string | undefined;
   tokenUsage: number | undefined;
+  isAdmin: boolean;
   isOnline: boolean;
   selectConversation: (id: ConversationId) => void;
   newChat: () => void;
