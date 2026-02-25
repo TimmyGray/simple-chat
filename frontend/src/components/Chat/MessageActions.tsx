@@ -56,6 +56,7 @@ function MessageActions({
   const handleCopy = useCallback(() => {
     onCopy?.();
     setCopied(true);
+    if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => setCopied(false), COPIED_FEEDBACK_MS);
   }, [onCopy]);
 

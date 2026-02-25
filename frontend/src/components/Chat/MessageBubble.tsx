@@ -61,7 +61,7 @@ function MessageBubble({ message, onEdit, onRegenerate, onStop, isStreaming }: M
   }, [message._id, onRegenerate]);
 
   const handleCopy = useCallback(() => {
-    void navigator.clipboard.writeText(message.content);
+    void navigator.clipboard.writeText(message.content).catch(() => { /* non-secure context */ });
   }, [message.content]);
 
   const handleEditKeyDown = useCallback(

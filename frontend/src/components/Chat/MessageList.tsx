@@ -127,7 +127,7 @@ export default function MessageList({
             message={message}
             onEdit={onEditMessage}
             onRegenerate={onRegenerateMessage}
-            onStop={onStopStreaming}
+            onStop={streaming && message._id === asMessageId('streaming') ? onStopStreaming : undefined}
             isStreaming={streaming && message._id === asMessageId('streaming')}
           />
         </Box>
