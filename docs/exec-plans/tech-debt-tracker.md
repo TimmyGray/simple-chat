@@ -108,7 +108,7 @@ Each task has:
 | FEAT-6 | Token Usage & Cost Tracking | fullstack | 2d | done | PR #28 merged. stream_options usage extraction, per-message + cumulative tracking. |
 | FEAT-7 | Streaming Response Controls (stop/copy/retry) | frontend | 1d | done | PR #82 merged. Stop button during streaming, copy-to-clipboard on all messages, 4 new tests. |
 | FEAT-8 | Dark/Light Theme Toggle | frontend | 1d | done | PR #79 merged. useThemeMode hook, ThemeModeProvider, ThemeToggle component, light/dark/system modes. |
-| FEAT-9 | Keyboard Shortcuts | frontend | 1d | todo | Cmd+N, Cmd+K, Escape, etc. |
+| FEAT-9 | Keyboard Shortcuts | frontend | 1d | done | PR #92 merged. Cmd+N (new chat), Cmd+K (search), Escape (stop streaming/blur input). IS_MAC_PLATFORM constant. |
 | FEAT-10 | Real-Time Collaboration | fullstack | 5d | todo | WebSocket, shared conversations |
 | FEAT-11 | Image Input (Multi-modal Chat): paste/upload images to vision-capable models via OpenRouter multi-modal API | fullstack | 1-2d | todo | Table-stakes feature. Extend existing file upload to handle images as model input, not text extraction. |
 | FEAT-12 | Conversation Branching: fork conversations from any message to explore alternative paths with tree-based history | fullstack | 2-3d | todo | Power user feature. LobeChat and TypingMind have shipped this. Visual branch indicator + keyboard nav. |
@@ -201,3 +201,4 @@ Each task has:
 | FEAT-5c | Frontend template selector — dropdown + conversation sync (PR #89) | 2026-02-26 |
 | FEAT-5d | Frontend admin template panel — CRUD management (PR #91) | 2026-02-26 |
 | FEAT-5 | System Prompt Templates — all subtasks complete | 2026-02-26 |
+| FEAT-9 | Keyboard Shortcuts — Cmd+N, Cmd+K, Escape (PR #92) | 2026-02-26 |
