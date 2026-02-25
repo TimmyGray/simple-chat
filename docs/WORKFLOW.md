@@ -89,6 +89,7 @@ Each `/develop-feature` agent creates an isolated git worktree (via `EnterWorktr
 - **Maintenance counters**: Slight over-counting from concurrent agents is acceptable and self-correcting (maintenance runs slightly more often)
 - **Maintenance launches**: Before launching maintenance tasks, agents re-read `pending_runs` to avoid double-launching
 - **Merge conflicts**: If merge fails due to conflicts from another recently-merged PR, the agent rebases and retries
+- **Branch not up to date**: If `gh pr merge` fails with "head branch is not up to date", follow the recovery steps in the **PR Merge Recovery** section below
 
 ### Example: Running Two Agents in Parallel
 
@@ -103,6 +104,23 @@ Maintenance cadence is tracked in `docs/exec-plans/maintenance-cadence.json`. Th
 - Thresholds are tunable: edit the `thresholds` object to change trigger points
 
 When thresholds are met, Phase 12 launches maintenance tasks as parallel background subagents. Each subagent reads the corresponding `.claude/commands/*.md` file and executes independently, creating its own branch and PR.
+
+## PR Merge Recovery
+
+If `gh pr merge` fails with **"the head branch is not up to date with the base branch"**, the feature branch is behind `main`. Follow these steps:
+
+1. **Fetch and rebase onto main**
+   ```bash
+   git fetch origin main
+   git rebase origin/main
+   ```
+2. **Resolve conflicts** — if the rebase produces conflicts, resolve them, `git add` the fixed files, and `git rebase --continue`
+3. **Run validation** — `npm run validate` to confirm nothing broke
+4. **Force-push the updated branch** — `git push --force-with-lease`
+5. **Wait for CI** — let any required checks pass on the updated branch
+6. **Retry the merge** — `gh pr merge <PR#> --squash --delete-branch`
+
+This is the expected recovery path when `main` has advanced since the branch was created (e.g., another PR was merged first). Do not use `--admin` to bypass branch protection.
 
 ## Principles
 
