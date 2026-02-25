@@ -110,6 +110,10 @@ Each task has:
 | FEAT-8 | Dark/Light Theme Toggle | frontend | 1d | done | PR #79 merged. useThemeMode hook, ThemeModeProvider, ThemeToggle component, light/dark/system modes. |
 | FEAT-9 | Keyboard Shortcuts | frontend | 1d | todo | Cmd+N, Cmd+K, Escape, etc. |
 | FEAT-10 | Real-Time Collaboration | fullstack | 5d | todo | WebSocket, shared conversations |
+| FEAT-11 | Image Input (Multi-modal Chat): paste/upload images to vision-capable models via OpenRouter multi-modal API | fullstack | 1-2d | todo | Table-stakes feature. Extend existing file upload to handle images as model input, not text extraction. |
+| FEAT-12 | Conversation Branching: fork conversations from any message to explore alternative paths with tree-based history | fullstack | 2-3d | todo | Power user feature. LobeChat and TypingMind have shipped this. Visual branch indicator + keyboard nav. |
+| FEAT-13 | Ollama / Local Model Support: direct Ollama connection (OpenAI-compatible API) for fully offline, zero-cost usage | backend | 1-2d | todo | Core to self-hosted vision. Auto-detect available models. Ollama is the de facto local LLM runtime. |
+| FEAT-14 | MCP Tool Integration: connect to MCP servers for external tools (web search, file systems, APIs) with inline tool-call UI | fullstack | 4-5d | todo | MCP is the new industry standard (Linux Foundation, adopted by OpenAI). All major competitors support it. |
 
 ## Completed
 

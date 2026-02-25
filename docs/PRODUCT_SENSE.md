@@ -26,20 +26,26 @@ Simple Chat is a self-hosted, privacy-first AI chat application that gives users
 ## Feature Prioritization (Impact vs Effort)
 
 ### Must Have (P0) — Blocking production use
-1. **Authentication** — Can't deploy without user isolation
-2. **System Prompts** — Core LLM UX, users expect this
+1. **System Prompt Templates** — Reusable prompt library with admin CRUD (backend done, frontend remaining)
 
 ### Should Have (P1) — High impact, moderate effort
-3. **Conversation Search** — Essential at scale (Cmd+K)
-4. **Message Regeneration** — Standard in all AI chat UIs
-5. **Stop Generation** — Already partially implemented (AbortController exists)
-6. **Keyboard Shortcuts** — Power user productivity
+2. **Image Input (Multi-modal Chat)** — Paste/upload images to vision-capable models
+3. **Conversation Branching** — Fork conversations from any message to explore alternatives
+4. **Ollama / Local Model Support** — Direct Ollama connection for fully offline, zero-cost usage
+5. **Keyboard Shortcuts** — Power user productivity (Cmd+N, Cmd+K, Escape, etc.)
 
 ### Nice to Have (P2) — Polish and delight
-7. **Token/Cost Tracking** — Important for team deployments
-8. **Conversation Export** — Data portability
-9. **Dark/Light Theme Toggle** — Accessibility
-10. **Real-time Collaboration** — Future team feature
+6. **MCP Tool Integration** — Connect to MCP servers for external tools (web search, APIs, file systems)
+7. **Real-time Collaboration** — WebSocket-based shared conversations for teams
+
+### Shipped
+- **Authentication** — JWT auth + userId-scoped data (FEAT-1)
+- **Conversation Search** — Cmd+K full-text search (FEAT-2)
+- **Message Editing & Regeneration** — Edit messages, regenerate responses (FEAT-3)
+- **Conversation Export** — Markdown/PDF/JSON export (FEAT-4)
+- **Token/Cost Tracking** — Per-message + cumulative usage tracking (FEAT-6)
+- **Streaming Response Controls** — Stop/copy/retry buttons (FEAT-7)
+- **Dark/Light Theme Toggle** — Light/dark/system modes (FEAT-8)
 
 ## Design Principles
 1. **Simple first** — Don't build features users haven't asked for

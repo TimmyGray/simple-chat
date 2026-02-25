@@ -1,10 +1,13 @@
 # Roadmap
 
 ## Current Status
-- **Phase 1 (Security & Stability):** 9/10 complete — JWT auth remaining
-- **Phase 2 (Reliability & Error Handling):** 8/9 complete — minor streaming fix remaining
-- **Phase 3 (Performance & Quality):** Not started
-- **Phase 4 (Testing & Observability):** Not started
+- **Phase 1 (Security & Stability):** Complete
+- **Phase 2 (Reliability & Error Handling):** Complete
+- **Phase 3 (Performance & Quality):** Complete
+- **Phase 4 (Testing & Observability):** Complete
+- **Phase 5 (System Prompt Templates):** In progress — backend done (FEAT-5a), frontend remaining (FEAT-5b/5c/5d)
+- **Phase 6 (Multi-Modal & Integrations):** Not started
+- **Phase 7 (Advanced UX):** Not started
 
 ## Phase 3: Performance & Quality
 Focus: Smooth UX for long conversations, clean codebase.
@@ -37,6 +40,22 @@ Key tasks:
 - Frontend admin panel for template management (FEAT-5d)
 - Future: per-user custom templates (visible only to creator)
 
+## Phase 6: Multi-Modal & Integrations
+Focus: Extend Simple Chat beyond text — support images, local models, and external tools.
+
+Key tasks:
+- Image input for vision-capable models (FEAT-11)
+- Direct Ollama connection for offline local model usage (FEAT-13)
+- MCP tool integration with inline tool-call rendering (FEAT-14)
+
+## Phase 7: Advanced UX
+Focus: Power-user workflows and conversation management.
+
+Key tasks:
+- Conversation branching / fork from any message (FEAT-12)
+- Keyboard shortcuts system (FEAT-9)
+- Real-time collaboration (FEAT-10)
+
 ## Future Features
 See `docs/PRODUCT_SENSE.md` for prioritized feature list.
 See `docs/exec-plans/tech-debt-tracker.md` for detailed task backlog.
@@ -44,5 +63,14 @@ See `docs/exec-plans/tech-debt-tracker.md` for detailed task backlog.
 ## Completed
 - Phase 1 items (rate limiting, input validation, XSS protection, error boundaries, etc.)
 - Phase 2 items (exception filter, error states, SSE reliability, structured logging, etc.)
+- Phase 3 items (memoize, virtualize, lazy-load, React Context, DTOs, code splitting)
+- Phase 4 items (coverage tooling, hook tests, error scenario tests, accessibility tests)
 - i18n support (4 languages)
 - Harness engineering infrastructure (CI/CD, hooks, commands)
+- FEAT-1: Authentication & Multi-Tenancy
+- FEAT-2: Conversation Search (Cmd+K)
+- FEAT-3: Message Editing & Regeneration
+- FEAT-4: Conversation Export (Markdown/PDF/JSON)
+- FEAT-6: Token Usage & Cost Tracking
+- FEAT-7: Streaming Response Controls
+- FEAT-8: Dark/Light Theme Toggle
