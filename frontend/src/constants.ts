@@ -66,6 +66,10 @@ export const MESSAGE_ACTION_BUTTON_SIZE = 28;
 // ─── Copy Feedback ──────────────────────────────────────────
 export const COPIED_FEEDBACK_MS = 2000;
 
+// ─── Template Selector ──────────────────────────────────────
+export const TEMPLATE_MENU_MAX_HEIGHT = 360;
+export const TEMPLATE_CONTENT_PREVIEW_LENGTH = 60;
+
 // ─── Snackbar ───────────────────────────────────────────────
 export const SNACKBAR_AUTO_HIDE_MS = 6000;
 export const ERROR_SNACKBAR_AUTO_HIDE_MS = 4000;

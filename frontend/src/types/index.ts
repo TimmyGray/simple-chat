@@ -8,10 +8,12 @@ type Brand<T, B extends string> = T & { readonly [__brand]: B };
 export type ConversationId = Brand<string, 'ConversationId'>;
 export type MessageId = Brand<string, 'MessageId'>;
 export type ModelId = Brand<string, 'ModelId'>;
+export type TemplateId = Brand<string, 'TemplateId'>;
 
 export const asConversationId = (s: string): ConversationId => s as ConversationId;
 export const asMessageId = (s: string): MessageId => s as MessageId;
 export const asModelId = (s: string): ModelId => s as ModelId;
+export const asTemplateId = (s: string): TemplateId => s as TemplateId;
 
 // --- Domain interfaces ---
 
@@ -31,8 +33,17 @@ export interface Conversation {
   _id: ConversationId;
   title: string;
   model: ModelId;
+  templateId?: TemplateId;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface Template {
+  _id: TemplateId;
+  name: string;
+  content: string;
+  category: string;
+  isDefault: boolean;
 }
 
 export interface Attachment {

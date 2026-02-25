@@ -73,6 +73,11 @@
     "json": "JSON (.json)",
     "exporting": "Exporting..."
   },
+  "templates": {
+    "selectTemplate": "System prompt template",
+    "none": "No template",
+    "activeTemplate": "Template: {{name}}"
+  },
   "models": {
     "free": "Free",
     "selectModel": "Select model"
@@ -96,6 +101,7 @@
     "regenerateFailed": "Failed to regenerate response",
     "searchFailed": "Failed to search conversations",
     "exportFailed": "Failed to export conversation",
+    "fetchTemplates": "Failed to fetch templates",
     "corsOrNetwork": "Cannot reach the server. Check that the backend is running and CORS is configured correctly.",
     "sse": {
       "STREAM_TIMEOUT": "The response took too long and timed out.",

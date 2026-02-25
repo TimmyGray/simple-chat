@@ -73,6 +73,11 @@
     "json": "JSON (.json)",
     "exporting": "导出中..."
   },
+  "templates": {
+    "selectTemplate": "系统提示模板",
+    "none": "无模板",
+    "activeTemplate": "模板: {{name}}"
+  },
   "models": {
     "free": "免费",
     "selectModel": "选择模型"
@@ -96,6 +101,7 @@
     "regenerateFailed": "重新生成失败",
     "searchFailed": "搜索对话失败",
     "exportFailed": "导出对话失败",
+    "fetchTemplates": "获取模板失败",
     "corsOrNetwork": "无法连接服务器。请检查后端是否正在运行以及 CORS 是否配置正确。",
     "sse": {
       "STREAM_TIMEOUT": "响应时间过长，已超时。",

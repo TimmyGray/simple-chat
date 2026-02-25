@@ -2,8 +2,9 @@ import { useTranslation } from 'react-i18next';
 import { Box, IconButton, Tooltip } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import SendIcon from '@mui/icons-material/Send';
-import type { ModelInfo, ModelId } from '../../types';
+import type { ModelInfo, ModelId, Template, TemplateId } from '../../types';
 import ModelSelector from './ModelSelector';
+import TemplateSelector from './TemplateSelector';
 import FileAttachment from './FileAttachment';
 import { SEND_BUTTON_SIZE } from '../../constants';
 
@@ -11,6 +12,9 @@ interface ChatInputToolbarProps {
   models: ModelInfo[];
   selectedModel: ModelId;
   onModelChange: (model: ModelId) => void;
+  templates: Template[];
+  selectedTemplateId: TemplateId | null;
+  onTemplateChange: (templateId: TemplateId | null) => void;
   onAttach: (files: File[]) => Promise<void>;
   onAttachError: (message: string) => void;
   onSend: () => void;
@@ -23,6 +27,9 @@ export default function ChatInputToolbar({
   models,
   selectedModel,
   onModelChange,
+  templates,
+  selectedTemplateId,
+  onTemplateChange,
   onAttach,
   onAttachError,
   onSend,
@@ -44,12 +51,18 @@ export default function ChatInputToolbar({
         borderColor: (theme) => alpha(theme.palette.text.primary, 0.04),
       }}
     >
-      {/* Left: model selector + attach button */}
+      {/* Left: model selector + template selector + attach button */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
         <ModelSelector
           models={models}
           value={selectedModel}
           onChange={onModelChange}
+        />
+        <TemplateSelector
+          templates={templates}
+          selectedTemplateId={selectedTemplateId}
+          onChange={onTemplateChange}
+          disabled={disabled}
         />
         <FileAttachment
           onAttach={onAttach}

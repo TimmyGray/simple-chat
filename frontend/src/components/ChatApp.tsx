@@ -4,17 +4,20 @@ import { Snackbar, Alert } from '@mui/material';
 import WifiOffIcon from '@mui/icons-material/WifiOff';
 import { useConversations } from '../hooks/useConversations';
 import { useModels } from '../hooks/useModels';
+import { useTemplates } from '../hooks/useTemplates';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { ChatAppProvider } from '../contexts/ChatAppContext';
 import { ModelProvider } from '../contexts/ModelContext';
+import { TemplateProvider } from '../contexts/TemplateContext';
 import Layout from './Layout';
 import SearchDialog from './common/SearchDialog';
 import { ERROR_SNACKBAR_AUTO_HIDE_MS } from '../constants';
 
-import type { User, ConversationId, ModelId } from '../types';
+import type { User, ConversationId, ModelId, TemplateId } from '../types';
 import { asModelId } from '../types';
 import type { ChatAppContextValue } from '../contexts/ChatAppContext';
 import type { ModelContextValue } from '../contexts/ModelContext';
+import type { TemplateContextValue } from '../contexts/TemplateContext';
 
 interface ChatAppProps {
   user: User;
@@ -26,18 +29,25 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
   const { t } = useTranslation();
   const { conversations, loading: convsLoading, error: convsError, clearError: clearConvsError, refresh, create, remove } = useConversations();
   const { models, error: modelsError, clearError: clearModelsError } = useModels();
+  const { templates, error: templatesError, clearError: clearTemplatesError } = useTemplates();
   const isOnline = useOnlineStatus();
 
   const [selectedId, setSelectedId] = useState<ConversationId | null>(null);
   const [selectedModel, setSelectedModel] = useState<ModelId>(asModelId('openrouter/free'));
+  const [selectedTemplateId, setSelectedTemplateId] = useState<TemplateId | null>(null);
   const [localError, setLocalError] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
 
-  // Ref keeps handleNewChat stable when only selectedModel changes
+  // Refs keep handleNewChat stable when only selectedModel/template changes
   const selectedModelRef = useRef(selectedModel);
   useEffect(() => {
     selectedModelRef.current = selectedModel;
   }, [selectedModel]);
+
+  const selectedTemplateRef = useRef(selectedTemplateId);
+  useEffect(() => {
+    selectedTemplateRef.current = selectedTemplateId;
+  }, [selectedTemplateId]);
 
   // Cmd+K / Ctrl+K keyboard shortcut for search
   useEffect(() => {
@@ -51,17 +61,25 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
     return () => document.removeEventListener('keydown', handler);
   }, []);
 
-  const handleSearchSelect = useCallback((id: ConversationId) => {
+  // Select conversation and sync template selector to match
+  const handleSelectConversation = useCallback((id: ConversationId | null) => {
     setSelectedId(id);
-  }, []);
+    const conv = id ? conversations.find((c) => c._id === id) : null;
+    setSelectedTemplateId(conv?.templateId ?? null);
+  }, [conversations]);
 
-  const error = convsError || modelsError || localError;
+  const handleSearchSelect = useCallback((id: ConversationId) => {
+    handleSelectConversation(id);
+  }, [handleSelectConversation]);
+
+  const error = convsError || modelsError || templatesError || localError;
 
   const clearError = useCallback(() => {
     setLocalError(null);
     if (convsError) clearConvsError();
     if (modelsError) clearModelsError();
-  }, [convsError, modelsError, clearConvsError, clearModelsError]);
+    if (templatesError) clearTemplatesError();
+  }, [convsError, modelsError, templatesError, clearConvsError, clearModelsError, clearTemplatesError]);
 
   const selectedConversation = useMemo(
     () => conversations.find((c) => c._id === selectedId) || null,
@@ -70,25 +88,25 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
 
   const handleNewChat = useCallback(async () => {
     try {
-      const conv = await create(selectedModelRef.current);
-      setSelectedId(conv._id);
+      const conv = await create(selectedModelRef.current, selectedTemplateRef.current);
+      handleSelectConversation(conv._id);
     } catch {
       setLocalError(t('errors.createConversation'));
     }
-  }, [create, t]);
+  }, [create, handleSelectConversation, t]);
 
   const handleDelete = useCallback(
     async (id: ConversationId) => {
       try {
         await remove(id);
         if (selectedId === id) {
-          setSelectedId(null);
+          handleSelectConversation(null);
         }
       } catch {
         setLocalError(t('errors.deleteConversation'));
       }
     },
-    [remove, selectedId, t],
+    [remove, selectedId, handleSelectConversation, t],
   );
 
   const handleConversationUpdate = useCallback(() => {
@@ -106,7 +124,7 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
       userEmail: user.email,
       tokenUsage: user.totalTokensUsed,
       isOnline,
-      selectConversation: setSelectedId,
+      selectConversation: handleSelectConversation,
       newChat: handleNewChat,
       deleteConversation: handleDelete,
       onConversationUpdate: handleConversationUpdate,
@@ -120,6 +138,7 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
       user.email,
       user.totalTokensUsed,
       isOnline,
+      handleSelectConversation,
       handleNewChat,
       handleDelete,
       handleConversationUpdate,
@@ -137,11 +156,22 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
     [models, selectedModel],
   );
 
+  const templateContextValue = useMemo<TemplateContextValue>(
+    () => ({
+      templates,
+      selectedTemplateId,
+      changeTemplate: setSelectedTemplateId,
+    }),
+    [templates, selectedTemplateId],
+  );
+
   return (
     <>
       <ChatAppProvider value={chatContextValue}>
         <ModelProvider value={modelContextValue}>
-          <Layout />
+          <TemplateProvider value={templateContextValue}>
+            <Layout />
+          </TemplateProvider>
         </ModelProvider>
       </ChatAppProvider>
       <SearchDialog

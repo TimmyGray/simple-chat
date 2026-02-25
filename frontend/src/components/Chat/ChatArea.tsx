@@ -1,8 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Box, Snackbar, Alert } from '@mui/material';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Box, Snackbar, Alert, Chip } from '@mui/material';
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import type { Attachment, MessageId } from '../../types';
 import { useChatApp } from '../../contexts/ChatAppContext';
 import { useModel } from '../../contexts/ModelContext';
+import { useTemplate } from '../../contexts/TemplateContext';
 import { useMessages } from '../../hooks/useMessages';
 import MessageList from './MessageList';
 import ChatInput from './ChatInput';
@@ -17,6 +20,8 @@ export default function ChatArea() {
     onConversationUpdate,
   } = useChatApp();
   const { models, selectedModel, changeModel } = useModel();
+  const { templates, selectedTemplateId, changeTemplate } = useTemplate();
+  const { t } = useTranslation();
 
   const {
     messages,
@@ -78,6 +83,12 @@ export default function ChatArea() {
     [conversation, regenerateMessage, onConversationUpdate],
   );
 
+  const conversationTemplateId = conversation?.templateId ?? null;
+  const activeTemplateName = useMemo(() => {
+    if (!conversationTemplateId) return null;
+    return templates.find((tmpl) => tmpl._id === conversationTemplateId)?.name ?? null;
+  }, [conversationTemplateId, templates]);
+
   if (!conversation) {
     return <EmptyState />;
   }
@@ -91,7 +102,17 @@ export default function ChatArea() {
         pb: 0.5,
       }}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', px: 1, pt: 0.5 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', px: 1, pt: 0.5, gap: 1 }}>
+        {activeTemplateName && (
+          <Chip
+            icon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}
+            label={activeTemplateName}
+            size="small"
+            variant="outlined"
+            color="primary"
+            aria-label={t('templates.activeTemplate', { name: activeTemplateName })}
+          />
+        )}
         <ExportMenu conversationId={conversation._id} onError={setExportError} />
       </Box>
       <MessageList
@@ -108,6 +129,9 @@ export default function ChatArea() {
         models={models}
         selectedModel={selectedModel}
         onModelChange={changeModel}
+        templates={templates}
+        selectedTemplateId={selectedTemplateId}
+        onTemplateChange={changeTemplate}
         onSend={handleSend}
         disabled={streaming || !isOnline}
       />

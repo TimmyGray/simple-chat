@@ -5,6 +5,7 @@ export interface ConversationDoc {
   userId: ObjectId;
   title: string;
   model: string;
+  templateId?: ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }

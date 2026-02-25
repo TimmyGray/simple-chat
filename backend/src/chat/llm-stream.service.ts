@@ -37,11 +37,29 @@ export class LlmStreamService {
     );
   }
 
+  private async getSystemPrompt(
+    templateId: ObjectId | undefined,
+    conversationId: string,
+  ): Promise<string | null> {
+    if (!templateId) return null;
+    const template = await this.databaseService
+      .templates()
+      .findOne({ _id: templateId });
+    if (!template) {
+      this.logger.warn(
+        `Template ${String(templateId)} not found for conversation ${conversationId}`,
+      );
+      return null;
+    }
+    return template.content;
+  }
+
   async *stream(
     conversationId: string,
     model: string,
     userId: ObjectId,
     abortSignal?: AbortSignal,
+    templateId?: ObjectId,
   ): AsyncGenerator<StreamEvent> {
     const messages = await this.databaseService
       .messages()
@@ -50,6 +68,10 @@ export class LlmStreamService {
       .toArray();
     const llmMessages =
       await this.fileExtractionService.buildLlmMessages(messages);
+    const systemPrompt = await this.getSystemPrompt(templateId, conversationId);
+    if (systemPrompt) {
+      llmMessages.unshift({ role: 'system', content: systemPrompt });
+    }
     let fullContent = '';
     let usage: TokenUsage | undefined;
     try {

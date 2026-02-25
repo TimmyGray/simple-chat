@@ -33,6 +33,7 @@ export class ChatService {
       userId,
       title: dto.title || 'New Chat',
       model: dto.model || 'openrouter/free',
+      ...(dto.templateId ? { templateId: new ObjectId(dto.templateId) } : {}),
       createdAt: now,
       updatedAt: now,
     };
@@ -170,6 +171,7 @@ export class ChatService {
       model,
       userId,
       abortSignal,
+      conversation.templateId,
     );
   }
 
@@ -204,6 +206,7 @@ export class ChatService {
       model,
       userId,
       abortSignal,
+      conversation.templateId,
     );
   }
 
@@ -230,6 +233,7 @@ export class ChatService {
       conversation.model,
       userId,
       abortSignal,
+      conversation.templateId,
     );
   }
 }

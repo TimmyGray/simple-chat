@@ -156,6 +156,9 @@ describe('Accessibility (axe-core)', () => {
           models={mockModels}
           selectedModel={asModelId('openrouter/free')}
           onModelChange={vi.fn()}
+          templates={[]}
+          selectedTemplateId={null}
+          onTemplateChange={vi.fn()}
           onSend={vi.fn()}
         />,
       );
@@ -169,6 +172,9 @@ describe('Accessibility (axe-core)', () => {
           models={mockModels}
           selectedModel={asModelId('openrouter/free')}
           onModelChange={vi.fn()}
+          templates={[]}
+          selectedTemplateId={null}
+          onTemplateChange={vi.fn()}
           onSend={vi.fn()}
           disabled
         />,

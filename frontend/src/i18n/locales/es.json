@@ -73,6 +73,11 @@
     "json": "JSON (.json)",
     "exporting": "Exportando..."
   },
+  "templates": {
+    "selectTemplate": "Plantilla de prompt del sistema",
+    "none": "Sin plantilla",
+    "activeTemplate": "Plantilla: {{name}}"
+  },
   "models": {
     "free": "Gratis",
     "selectModel": "Seleccionar modelo"
@@ -96,6 +101,7 @@
     "regenerateFailed": "Error al regenerar la respuesta",
     "searchFailed": "Error al buscar conversaciones",
     "exportFailed": "Error al exportar la conversación",
+    "fetchTemplates": "Error al obtener las plantillas",
     "corsOrNetwork": "No se puede conectar al servidor. Verifica que el backend esté en ejecución y que CORS esté configurado correctamente.",
     "sse": {
       "STREAM_TIMEOUT": "La respuesta tardó demasiado y se agotó el tiempo.",

@@ -17,6 +17,7 @@ export const conversationsSchema: Document = {
       userId: { bsonType: 'objectId' },
       title: { bsonType: 'string' },
       model: { bsonType: 'string' },
+      templateId: { bsonType: 'objectId' },
       createdAt: { bsonType: 'date' },
       updatedAt: { bsonType: 'date' },
     },
