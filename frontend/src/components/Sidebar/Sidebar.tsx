@@ -103,7 +103,7 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
             fontSize: '0.7rem',
           }}
         >
-          {navigator.platform.includes('Mac') ? '\u2318K' : 'Ctrl+K'}
+          {/Mac|iPhone|iPad|iPod/.test(navigator.userAgent) ? '\u2318K' : 'Ctrl+K'}
         </Typography>
       </Button>
 

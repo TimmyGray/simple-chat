@@ -12,6 +12,7 @@ import {
   CircularProgress,
   InputAdornment,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import SearchIcon from '@mui/icons-material/Search';
 import type { Conversation, ConversationId } from '../../types';
 import { useSearch } from '../../hooks/useSearch';
@@ -20,6 +21,14 @@ import {
   SEARCH_RESULT_MAX_HEIGHT,
   LOADING_SPINNER_SM,
 } from '../../constants';
+
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+  });
+}
 
 interface SearchDialogProps {
   open: boolean;
@@ -83,14 +92,6 @@ export default function SearchDialog({ open, onClose, onSelect }: SearchDialogPr
     },
     [results, clampedIndex, handleSelect],
   );
-
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString(undefined, {
-      month: 'short',
-      day: 'numeric',
-    });
-  };
 
   return (
     <Dialog
@@ -176,10 +177,10 @@ export default function SearchDialog({ open, onClose, onSelect }: SearchDialogPr
                     px: 3,
                     py: 1,
                     '&.Mui-selected': {
-                      backgroundColor: 'rgba(124, 77, 255, 0.12)',
+                      backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.12),
                     },
                     '&.Mui-selected:hover': {
-                      backgroundColor: 'rgba(124, 77, 255, 0.18)',
+                      backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.18),
                     },
                   }}
                 >

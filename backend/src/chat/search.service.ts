@@ -39,16 +39,19 @@ export class SearchService {
     if (userConvIdObjects.length > 0) {
       const messageMatches = await this.databaseService
         .messages()
-        .aggregate<{ _id: ObjectId }>([
-          {
-            $match: {
-              conversationId: { $in: userConvIdObjects },
-              content: { $regex: regex },
+        .aggregate<{ _id: ObjectId }>(
+          [
+            {
+              $match: {
+                conversationId: { $in: userConvIdObjects },
+                content: { $regex: regex },
+              },
             },
-          },
-          { $group: { _id: '$conversationId' } },
-          { $limit: limit },
-        ])
+            { $group: { _id: '$conversationId' } },
+            { $limit: limit },
+          ],
+          { maxTimeMS: 5000 },
+        )
         .toArray();
 
       const additionalIds = messageMatches

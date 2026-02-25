@@ -96,6 +96,8 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
     void onRefreshUser();
   }, [refresh, onRefreshUser]);
 
+  const handleOpenSearch = useCallback(() => setSearchOpen(true), []);
+
   const chatContextValue = useMemo<ChatAppContextValue>(
     () => ({
       conversations,
@@ -108,7 +110,7 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
       newChat: handleNewChat,
       deleteConversation: handleDelete,
       onConversationUpdate: handleConversationUpdate,
-      openSearch: () => setSearchOpen(true),
+      openSearch: handleOpenSearch,
       logout: onLogout,
     }),
     [
@@ -121,6 +123,7 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
       handleNewChat,
       handleDelete,
       handleConversationUpdate,
+      handleOpenSearch,
       onLogout,
     ],
   );

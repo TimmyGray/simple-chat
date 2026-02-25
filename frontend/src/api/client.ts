@@ -104,8 +104,8 @@ export async function getMessages(conversationId: ConversationId): Promise<Messa
   return data;
 }
 
-export async function searchConversations(query: string): Promise<Conversation[]> {
-  const { data } = await api.get('/conversations/search', { params: { q: query } });
+export async function searchConversations(query: string, signal?: AbortSignal): Promise<Conversation[]> {
+  const { data } = await api.get('/conversations/search', { params: { q: query }, signal });
   return data;
 }
 

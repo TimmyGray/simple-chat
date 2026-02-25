@@ -70,6 +70,19 @@ describe('ChatController', () => {
     controller = module.get<ChatController>(ChatController);
   });
 
+  describe('searchConversations', () => {
+    it('should delegate to searchService with dto and userId', async () => {
+      searchService.searchConversations.mockResolvedValue([mockConversation]);
+      const dto = { q: 'test' };
+      const result = await controller.searchConversations(mockUser, dto);
+      expect(result).toEqual([mockConversation]);
+      expect(searchService.searchConversations).toHaveBeenCalledWith(
+        dto,
+        mockUserId,
+      );
+    });
+  });
+
   describe('getConversations', () => {
     it('should return conversations for the authenticated user', async () => {
       const result = await controller.getConversations(mockUser);

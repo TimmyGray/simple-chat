@@ -49,7 +49,7 @@ export function useSearch(): UseSearchReturn {
 
       void (async () => {
         try {
-          const data = await api.searchConversations(trimmed);
+          const data = await api.searchConversations(trimmed, controller.signal);
           if (!controller.signal.aborted) {
             setResults(data);
             setError(null);
@@ -76,6 +76,7 @@ export function useSearch(): UseSearchReturn {
       if (timerRef.current) {
         clearTimeout(timerRef.current);
       }
+      abortRef.current?.abort();
     };
   }, [query]);
 

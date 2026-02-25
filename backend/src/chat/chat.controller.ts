@@ -57,6 +57,7 @@ export class ChatController {
   }
 
   @Get('conversations/search')
+  @Throttle({ default: { ttl: 60000, limit: 30 } })
   searchConversations(
     @CurrentUser() user: AuthUser,
     @Query() dto: SearchConversationsDto,
