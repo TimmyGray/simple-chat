@@ -1,9 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Button, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { SHORTCUT_HINT_FONT_SIZE, SHORTCUT_HINT_OPACITY } from '../../constants';
-
-const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
+import { IS_MAC_PLATFORM, SHORTCUT_HINT_FONT_SIZE, SHORTCUT_HINT_OPACITY } from '../../constants';
 
 interface NewChatButtonProps {
   onClick: () => void;
@@ -36,7 +34,7 @@ export default function NewChatButton({ onClick }: NewChatButtonProps) {
           fontSize: SHORTCUT_HINT_FONT_SIZE,
         }}
       >
-        {isMac ? '\u2318N' : 'Ctrl+N'}
+        {IS_MAC_PLATFORM ? '\u2318N' : 'Ctrl+N'}
       </Typography>
     </Button>
   );

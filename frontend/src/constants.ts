@@ -70,7 +70,9 @@ export const COPIED_FEEDBACK_MS = 2000;
 export const TEMPLATE_MENU_MAX_HEIGHT = 360;
 export const TEMPLATE_CONTENT_PREVIEW_LENGTH = 60;
 
-// ─── Shortcut Hints ──────────────────────────────────────────
+// ─── Keyboard Shortcuts ──────────────────────────────────────
+export const IS_MAC_PLATFORM = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
+export const MODIFIER_KEY = IS_MAC_PLATFORM ? '\u2318' : 'Ctrl+';
 export const SHORTCUT_HINT_FONT_SIZE = '0.7rem';
 export const SHORTCUT_HINT_OPACITY = 0.7;
 

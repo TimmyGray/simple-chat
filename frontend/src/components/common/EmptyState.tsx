@@ -1,10 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { useTranslation } from 'react-i18next';
-import { EMPTY_STATE_ICON_SIZE, EMPTY_STATE_OPACITY } from '../../constants';
-
-const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
-const modifier = isMac ? '\u2318' : 'Ctrl+';
+import { EMPTY_STATE_ICON_SIZE, EMPTY_STATE_OPACITY, MODIFIER_KEY } from '../../constants';
 
 export default function EmptyState() {
   const { t } = useTranslation();
@@ -27,9 +24,9 @@ export default function EmptyState() {
         {t('chat.noConversationHint')}
       </Typography>
       <Typography variant="caption" color="text.secondary">
-        {t('shortcuts.newChatHint', { shortcut: `${modifier}N` })}
+        {t('shortcuts.newChatHint', { shortcut: `${MODIFIER_KEY}N` })}
         {' · '}
-        {t('shortcuts.searchHint', { shortcut: `${modifier}K` })}
+        {t('shortcuts.searchHint', { shortcut: `${MODIFIER_KEY}K` })}
       </Typography>
     </Box>
   );

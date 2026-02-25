@@ -84,6 +84,7 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
   }, [create, handleSelectConversation, t]);
 
   // Global keyboard shortcuts: Cmd+K (search), Cmd+N (new chat)
+  // Cmd+N overrides browser "new window" — matches Slack/Notion convention
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (!(e.metaKey || e.ctrlKey)) return;
