@@ -1,18 +1,18 @@
 {
   "schema_version": 1,
   "counters": {
-    "features_since_last_sweep": 2,
-    "features_since_last_audit": 3,
-    "features_since_last_retrospective": 3
+    "features_since_last_sweep": 0,
+    "features_since_last_audit": 4,
+    "features_since_last_retrospective": 4
   },
   "thresholds": {
     "sweep_every_n_features": 3,
     "audit_every_n_features": 5,
     "retrospective_every_n_features": 10
   },
-  "pending_runs": [],
+  "pending_runs": ["sweep"],
   "last_runs": {
-    "sweep": "2026-02-25",
+    "sweep": "2026-02-26",
     "audit": "2026-02-25",
     "retrospective": "2026-02-25"
   },
