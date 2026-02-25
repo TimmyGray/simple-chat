@@ -30,7 +30,7 @@ export default function LanguageSwitcher() {
           borderColor: 'divider',
           '&.Mui-selected': {
             backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.15),
-            color: 'primary.light',
+            color: 'primary.main',
             '&:hover': {
               backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.25),
             },

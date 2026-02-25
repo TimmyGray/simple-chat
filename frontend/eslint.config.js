@@ -74,7 +74,7 @@ export default defineConfig([
   },
   {
     // getErrorMessage.ts is the canonical implementation — exempt it from the instanceof Error rule
-    files: ['src/utils/getErrorMessage.ts'],
+    files: ['src/utils/getErrorMessage.ts', '**/src/utils/getErrorMessage.ts'],
     rules: {
       'no-restricted-syntax': [
         'error',
@@ -107,7 +107,7 @@ export default defineConfig([
   },
   {
     // theme.ts is where hex colors SHOULD be defined — exempt it from the hex color rule
-    files: ['src/theme.ts'],
+    files: ['src/theme.ts', '**/src/theme.ts'],
     rules: {
       'no-restricted-syntax': [
         'error',

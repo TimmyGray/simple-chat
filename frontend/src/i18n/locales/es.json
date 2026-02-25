@@ -46,6 +46,12 @@
   "network": {
     "offline": "No hay conexión a internet. Verifica tu conexión."
   },
+  "theme": {
+    "label": "Tema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema"
+  },
   "models": {
     "free": "Gratis",
     "selectModel": "Seleccionar modelo"

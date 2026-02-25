@@ -8,9 +8,9 @@ Reference document for the React frontend of Simple Chat. Use this when implemen
 
 ```
 App (src/App.tsx)
-  state: selectedId, selectedModel, localError
-  hooks: useConversations(), useModels()
-  renders: ErrorBoundary > ThemeProvider > CssBaseline > Layout + Snackbar
+  state: authMode
+  hooks: useAuth(), useThemeMode()
+  renders: ErrorBoundary > ThemeModeProvider > ThemeProvider > CssBaseline > ChatApp | AuthPage
 |
 +-- ErrorBoundary (src/components/ErrorBoundary.tsx)
 |     Class component. Catches render errors, shows fallback UI with
@@ -32,6 +32,10 @@ App (src/App.tsx)
 |   |     Reads data from ChatAppContext via useChatApp() hook.
 |   |     Manages deleteTarget state for confirmation dialog.
 |   |
+|   |   +-- ThemeToggle (src/components/common/ThemeToggle.tsx)
+|   |   |     ToggleButtonGroup: Light | Dark | System (icon buttons)
+|   |   |     Reads/writes ThemeModeContext via useThemeModeContext().
+|   |   |
 |   |   +-- LanguageSwitcher (src/components/common/LanguageSwitcher.tsx)
 |   |   |     ToggleButtonGroup: EN | RU | ZH (zh-CN) | ES
 |   |   |     Calls i18n.changeLanguage() on selection.
@@ -390,7 +394,7 @@ Manual chunks are configured in `vite.config.ts` to optimize caching:
 frontend/src/
   App.tsx                          # Root component, auth routing
   main.tsx                         # Entry point, renders App
-  theme.ts                         # MUI dark theme configuration
+  theme.ts                         # MUI theme factory (createAppTheme: dark/light)
   setupTests.ts                    # Vitest setup (i18n init)
   types/
     index.ts                       # Conversation, Message, Attachment, ModelInfo
@@ -399,12 +403,14 @@ frontend/src/
     stream.ts                      # SSE streaming (native fetch)
   contexts/
     ChatAppContext.tsx              # Shared app state context (conversations, models, selection)
+    ThemeContext.tsx                # Theme mode context (light/dark/system)
   hooks/
     useConversations.ts            # Conversations CRUD state
     useMessages.ts                 # Messages + streaming state
     useModels.ts                   # Available models state
     useFocusRevalidation.ts        # SWR-style focus revalidation primitive
     useOnlineStatus.ts             # Browser online/offline detection
+    useThemeMode.ts                # Theme mode state (light/dark/system) + localStorage + matchMedia
   utils/
     getErrorMessage.ts             # Safe error message extraction from unknown errors
   i18n/

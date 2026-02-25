@@ -6,6 +6,7 @@ import theme from '../theme';
 import { asConversationId, asModelId } from '../types';
 import { ChatAppProvider } from '../contexts/ChatAppContext';
 import type { ChatAppContextValue } from '../contexts/ChatAppContext';
+import { ThemeModeProvider } from '../contexts/ThemeContext';
 import Sidebar from '../components/Sidebar/Sidebar';
 
 const mockConversations = [
@@ -43,9 +44,11 @@ function renderSidebar(overrides?: Partial<ChatAppContextValue>) {
   const value = { ...defaultContext, ...overrides };
   return render(
     <ThemeProvider theme={theme}>
-      <ChatAppProvider value={value}>
-        <Sidebar />
-      </ChatAppProvider>
+      <ThemeModeProvider value={{ mode: 'dark', setMode: vi.fn() }}>
+        <ChatAppProvider value={value}>
+          <Sidebar />
+        </ChatAppProvider>
+      </ThemeModeProvider>
     </ThemeProvider>,
   );
 }

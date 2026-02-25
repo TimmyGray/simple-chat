@@ -3,10 +3,17 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from '../theme';
+import { ThemeModeProvider } from '../contexts/ThemeContext';
 import AuthPage from '../components/Auth/AuthPage';
 
 const renderWithTheme = (ui: React.ReactElement) =>
-  render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
+  render(
+    <ThemeProvider theme={theme}>
+      <ThemeModeProvider value={{ mode: 'dark', setMode: vi.fn() }}>
+        {ui}
+      </ThemeModeProvider>
+    </ThemeProvider>,
+  );
 
 describe('AuthPage', () => {
   it('renders login form by default', () => {

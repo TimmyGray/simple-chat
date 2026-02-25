@@ -45,7 +45,7 @@ export default function ModelSelector({
             borderColor: 'divider',
           },
           '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: (theme) => alpha(theme.palette.common.white, 0.16),
+            borderColor: (theme) => alpha(theme.palette.text.primary, 0.16),
           },
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
             borderColor: 'primary.main',

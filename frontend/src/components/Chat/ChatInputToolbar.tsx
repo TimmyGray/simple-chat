@@ -41,7 +41,7 @@ export default function ChatInputToolbar({
         px: 1,
         py: 0.75,
         borderTop: '1px solid',
-        borderColor: (theme) => alpha(theme.palette.common.white, 0.04),
+        borderColor: (theme) => alpha(theme.palette.text.primary, 0.04),
       }}
     >
       {/* Left: model selector + attach button */}
@@ -67,7 +67,7 @@ export default function ChatInputToolbar({
             disabled={disabled || !canSend}
             sx={{
               bgcolor: 'primary.main',
-              color: 'white',
+              color: 'common.white',
               '&:hover': { bgcolor: 'primary.dark' },
               '&.Mui-disabled': {
                 bgcolor: 'action.disabledBackground',
