@@ -67,6 +67,30 @@ export const messagesSchema: Document = {
   },
 };
 
+export const templatesSchema: Document = {
+  $jsonSchema: {
+    bsonType: 'object',
+    required: [
+      'name',
+      'content',
+      'category',
+      'isDefault',
+      'createdAt',
+      'updatedAt',
+    ],
+    properties: {
+      _id: { bsonType: 'objectId' },
+      name: { bsonType: 'string' },
+      content: { bsonType: 'string' },
+      category: { bsonType: 'string' },
+      isDefault: { bsonType: 'bool' },
+      createdAt: { bsonType: 'date' },
+      updatedAt: { bsonType: 'date' },
+    },
+    additionalProperties: false,
+  },
+};
+
 export const usersSchema: Document = {
   $jsonSchema: {
     bsonType: 'object',

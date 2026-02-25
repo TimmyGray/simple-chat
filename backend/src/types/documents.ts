@@ -38,6 +38,16 @@ export interface MessageDoc {
   updatedAt: Date;
 }
 
+export interface TemplateDoc {
+  _id?: ObjectId;
+  name: string;
+  content: string;
+  category: string;
+  isDefault: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface UserDoc {
   _id?: ObjectId;
   email: string;
