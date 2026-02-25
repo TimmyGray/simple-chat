@@ -1,14 +1,14 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-25 (audit #12)
+> Last updated: 2026-02-25 (sweep #15)
 
 ## Test Summary
 
 | Area | Test Files | Tests | Pass Rate |
 |------|-----------|-------|-----------|
-| Backend | 17 | 162 | 100% |
+| Backend | 18 | 178 | 100% |
 | Frontend | 18 | 174 | 100% |
-| **Total** | **35** | **336** | **100%** |
+| **Total** | **36** | **352** | **100%** |
 
 ## Lint Status
 
@@ -44,16 +44,49 @@
 | Frontend | ~20 | 8 (3 patch, 2 minor, 3 major) | 11 (1 moderate, 10 high — all in eslint/minimatch transitive deps) |
 
 ## Bundle Size
-- Backend: 1.3 MB (dist/)
-- Frontend: 1.5 MB (dist/) — initial load 323 KB + 298 KB vendor-mui + 62 KB vendor-i18n + 789 KB lazy markdown chunk
+- Backend: 1.1 MB (dist/)
+- Frontend: 1.5 MB (dist/) — initial load 331 KB + 305 KB vendor-mui + 63 KB vendor-i18n + 808 KB lazy markdown chunk
 
 ## Tech Debt
 - Critical: 0 todo, 4 done (JWT authentication completed)
 - High: 0 todo, 7 done — all high-priority items completed
 - Medium: 0 todo, 31 done, 1 wont-fix — all medium items done
 - Low: 0 todo, 15 done — all low-priority items completed
-- Features: 7 todo, 7 done (FEAT-4, FEAT-7 completed since last sweep)
+- Features: 6 todo, 8 done (FEAT-5a completed since last audit)
 - Total tracked: 72 (see `docs/exec-plans/tech-debt-tracker.md`)
+
+## Sweep #15 Findings
+- All validation passing: lint 0 errors, typecheck 0 errors, 352 tests passing, build passing
+- Backend tests: 162 -> 178 (+16, 17->18 files — new templates.service.spec.ts with 15 tests from FEAT-5a, +1 elsewhere)
+- Frontend tests: 174 (18 files, unchanged)
+- Total tests: 336 -> 352 (+16, target: 100+ sustained, comfortably exceeded)
+- Completed since last sweep/audit: FEAT-5a (Backend templates module, PR #85)
+- Fixed: Features count was stale (was 7 todo/7 done, actually 6 todo/8 done — FEAT-5a completed)
+- Fixed: Backend bundle size was stale (was 1.3 MB, actually 1.1 MB — tsbuildinfo regenerated smaller)
+- Fixed: Frontend bundle sizes slightly changed (331 KB index, 305 KB vendor-mui, 63 KB vendor-i18n, 808 KB lazy markdown)
+- No auto-fixable code violations found (codebase is clean)
+- No console.log/warn/error in source (clean)
+- No dangerouslySetInnerHTML (clean)
+- No hardcoded secrets (clean)
+- No `any` types in non-test source files (clean)
+- No hardcoded user-facing strings in .tsx files (all use t())
+- No TODO/FIXME/HACK comments in source (clean)
+- i18n: all 4 locales in sync (80 leaf keys each, unchanged)
+- All cross-module imports follow approved patterns (chat->auth for guards/decorators, templates->auth for guards, all modules->database for DatabaseService)
+- No services importing Express types (clean)
+- No direct MongoDB collection access outside DatabaseService (clean)
+- No files exceed 300-line limit (largest: chat.controller.ts at 274, MessageBubble.tsx at 269, export.service.ts at 264)
+- All hex/rgba/gradient colors in theme.ts only (exempt per convention)
+- No window.alert() in source (clean)
+- No hardcoded hex colors outside theme.ts (clean)
+- Backend `instanceof Error` pattern: RESOLVED — 0 inline occurrences (canonical utilities in place, ESLint enforced)
+- Frontend `instanceof Error` pattern: 1 occurrence in getErrorMessage.ts utility only (exempt per convention)
+- New templates module review: well-structured — DTOs with class-validator, PartialType for update, proper error handling (MongoServerError 11000 for duplicate key), unique index on name, seeding on init, 15 tests covering all CRUD + edge cases
+- Existing tracked observations:
+  - 1 backend function borderline over 50-line limit: refreshModels at 52 lines (not tracked separately, only 2 lines over)
+  - Frontend components exceed 50-line function limit: MessageBubble (269), SearchDialog (214), ChatInput (204) — React components with JSX, expected
+  - stream.ts has 3 hardcoded English fallback strings — acceptable per convention (plain .ts without React hooks)
+- 106 non-test source files scanned (60 backend + 46 frontend), 36 test files scanned
 
 ## Audit #12 Findings
 - All validation passing: lint 0 errors, typecheck 0 errors, 336 tests passing, build passing
@@ -631,7 +664,7 @@
 - 5 frontend functions exceed 50-line limit (React components/hooks, tracked as F-L2)
 
 ## Targets
-- Test count: 100+ (achieved — currently 319)
+- Test count: 100+ (achieved — currently 352)
 - Coverage: 80%+ (currently 60%/50% thresholds)
 - Lint errors: 0 (achieved)
 - Type errors: 0 (achieved)
