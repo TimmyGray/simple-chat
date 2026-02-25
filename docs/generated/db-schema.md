@@ -74,6 +74,24 @@
 
 **Source:** `backend/src/auth/interfaces/user.interface.ts`
 
+### Collection: templates
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| _id | ObjectId | auto | Primary key |
+| name | string | yes | Template name (unique, max 100 chars) |
+| content | string | yes | System prompt content (max 10,000 chars) |
+| category | string | yes | Template category (e.g., "general", "development", "writing") |
+| isDefault | boolean | yes | Whether this is a built-in default template |
+| createdAt | Date | yes | Creation timestamp |
+| updatedAt | Date | yes | Last update timestamp |
+
+**Indexes:**
+- `{ name: 1 }` (unique) — enforces unique template names
+- `{ category: 1, name: 1 }` — list templates grouped by category
+
+**Source:** `backend/src/templates/interfaces/template.interface.ts`
+
 ## Schema Validation
 
 MongoDB JSON Schema validators are applied to all collections at startup via `collMod` commands in `DatabaseService.onModuleInit()`.

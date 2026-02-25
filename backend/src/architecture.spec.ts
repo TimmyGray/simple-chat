@@ -19,7 +19,14 @@ import { describe, it, expect } from 'vitest';
 const SRC_DIR = join(__dirname);
 
 /** Backend domain modules — each is an isolated bounded context */
-const DOMAIN_MODULES = ['auth', 'chat', 'health', 'models', 'uploads'] as const;
+const DOMAIN_MODULES = [
+  'auth',
+  'chat',
+  'health',
+  'models',
+  'templates',
+  'uploads',
+] as const;
 
 /** Modules that any domain module may import from (shared infrastructure) */
 const SHARED_MODULES = ['common', 'config', 'database', 'types'];
@@ -114,8 +121,12 @@ describe('Architecture: Module Boundaries', () => {
           if (targetModule === mod) continue;
           if (SHARED_MODULES.includes(targetModule)) continue;
 
-          // Allow auth imports from chat (chat needs JwtAuthGuard)
-          if (mod === 'chat' && targetModule === 'auth') continue;
+          // Allow auth imports from chat and templates (need JwtAuthGuard)
+          if (
+            (mod === 'chat' || mod === 'templates') &&
+            targetModule === 'auth'
+          )
+            continue;
 
           violations.push(
             `${relFile} imports from ${targetModule}/ (via "${imp}"). ` +

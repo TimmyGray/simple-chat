@@ -34,7 +34,7 @@
 
 These rules are enforced by ESLint custom rules with remediation messages and structural architecture tests:
 
-1. **No cross-module imports:** Backend modules (`auth/`, `chat/`, `uploads/`, `health/`, `models/`) must not import from each other's internal files. Use NestJS DI instead.
+1. **No cross-module imports:** Backend modules (`auth/`, `chat/`, `health/`, `models/`, `templates/`, `uploads/`) must not import from each other's internal files. Use NestJS DI instead.
 2. **No console.log:** Use the injected Pino logger (`Logger` from `@nestjs/common`)
 3. **No raw HTML in React:** Use MUI components (`Button`, `TextField`, `Select`, etc.)
 4. **No hardcoded colors:** Use `theme.palette.*` tokens

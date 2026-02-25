@@ -1,10 +1,16 @@
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Collection, Db, Document, MongoServerError } from 'mongodb';
 import { DATABASE_CONNECTION } from './database.constants';
-import { ConversationDoc, MessageDoc, UserDoc } from '../types/documents';
+import {
+  ConversationDoc,
+  MessageDoc,
+  TemplateDoc,
+  UserDoc,
+} from '../types/documents';
 import {
   conversationsSchema,
   messagesSchema,
+  templatesSchema,
   usersSchema,
 } from './database.schemas';
 
@@ -28,6 +34,8 @@ export class DatabaseService implements OnModuleInit {
     );
     await this.conversations().createIndex({ userId: 1, updatedAt: -1 });
     await this.users().createIndex({ email: 1 }, { unique: true });
+    await this.templates().createIndex({ category: 1, name: 1 });
+    await this.templates().createIndex({ name: 1 }, { unique: true });
   }
 
   private async applySchemaValidation() {
@@ -35,6 +43,7 @@ export class DatabaseService implements OnModuleInit {
       { name: 'conversations', validator: conversationsSchema },
       { name: 'messages', validator: messagesSchema },
       { name: 'users', validator: usersSchema },
+      { name: 'templates', validator: templatesSchema },
     ];
 
     for (const { name, validator } of schemas) {
@@ -83,5 +92,9 @@ export class DatabaseService implements OnModuleInit {
 
   users(): Collection<UserDoc> {
     return this.db.collection<UserDoc>('users');
+  }
+
+  templates(): Collection<TemplateDoc> {
+    return this.db.collection<TemplateDoc>('templates');
   }
 }

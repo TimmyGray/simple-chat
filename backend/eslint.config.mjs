@@ -63,6 +63,10 @@ export default tseslint.config(
             group: ['../models/*'],
             message: 'Cross-module import detected. Do not import from models/ internals. Use NestJS dependency injection: import ModelsModule in your module.ts and inject ModelsService via constructor.',
           },
+          {
+            group: ['../templates/*'],
+            message: 'Cross-module import detected. Do not import from templates/ internals. Use NestJS dependency injection: import TemplatesModule in your module.ts and inject TemplatesService via constructor.',
+          },
         ],
       }],
     },
@@ -70,6 +74,36 @@ export default tseslint.config(
   {
     // chat/ is allowed to import from auth/ (guards, decorators, interfaces)
     files: ['src/chat/**/*.ts'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [
+          {
+            group: ['../chat/*'],
+            message: 'Cross-module import detected. Do not import from chat/ internals.',
+          },
+          {
+            group: ['../uploads/*'],
+            message: 'Cross-module import detected. Do not import from uploads/ internals.',
+          },
+          {
+            group: ['../health/*'],
+            message: 'Cross-module import detected. Do not import from health/ internals.',
+          },
+          {
+            group: ['../models/*'],
+            message: 'Cross-module import detected. Do not import from models/ internals.',
+          },
+          {
+            group: ['../templates/*'],
+            message: 'Cross-module import detected. Do not import from templates/ internals.',
+          },
+        ],
+      }],
+    },
+  },
+  {
+    // templates/ is allowed to import from auth/ (guards, decorators)
+    files: ['src/templates/**/*.ts'],
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [
