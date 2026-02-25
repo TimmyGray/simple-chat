@@ -36,7 +36,10 @@
     "regenerate": "Regenerate response",
     "edited": "(edited)",
     "saveEdit": "Save",
-    "cancelEdit": "Cancel"
+    "cancelEdit": "Cancel",
+    "stopGenerating": "Stop generating",
+    "copyMessage": "Copy message",
+    "copied": "Copied!"
   },
   "dialog": {
     "deleteTitle": "Delete conversation",

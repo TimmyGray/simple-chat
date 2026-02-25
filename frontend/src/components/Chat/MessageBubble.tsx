@@ -25,10 +25,11 @@ interface MessageBubbleProps {
   message: Message;
   onEdit?: (messageId: MessageId, content: string) => void;
   onRegenerate?: (messageId: MessageId) => void;
+  onStop?: () => void;
   isStreaming?: boolean;
 }
 
-function MessageBubble({ message, onEdit, onRegenerate, isStreaming }: MessageBubbleProps) {
+function MessageBubble({ message, onEdit, onRegenerate, onStop, isStreaming }: MessageBubbleProps) {
   const { t } = useTranslation();
   const isUser = message.role === 'user';
   const [editing, setEditing] = useState(false);
@@ -59,6 +60,10 @@ function MessageBubble({ message, onEdit, onRegenerate, isStreaming }: MessageBu
     onRegenerate?.(message._id);
   }, [message._id, onRegenerate]);
 
+  const handleCopy = useCallback(() => {
+    void navigator.clipboard.writeText(message.content).catch(() => { /* non-secure context */ });
+  }, [message.content]);
+
   const handleEditKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter' && !e.shiftKey) {
@@ -71,7 +76,7 @@ function MessageBubble({ message, onEdit, onRegenerate, isStreaming }: MessageBu
     [handleSaveEdit, handleCancelEdit],
   );
 
-  const showActions = !isStreaming && !editing;
+  const showIdleActions = !isStreaming && !editing;
 
   return (
     <Box
@@ -114,12 +119,21 @@ function MessageBubble({ message, onEdit, onRegenerate, isStreaming }: MessageBu
           '&:hover .message-actions': { opacity: 1 },
         }}
       >
-        {/* Action buttons (hover overlay) */}
-        {showActions && (
+        {/* Stop button during streaming (always visible) */}
+        {isStreaming && (
+          <MessageActions
+            isUser={isUser}
+            isStreaming
+            onStop={onStop}
+          />
+        )}
+        {/* Idle action buttons (hover overlay) */}
+        {showIdleActions && (
           <MessageActions
             isUser={isUser}
             onEdit={onEdit ? handleStartEdit : undefined}
             onRegenerate={onRegenerate ? handleRegenerate : undefined}
+            onCopy={handleCopy}
           />
         )}
 

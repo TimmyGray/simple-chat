@@ -36,7 +36,10 @@
     "regenerate": "Regenerar respuesta",
     "edited": "(editado)",
     "saveEdit": "Guardar",
-    "cancelEdit": "Cancelar"
+    "cancelEdit": "Cancelar",
+    "stopGenerating": "Detener generación",
+    "copyMessage": "Copiar mensaje",
+    "copied": "¡Copiado!"
   },
   "dialog": {
     "deleteTitle": "Eliminar conversación",

@@ -227,4 +227,85 @@ describe('MessageBubble', () => {
     );
     expect(screen.queryByLabelText('Edit message')).not.toBeInTheDocument();
   });
+
+  it('shows stop button when streaming', () => {
+    const onStop = vi.fn();
+    renderWithTheme(
+      <MessageBubble
+        message={{
+          _id: asMessageId('12'),
+          conversationId: asConversationId('c1'),
+          role: 'assistant',
+          content: 'Generating...',
+          attachments: [],
+          createdAt: new Date().toISOString(),
+        }}
+        onStop={onStop}
+        isStreaming
+      />,
+    );
+    expect(screen.getByLabelText('Stop generating')).toBeInTheDocument();
+  });
+
+  it('calls onStop when stop button is clicked', async () => {
+    const user = userEvent.setup();
+    const onStop = vi.fn();
+    renderWithTheme(
+      <MessageBubble
+        message={{
+          _id: asMessageId('13'),
+          conversationId: asConversationId('c1'),
+          role: 'assistant',
+          content: 'Generating...',
+          attachments: [],
+          createdAt: new Date().toISOString(),
+        }}
+        onStop={onStop}
+        isStreaming
+      />,
+    );
+    await user.click(screen.getByLabelText('Stop generating'));
+    expect(onStop).toHaveBeenCalledOnce();
+  });
+
+  it('shows copy button for messages', () => {
+    renderWithTheme(
+      <MessageBubble
+        message={{
+          _id: asMessageId('14'),
+          conversationId: asConversationId('c1'),
+          role: 'user',
+          content: 'Copy me',
+          attachments: [],
+          createdAt: new Date().toISOString(),
+        }}
+      />,
+    );
+    expect(screen.getByLabelText('Copy message')).toBeInTheDocument();
+  });
+
+  it('copies message content to clipboard on click', async () => {
+    const user = userEvent.setup();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      writable: true,
+      configurable: true,
+    });
+
+    renderWithTheme(
+      <MessageBubble
+        message={{
+          _id: asMessageId('15'),
+          conversationId: asConversationId('c1'),
+          role: 'assistant',
+          content: 'Copy this text',
+          attachments: [],
+          createdAt: new Date().toISOString(),
+        }}
+      />,
+    );
+    await user.click(screen.getByLabelText('Copy message'));
+    expect(writeText).toHaveBeenCalledWith('Copy this text');
+  });
 });

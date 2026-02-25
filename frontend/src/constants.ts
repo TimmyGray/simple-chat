@@ -63,6 +63,9 @@ export const SEARCH_RESULT_MAX_HEIGHT = 400;
 export const MESSAGE_ACTION_ICON_SIZE = 16;
 export const MESSAGE_ACTION_BUTTON_SIZE = 28;
 
+// ─── Copy Feedback ──────────────────────────────────────────
+export const COPIED_FEEDBACK_MS = 2000;
+
 // ─── Snackbar ───────────────────────────────────────────────
 export const SNACKBAR_AUTO_HIDE_MS = 6000;
 export const ERROR_SNACKBAR_AUTO_HIDE_MS = 4000;
