@@ -55,6 +55,12 @@
   "network": {
     "offline": "Нет подключения к интернету. Проверьте соединение."
   },
+  "websocket": {
+    "connected": "Подключено",
+    "connecting": "Подключение...",
+    "disconnected": "Отключено",
+    "typingUsers": "{{users}} печатает..."
+  },
   "theme": {
     "label": "Тема",
     "light": "Светлая",

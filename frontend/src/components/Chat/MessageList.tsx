@@ -23,6 +23,7 @@ interface MessageListProps {
   onRegenerateMessage?: (messageId: MessageId) => void;
   onForkMessage?: (messageId: MessageId) => void;
   onStopStreaming?: () => void;
+  remoteTypingUsers?: string[];
 }
 
 export default function MessageList({
@@ -34,6 +35,7 @@ export default function MessageList({
   onRegenerateMessage,
   onForkMessage,
   onStopStreaming,
+  remoteTypingUsers,
 }: MessageListProps) {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const isAtBottomRef = useRef(true);
@@ -141,6 +143,10 @@ export default function MessageList({
           streaming && !streamingContent ? (
             <Box sx={{ px: { xs: 2, md: 3, lg: 4 }, pb: 2 }}>
               <TypingIndicator />
+            </Box>
+          ) : remoteTypingUsers && remoteTypingUsers.length > 0 ? (
+            <Box sx={{ px: { xs: 2, md: 3, lg: 4 }, pb: 2 }}>
+              <TypingIndicator remoteUsers={remoteTypingUsers} />
             </Box>
           ) : (
             <Box sx={{ height: LIST_SPACER_HEIGHT }} />

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Snackbar, Alert, Chip } from '@mui/material';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
@@ -6,12 +6,19 @@ import type { Attachment, MessageId } from '../../types';
 import { useChatApp } from '../../contexts/ChatAppContext';
 import { useModel } from '../../contexts/ModelContext';
 import { useTemplate } from '../../contexts/TemplateContext';
+import { useWebSocketContext } from '../../contexts/WebSocketContext';
 import { useMessages } from '../../hooks/useMessages';
+import { WS_SERVER_EVENT, toFrontendMessage, toDeletedIds } from '../../api/socket';
+import type { WsMessagePayload, WsMessageDeletedPayload, WsTypingPayload } from '../../api/socket';
 import MessageList from './MessageList';
 import ChatInput from './ChatInput';
 import ExportMenu from './ExportMenu';
+import ConnectionStatus from './ConnectionStatus';
 import EmptyState from '../common/EmptyState';
 import { ERROR_SNACKBAR_AUTO_HIDE_MS } from '../../constants';
+
+const TYPING_DEBOUNCE_MS = 3000;
+const TYPING_TIMEOUT_MS = 5000;
 
 export default function ChatArea() {
   const {
@@ -22,6 +29,7 @@ export default function ChatArea() {
   } = useChatApp();
   const { models, selectedModel, changeModel } = useModel();
   const { templates, selectedTemplateId, changeTemplate } = useTemplate();
+  const { socket, connectionStatus, joinConversation, leaveConversation, emitTypingStart, emitTypingStop } = useWebSocketContext();
   const { t } = useTranslation();
 
   const {
@@ -35,9 +43,15 @@ export default function ChatArea() {
     regenerateMessage,
     stopStreaming,
     clear,
+    addRemoteMessage,
+    updateRemoteMessage,
+    removeRemoteMessage,
   } = useMessages();
 
   const [exportError, setExportError] = useState<string | null>(null);
+  const [remoteTypingUsers, setRemoteTypingUsers] = useState<string[]>([]);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const typingTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   // Escape key stops streaming when active
   useEffect(() => {
@@ -52,9 +66,6 @@ export default function ChatArea() {
     return () => document.removeEventListener('keydown', handler);
   }, [streaming, stopStreaming]);
 
-  // Depend on conversation ID (not object reference) to avoid
-  // re-fetching messages when the conversation list refreshes
-  // but the selected conversation hasn't actually changed.
   const conversationId = conversation?._id ?? null;
 
   useEffect(() => {
@@ -65,9 +76,115 @@ export default function ChatArea() {
     }
   }, [conversationId, fetchMessages, clear]);
 
+  // Join/leave WebSocket rooms on conversation change
+  const prevConversationIdRef = useRef(conversationId);
+  useEffect(() => {
+    const prev = prevConversationIdRef.current;
+    if (prev && prev !== conversationId) {
+      leaveConversation(prev);
+    }
+    if (conversationId) {
+      joinConversation(conversationId);
+    }
+    prevConversationIdRef.current = conversationId;
+    return () => {
+      if (conversationId) {
+        leaveConversation(conversationId);
+      }
+    };
+  }, [conversationId, joinConversation, leaveConversation]);
+
+  // Listen for WebSocket events
+  useEffect(() => {
+    if (!socket || !conversationId) return;
+
+    const handleMessageCreated = (payload: WsMessagePayload) => {
+      const { conversationId: msgConvId, message } = toFrontendMessage(payload);
+      if (msgConvId === conversationId) {
+        addRemoteMessage(message);
+      }
+    };
+
+    const handleMessageUpdated = (payload: WsMessagePayload) => {
+      const { conversationId: msgConvId, message } = toFrontendMessage(payload);
+      if (msgConvId === conversationId) {
+        updateRemoteMessage(message);
+      }
+    };
+
+    const handleMessageDeleted = (payload: WsMessageDeletedPayload) => {
+      const { conversationId: msgConvId, messageId } = toDeletedIds(payload);
+      if (msgConvId === conversationId) {
+        removeRemoteMessage(messageId);
+      }
+    };
+
+    const handleTypingStart = (payload: WsTypingPayload) => {
+      if (payload.conversationId !== conversationId) return;
+      setRemoteTypingUsers((prev) =>
+        prev.includes(payload.email) ? prev : [...prev, payload.email],
+      );
+      // Auto-clear after timeout (safety net)
+      const existing = typingTimersRef.current.get(payload.userId);
+      if (existing) clearTimeout(existing);
+      typingTimersRef.current.set(
+        payload.userId,
+        setTimeout(() => {
+          setRemoteTypingUsers((prev) => prev.filter((e) => e !== payload.email));
+          typingTimersRef.current.delete(payload.userId);
+        }, TYPING_TIMEOUT_MS),
+      );
+    };
+
+    const handleTypingStop = (payload: WsTypingPayload) => {
+      if (payload.conversationId !== conversationId) return;
+      setRemoteTypingUsers((prev) => prev.filter((e) => e !== payload.email));
+      const timer = typingTimersRef.current.get(payload.userId);
+      if (timer) {
+        clearTimeout(timer);
+        typingTimersRef.current.delete(payload.userId);
+      }
+    };
+
+    socket.on(WS_SERVER_EVENT.MESSAGE_CREATED, handleMessageCreated);
+    socket.on(WS_SERVER_EVENT.MESSAGE_UPDATED, handleMessageUpdated);
+    socket.on(WS_SERVER_EVENT.MESSAGE_DELETED, handleMessageDeleted);
+    socket.on(WS_SERVER_EVENT.TYPING_START, handleTypingStart);
+    socket.on(WS_SERVER_EVENT.TYPING_STOP, handleTypingStop);
+
+    const timers = typingTimersRef.current;
+    return () => {
+      socket.off(WS_SERVER_EVENT.MESSAGE_CREATED, handleMessageCreated);
+      socket.off(WS_SERVER_EVENT.MESSAGE_UPDATED, handleMessageUpdated);
+      socket.off(WS_SERVER_EVENT.MESSAGE_DELETED, handleMessageDeleted);
+      socket.off(WS_SERVER_EVENT.TYPING_START, handleTypingStart);
+      socket.off(WS_SERVER_EVENT.TYPING_STOP, handleTypingStop);
+      timers.forEach((timer) => clearTimeout(timer));
+      timers.clear();
+      setRemoteTypingUsers([]);
+    };
+  }, [socket, conversationId, addRemoteMessage, updateRemoteMessage, removeRemoteMessage]);
+
+  // Typing emission with debounce
+  const handleTyping = useCallback(() => {
+    if (!conversationId) return;
+    emitTypingStart(conversationId);
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      emitTypingStop(conversationId);
+      typingTimeoutRef.current = null;
+    }, TYPING_DEBOUNCE_MS);
+  }, [conversationId, emitTypingStart, emitTypingStop]);
+
   const handleSend = useCallback(
     async (content: string, attachments: Attachment[]) => {
       if (!conversation) return;
+      // Stop typing indicator on send
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = null;
+        emitTypingStop(conversation._id);
+      }
       await sendMessage(
         conversation._id,
         content,
@@ -76,7 +193,7 @@ export default function ChatArea() {
       );
       onConversationUpdate();
     },
-    [conversation, selectedModel, sendMessage, onConversationUpdate],
+    [conversation, selectedModel, sendMessage, onConversationUpdate, emitTypingStop],
   );
 
   const handleEditMessage = useCallback(
@@ -100,8 +217,6 @@ export default function ChatArea() {
   const handleForkMessage = useCallback(
     async (messageId: MessageId) => {
       if (!conversation) return;
-      // Optimistic messages use UUIDs; the fork API needs real MongoDB ObjectIds.
-      // Only allow forking persisted messages (24-char hex ObjectIds).
       if (!/^[a-f\d]{24}$/i.test(messageId)) return;
       await forkConversation(conversation._id, messageId);
     },
@@ -128,6 +243,7 @@ export default function ChatArea() {
       }}
     >
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', px: 1, pt: 0.5, gap: 1 }}>
+        <ConnectionStatus status={connectionStatus} />
         {activeTemplateName && (
           <Chip
             icon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}
@@ -149,6 +265,7 @@ export default function ChatArea() {
         onRegenerateMessage={handleRegenerateMessage}
         onForkMessage={handleForkMessage}
         onStopStreaming={stopStreaming}
+        remoteTypingUsers={remoteTypingUsers}
       />
       <ChatInput
         key={conversation._id}
@@ -160,6 +277,7 @@ export default function ChatArea() {
         onTemplateChange={changeTemplate}
         onSend={handleSend}
         disabled={streaming || !isOnline}
+        onTyping={handleTyping}
       />
       <Snackbar
         open={!!exportError}

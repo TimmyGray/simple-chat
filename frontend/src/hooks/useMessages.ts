@@ -17,6 +17,9 @@ export interface UseMessagesReturn {
   regenerateMessage: (conversationId: ConversationId, messageId: MessageId) => Promise<void>;
   stopStreaming: () => void;
   clear: () => void;
+  addRemoteMessage: (message: Message) => void;
+  updateRemoteMessage: (message: Message) => void;
+  removeRemoteMessage: (messageId: MessageId) => void;
 }
 
 export function useMessages(): UseMessagesReturn {
@@ -209,6 +212,23 @@ export function useMessages(): UseMessagesReturn {
     setError(null);
   }, []);
 
+  const addRemoteMessage = useCallback((message: Message) => {
+    setMessages((prev) => {
+      if (prev.some((m) => m._id === message._id)) return prev;
+      return [...prev, message];
+    });
+  }, []);
+
+  const updateRemoteMessage = useCallback((message: Message) => {
+    setMessages((prev) =>
+      prev.map((m) => (m._id === message._id ? message : m)),
+    );
+  }, []);
+
+  const removeRemoteMessage = useCallback((messageId: MessageId) => {
+    setMessages((prev) => prev.filter((m) => m._id !== messageId));
+  }, []);
+
   return {
     messages,
     loading,
@@ -221,5 +241,8 @@ export function useMessages(): UseMessagesReturn {
     regenerateMessage,
     stopStreaming,
     clear,
+    addRemoteMessage,
+    updateRemoteMessage,
+    removeRemoteMessage,
   };
 }

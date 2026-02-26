@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Box, keyframes } from '@mui/material';
+import { Box, Typography, keyframes } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import {
   TYPING_DOT_SIZE,
@@ -13,13 +13,21 @@ const bounce = keyframes`
   30% { transform: translateY(${TYPING_BOUNCE_OFFSET}px); }
 `;
 
-export default function TypingIndicator() {
+interface TypingIndicatorProps {
+  remoteUsers?: string[];
+}
+
+export default function TypingIndicator({ remoteUsers }: TypingIndicatorProps) {
   const { t } = useTranslation();
 
+  const label = remoteUsers && remoteUsers.length > 0
+    ? t('websocket.typingUsers', { users: remoteUsers.join(', ') })
+    : t('chat.typing');
+
   return (
-    <Box role="status" aria-live="polite" sx={{ display: 'flex', gap: 0.5, p: 1, pl: 2 }}>
+    <Box role="status" aria-live="polite" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, p: 1, pl: 2 }}>
       <Box component="span" sx={visuallyHidden}>
-        {t('chat.typing')}
+        {label}
       </Box>
       {[0, 1, 2].map((i) => (
         <Box
@@ -34,6 +42,11 @@ export default function TypingIndicator() {
           }}
         />
       ))}
+      {remoteUsers && remoteUsers.length > 0 && (
+        <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+          {t('websocket.typingUsers', { users: remoteUsers.join(', ') })}
+        </Typography>
+      )}
     </Box>
   );
 }

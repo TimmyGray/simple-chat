@@ -20,6 +20,7 @@ interface ChatInputProps {
   onTemplateChange: (templateId: TemplateId | null) => void;
   onSend: (content: string, attachments: Attachment[]) => void;
   disabled?: boolean;
+  onTyping?: () => void;
 }
 
 export default function ChatInput({
@@ -31,6 +32,7 @@ export default function ChatInput({
   onTemplateChange,
   onSend,
   disabled,
+  onTyping,
 }: ChatInputProps) {
   const { t } = useTranslation();
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -123,7 +125,10 @@ export default function ChatInput({
           maxRows={8}
           placeholder={t('chat.placeholder')}
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => {
+            setInput(e.target.value);
+            onTyping?.();
+          }}
           onKeyDown={handleKeyDown}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}

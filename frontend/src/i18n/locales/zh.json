@@ -55,6 +55,12 @@
   "network": {
     "offline": "您已离线，请检查网络连接。"
   },
+  "websocket": {
+    "connected": "已连接",
+    "connecting": "连接中...",
+    "disconnected": "已断开",
+    "typingUsers": "{{users}} 正在输入..."
+  },
   "theme": {
     "label": "主题",
     "light": "浅色",
