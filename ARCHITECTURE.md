@@ -143,6 +143,7 @@ The project uses the **MongoDB native driver** (not Mongoose). `DatabaseModule` 
 | `title`     | string   | Display name (auto-set from first message) |
 | `model`     | string   | Default LLM model ID             |
 | `templateId`| ObjectId (optional) | Reference to templates._id (system prompt template) |
+| `forkedFrom`| object (optional) | Fork origin: `{ conversationId: ObjectId, messageId: ObjectId }` |
 | `createdAt` | Date     | Creation timestamp               |
 | `updatedAt` | Date     | Last modification timestamp      |
 
@@ -178,6 +179,18 @@ The project uses the **MongoDB native driver** (not Mongoose). `DatabaseModule` 
 | `createdAt`             | Date     | Creation timestamp                       |
 | `updatedAt`             | Date     | Last modification timestamp              |
 
+**mcpServers**
+| Field       | Type     | Description                              |
+|-------------|----------|------------------------------------------|
+| `_id`       | ObjectId | Primary key                              |
+| `name`      | string   | Display name for the MCP server          |
+| `command`   | string   | Executable command to launch the server  |
+| `args`      | string[] | Command-line arguments                   |
+| `env`       | Record<string, string> (optional) | Environment variables for the server process |
+| `enabled`   | boolean  | Whether to auto-connect on startup       |
+| `createdAt` | Date     | Creation timestamp                       |
+| `updatedAt` | Date     | Last modification timestamp              |
+
 #### Indexes
 
 Created programmatically in `DatabaseService.onModuleInit()`:
@@ -204,6 +217,7 @@ All routes are prefixed with `/api`.
 | `POST`   | `/conversations/:id/messages`       | **10/min**   | JWT      | Send message + stream LLM response (SSE) |
 | `POST`   | `/conversations/:id/messages/:msgId/edit` | **10/min** | JWT   | Edit message + re-stream LLM response (SSE) |
 | `POST`   | `/conversations/:id/messages/:msgId/regenerate` | **10/min** | JWT | Regenerate assistant response (SSE) |
+| `POST`   | `/conversations/:id/fork/:messageId` | **10/min** | JWT      | Fork conversation from a specific message |
 | `GET`    | `/conversations/search`             | **30/min**   | JWT      | Search conversations and messages |
 | `GET`    | `/conversations/:id/export`         | **10/min**   | JWT      | Export conversation (Markdown/JSON/PDF) |
 | `GET`    | `/templates`                        | 60/min       | JWT      | List all system prompt templates         |
@@ -212,6 +226,12 @@ All routes are prefixed with `/api`.
 | `PATCH`  | `/templates/:id`                    | **10/min**   | JWT+Admin| Update a template (admin only)           |
 | `DELETE` | `/templates/:id`                    | **10/min**   | JWT+Admin| Delete a template (admin only)           |
 | `POST`   | `/upload`                           | **20/min**   | JWT      | Upload files (multipart, max 5 files, 10MB each) |
+| `GET`    | `/mcp-servers`                      | 60/min       | JWT      | List all MCP server configs              |
+| `GET`    | `/mcp-servers/tools`                | 60/min       | JWT      | List available tools from connected MCP servers |
+| `GET`    | `/mcp-servers/:id`                  | 60/min       | JWT      | Get a single MCP server config           |
+| `POST`   | `/mcp-servers`                      | **10/min**   | JWT+Admin| Register a new MCP server (admin only)   |
+| `PATCH`  | `/mcp-servers/:id`                  | **10/min**   | JWT+Admin| Update MCP server config (admin only)    |
+| `DELETE` | `/mcp-servers/:id`                  | **10/min**   | JWT+Admin| Remove MCP server (admin only)           |
 | `GET`    | `/models`                           | 60/min       | No       | List available LLM models                |
 | `GET`    | `/health`                           | none         | No       | Health check (skips throttler)           |
 
@@ -225,6 +245,7 @@ All `:id` parameters are validated by `ParseObjectIdPipe` (returns 400 for inval
 - **Upload cleanup**: `UploadsCleanupService` runs an hourly cron job that deletes files older than a configurable TTL (default 24 hours, set via `UPLOAD_TTL_HOURS`).
 - **Error handling**: `AllExceptionsFilter` catches all unhandled exceptions, includes `correlationId` in the response, logs 5xx at error level and 4xx at warn level.
 - **Correlation IDs**: `CorrelationIdMiddleware` assigns a UUID to every request (or validates an incoming one). Pino logger includes it in all log entries.
+- **MCP tool integration**: `McpService` manages connections to MCP (Model Context Protocol) servers via stdio transport. On startup, it connects to all enabled servers and caches available tools. `LlmStreamService` converts cached tools to OpenAI function-calling format and executes a tool-use loop (max 10 iterations) when the LLM returns `tool_calls`. Tool execution has a 30-second timeout. Environment inheritance is sandboxed via `buildSafeEnv()` (only PATH, HOME, NODE_ENV, LANG).
 - **Env validation**: Joi schema in `env.validation.ts` validates all environment variables at startup. `OPENROUTER_API_KEY` is required; others have sensible defaults.
 - **Rate limiting**: Default 60 req/min via `ThrottlerGuard` (APP_GUARD). Streaming endpoint: 10/min. Upload endpoint: 20/min.
 

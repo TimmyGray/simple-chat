@@ -72,6 +72,8 @@ Each task has:
 | F-M23 | Localize "Error:" prefix in useMessages error display | frontend | 0.1d | done | Fixed in retrospective #2: uses t('errors.streamErrorPrefix') |
 | B-M11 | Update /develop-feature skill to use git worktree isolation for parallel execution | infra | 0.25d | done | PR #69 merged. Phase 1.5 uses EnterWorktree for isolated execution. |
 | B-M12 | Refactor toPdf in export.service.ts (85 lines, exceeds 50-line limit) | backend | 0.25d | done | PR #96 merged. Extracted renderPdfHeader + renderPdfMessage helpers. |
+| B-M13 | Split chat.service.ts (316 lines, exceeds 300-line limit) | backend | 0.5d | todo | forkConversation adds ~20 lines from FEAT-12. Extract fork logic or conversation CRUD into separate service. |
+| B-M14 | Split llm-stream.service.ts (315 lines, exceeds 300-line limit) | backend | 0.5d | todo | MCP tool-use loop adds ~25 lines from FEAT-14a. Extract tool execution into a dedicated ToolExecutionService. |
 
 ## Low
 
@@ -115,6 +117,7 @@ Each task has:
 | FEAT-12 | Conversation Branching: fork conversations from any message to explore alternative paths with tree-based history | fullstack | 2-3d | done | PR #97. Fork-as-copy approach with `forkedFrom` back-reference. |
 | FEAT-13 | Ollama / Local Model Support: direct Ollama connection (OpenAI-compatible API) for fully offline, zero-cost usage | backend | 1-2d | done | PR #95 merged. OllamaService auto-detect, dual OpenAI client routing, provider badges. |
 | FEAT-14 | MCP Tool Integration: connect to MCP servers for external tools (web search, file systems, APIs) with inline tool-call UI | fullstack | 4-5d | done | PR #98 merged (FEAT-14a: backend). McpModule with admin CRUD, tool-use streaming loop, security hardening. Frontend tool-call UI deferred to FEAT-14b. |
+| FEAT-14b | MCP Frontend UI: inline tool-call display with collapsible results, tool status indicators during streaming | frontend | 1-2d | todo | Backend streams tool_call + tool_result SSE events; frontend needs UI components to display them. |
 
 ## Completed
 

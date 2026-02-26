@@ -50,10 +50,10 @@
 ## Tech Debt
 - Critical: 0 todo, 4 done (JWT authentication completed)
 - High: 0 todo, 7 done — all high-priority items completed
-- Medium: 1 todo, 31 done, 1 wont-fix
+- Medium: 3 todo, 31 done, 1 wont-fix
 - Low: 0 todo, 15 done — all low-priority items completed
-- Features: 2 todo, 16 done (FEAT-1..14 + subtasks, FEAT-14 MCP Tool Integration was most recent)
-- Total tracked: 80 (see `docs/exec-plans/tech-debt-tracker.md`)
+- Features: 3 todo, 16 done (FEAT-1..14b + subtasks, FEAT-14b MCP Frontend UI is next)
+- Total tracked: 83 (see `docs/exec-plans/tech-debt-tracker.md`)
 
 ## Sweep #18 Findings
 - All validation passing: lint 0 errors, typecheck 0 errors, 397 tests passing (39 files), build passing
