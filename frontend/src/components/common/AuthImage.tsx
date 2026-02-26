@@ -3,6 +3,7 @@ import { Box, CircularProgress } from '@mui/material';
 import BrokenImageIcon from '@mui/icons-material/BrokenImage';
 import { alpha } from '@mui/material/styles';
 import { getStoredToken } from '../../api/client';
+import { IMAGE_THUMB_SIZE } from '../../constants';
 
 interface AuthImageProps {
   src: string;
@@ -62,8 +63,8 @@ export default function AuthImage({
     return (
       <Box
         sx={{
-          width: 80,
-          height: 80,
+          width: IMAGE_THUMB_SIZE,
+          height: IMAGE_THUMB_SIZE,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -80,8 +81,8 @@ export default function AuthImage({
     return (
       <Box
         sx={{
-          width: 80,
-          height: 80,
+          width: IMAGE_THUMB_SIZE,
+          height: IMAGE_THUMB_SIZE,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

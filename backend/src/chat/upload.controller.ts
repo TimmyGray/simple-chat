@@ -16,7 +16,7 @@ import {
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Throttle } from '@nestjs/throttler';
 import { diskStorage } from 'multer';
-import { basename, extname, join, resolve } from 'path';
+import { basename, extname, join, resolve, sep } from 'path';
 import { existsSync } from 'fs';
 import { createReadStream } from 'fs';
 import type { Response } from 'express';
@@ -90,11 +90,12 @@ export class UploadController {
   }
 
   @Get('uploads/:filename')
+  @Throttle({ default: { ttl: 60000, limit: 60 } })
   serveUploadedFile(@Param('filename') filename: string, @Res() res: Response) {
     const safeName = basename(filename);
     const fullPath = join(UPLOADS_DIR, safeName);
 
-    if (!fullPath.startsWith(UPLOADS_DIR)) {
+    if (!fullPath.startsWith(UPLOADS_DIR + sep)) {
       throw new ForbiddenException('Access denied');
     }
     if (!existsSync(fullPath)) {

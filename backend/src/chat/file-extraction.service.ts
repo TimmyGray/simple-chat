@@ -56,7 +56,7 @@ export class FileExtractionService {
     const parts: OpenAI.Chat.ChatCompletionContentPart[] = [];
 
     let textContent = msg.content;
-    for (const attachment of msg.attachments) {
+    for (const attachment of msg.attachments ?? []) {
       if (this.isImageFile(attachment.fileType)) {
         const dataUrl = this.readImageAsDataUrl(attachment);
         if (dataUrl) {
