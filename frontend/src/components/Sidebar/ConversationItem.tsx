@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import ForkRightIcon from '@mui/icons-material/ForkRight';
 import type { Conversation } from '../../types';
 
 interface ConversationItemProps {
@@ -64,7 +65,10 @@ export default function ConversationItem({
       >
         <ListItemText
           primary={
-            <Typography noWrap variant="body2" fontWeight={selected ? 600 : 400}>
+            <Typography noWrap variant="body2" fontWeight={selected ? 600 : 400} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              {conversation.forkedFrom && (
+                <ForkRightIcon sx={{ fontSize: 14, color: 'text.secondary', flexShrink: 0 }} />
+              )}
               {conversation.title}
             </Typography>
           }

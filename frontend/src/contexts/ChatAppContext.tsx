@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
-import type { Conversation, ConversationId } from '../types';
+import type { Conversation, ConversationId, MessageId } from '../types';
 
 export interface ChatAppContextValue {
   conversations: Conversation[];
@@ -13,6 +13,7 @@ export interface ChatAppContextValue {
   selectConversation: (id: ConversationId) => void;
   newChat: () => void;
   deleteConversation: (id: ConversationId) => void;
+  forkConversation: (conversationId: ConversationId, messageId: MessageId) => Promise<void>;
   onConversationUpdate: () => void;
   onTemplatesChanged: () => void;
   openSearch: () => void;

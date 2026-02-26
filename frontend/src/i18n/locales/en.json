@@ -39,7 +39,8 @@
     "cancelEdit": "Cancel",
     "stopGenerating": "Stop generating",
     "copyMessage": "Copy message",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "forkConversation": "Fork conversation from here"
   },
   "dialog": {
     "deleteTitle": "Delete conversation",
@@ -126,6 +127,7 @@
     "createTemplate": "Failed to create template",
     "updateTemplate": "Failed to update template",
     "deleteTemplate": "Failed to delete template",
+    "forkConversation": "Failed to fork conversation",
     "corsOrNetwork": "Cannot reach the server. Check that the backend is running and CORS is configured correctly.",
     "sse": {
       "STREAM_TIMEOUT": "The response took too long and timed out.",

@@ -17,6 +17,7 @@ export default function ChatArea() {
   const {
     selectedConversation: conversation,
     isOnline,
+    forkConversation,
     onConversationUpdate,
   } = useChatApp();
   const { models, selectedModel, changeModel } = useModel();
@@ -96,6 +97,17 @@ export default function ChatArea() {
     [conversation, regenerateMessage, onConversationUpdate],
   );
 
+  const handleForkMessage = useCallback(
+    async (messageId: MessageId) => {
+      if (!conversation) return;
+      // Optimistic messages use UUIDs; the fork API needs real MongoDB ObjectIds.
+      // Only allow forking persisted messages (24-char hex ObjectIds).
+      if (!/^[a-f\d]{24}$/i.test(messageId)) return;
+      await forkConversation(conversation._id, messageId);
+    },
+    [conversation, forkConversation],
+  );
+
   const conversationTemplateId = conversation?.templateId ?? null;
   const activeTemplateName = useMemo(() => {
     if (!conversationTemplateId) return null;
@@ -135,6 +147,7 @@ export default function ChatArea() {
         streamingContent={streamingContent}
         onEditMessage={handleEditMessage}
         onRegenerateMessage={handleRegenerateMessage}
+        onForkMessage={handleForkMessage}
         onStopStreaming={stopStreaming}
       />
       <ChatInput

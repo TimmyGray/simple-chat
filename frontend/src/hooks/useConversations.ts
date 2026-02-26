@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Conversation, ConversationId, ModelId, TemplateId } from '../types';
+import type { Conversation, ConversationId, MessageId, ModelId, TemplateId } from '../types';
 import * as api from '../api/client';
 import { useFocusRevalidation } from './useFocusRevalidation';
 import { getErrorMessage } from '../utils/getErrorMessage';
@@ -14,6 +14,7 @@ export interface UseConversationsReturn {
   create: (model?: ModelId, templateId?: TemplateId | null) => Promise<Conversation>;
   update: (id: ConversationId, body: { title?: string; model?: ModelId }) => Promise<Conversation>;
   remove: (id: ConversationId) => Promise<void>;
+  fork: (conversationId: ConversationId, messageId: MessageId) => Promise<Conversation>;
 }
 
 export function useConversations(): UseConversationsReturn {
@@ -104,7 +105,22 @@ export function useConversations(): UseConversationsReturn {
     }
   }, []);
 
+  const fork = useCallback(
+    async (conversationId: ConversationId, messageId: MessageId) => {
+      try {
+        const forked = await api.forkConversation(conversationId, messageId);
+        setConversations((prev) => [forked, ...prev]);
+        return forked;
+      } catch (err) {
+        const msg = getErrorMessage(err, tRef.current('errors.forkConversation'), tRef.current('errors.corsOrNetwork'));
+        setError(msg);
+        throw err;
+      }
+    },
+    [],
+  );
+
   const clearError = useCallback(() => setError(null), []);
 
-  return { conversations, loading, error, clearError, refresh: fetchConversations, create, update, remove };
+  return { conversations, loading, error, clearError, refresh: fetchConversations, create, update, remove, fork };
 }

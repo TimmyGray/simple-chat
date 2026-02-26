@@ -28,11 +28,12 @@ interface MessageBubbleProps {
   message: Message;
   onEdit?: (messageId: MessageId, content: string) => void;
   onRegenerate?: (messageId: MessageId) => void;
+  onFork?: (messageId: MessageId) => void;
   onStop?: () => void;
   isStreaming?: boolean;
 }
 
-function MessageBubble({ message, onEdit, onRegenerate, onStop, isStreaming }: MessageBubbleProps) {
+function MessageBubble({ message, onEdit, onRegenerate, onFork, onStop, isStreaming }: MessageBubbleProps) {
   const { t } = useTranslation();
   const isUser = message.role === 'user';
   const [editing, setEditing] = useState(false);
@@ -62,6 +63,10 @@ function MessageBubble({ message, onEdit, onRegenerate, onStop, isStreaming }: M
   const handleRegenerate = useCallback(() => {
     onRegenerate?.(message._id);
   }, [message._id, onRegenerate]);
+
+  const handleFork = useCallback(() => {
+    onFork?.(message._id);
+  }, [message._id, onFork]);
 
   const handleCopy = useCallback(() => {
     void navigator.clipboard.writeText(message.content).catch(() => { /* non-secure context */ });
@@ -136,6 +141,7 @@ function MessageBubble({ message, onEdit, onRegenerate, onStop, isStreaming }: M
             isUser={isUser}
             onEdit={onEdit ? handleStartEdit : undefined}
             onRegenerate={onRegenerate ? handleRegenerate : undefined}
+            onFork={onFork ? handleFork : undefined}
             onCopy={handleCopy}
           />
         )}

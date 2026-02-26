@@ -1,11 +1,17 @@
 import { ObjectId } from 'mongodb';
 
+export interface ForkedFromRef {
+  conversationId: ObjectId;
+  messageId: ObjectId;
+}
+
 export interface ConversationDoc {
   _id?: ObjectId;
   userId: ObjectId;
   title: string;
   model: string;
   templateId?: ObjectId;
+  forkedFrom?: ForkedFromRef;
   createdAt: Date;
   updatedAt: Date;
 }

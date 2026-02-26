@@ -39,7 +39,8 @@
     "cancelEdit": "Cancelar",
     "stopGenerating": "Detener generación",
     "copyMessage": "Copiar mensaje",
-    "copied": "¡Copiado!"
+    "copied": "¡Copiado!",
+    "forkConversation": "Bifurcar conversación desde aquí"
   },
   "dialog": {
     "deleteTitle": "Eliminar conversación",
@@ -126,6 +127,7 @@
     "createTemplate": "Error al crear la plantilla",
     "updateTemplate": "Error al actualizar la plantilla",
     "deleteTemplate": "Error al eliminar la plantilla",
+    "forkConversation": "Error al bifurcar la conversación",
     "corsOrNetwork": "No se puede conectar al servidor. Verifica que el backend esté en ejecución y que CORS esté configurado correctamente.",
     "sse": {
       "STREAM_TIMEOUT": "La respuesta tardó demasiado y se agotó el tiempo.",

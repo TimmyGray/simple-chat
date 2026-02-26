@@ -18,6 +18,15 @@ export const conversationsSchema: Document = {
       title: { bsonType: 'string' },
       model: { bsonType: 'string' },
       templateId: { bsonType: 'objectId' },
+      forkedFrom: {
+        bsonType: 'object',
+        required: ['conversationId', 'messageId'],
+        properties: {
+          conversationId: { bsonType: 'objectId' },
+          messageId: { bsonType: 'objectId' },
+        },
+        additionalProperties: false,
+      },
       createdAt: { bsonType: 'date' },
       updatedAt: { bsonType: 'date' },
     },

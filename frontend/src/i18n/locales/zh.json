@@ -39,7 +39,8 @@
     "cancelEdit": "取消",
     "stopGenerating": "停止生成",
     "copyMessage": "复制消息",
-    "copied": "已复制！"
+    "copied": "已复制！",
+    "forkConversation": "从此处创建分支"
   },
   "dialog": {
     "deleteTitle": "删除对话",
@@ -126,6 +127,7 @@
     "createTemplate": "创建模板失败",
     "updateTemplate": "更新模板失败",
     "deleteTemplate": "删除模板失败",
+    "forkConversation": "创建对话分支失败",
     "corsOrNetwork": "无法连接服务器。请检查后端是否正在运行以及 CORS 是否配置正确。",
     "sse": {
       "STREAM_TIMEOUT": "响应时间过长，已超时。",
