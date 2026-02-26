@@ -1,14 +1,14 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-26 (retrospective #5)
+> Last updated: 2026-02-26 (sweep #19)
 
 ## Test Summary
 
 | Area | Test Files | Tests | Pass Rate |
 |------|-----------|-------|-----------|
-| Backend | 21 | 220 | 100% |
-| Frontend | 18 | 178 | 100% |
-| **Total** | **39** | **398** | **100%** |
+| Backend | 24 | 270 | 100% |
+| Frontend | 19 | 192 | 100% |
+| **Total** | **43** | **462** | **100%** |
 
 ## Lint Status
 
@@ -40,20 +40,48 @@
 | Area | Total | Outdated | Vulnerabilities |
 |------|-------|----------|----------------|
 | Root | 3 | 0 | 0 |
-| Backend | ~26 | n/a (npm cache EPERM) | 8 (6 moderate, 2 high — transitive deps) |
-| Frontend | ~20 | n/a (npm cache EPERM) | 14 (1 moderate, 13 high — all in eslint/minimatch transitive deps) |
+| Backend | ~26 | n/a (npm cache EPERM) | 48 (13 moderate, 35 high — transitive deps) |
+| Frontend | ~27 | n/a (npm cache EPERM) | 20 (1 moderate, 19 high — transitive deps in eslint/minimatch) |
 
 ## Bundle Size
-- Backend: 1.1 MB (dist/)
-- Frontend: 7.0 MB (dist/ including source maps) — JS only: 348 KB index + 308 KB vendor-mui + 63 KB vendor-i18n + 808 KB lazy markdown chunk
+- Backend: 2 MB (dist/)
+- Frontend: 8 MB (dist/ including source maps) — JS only: 396 KB index + 309 KB vendor-mui + 63 KB vendor-i18n + 808 KB lazy markdown chunk
 
 ## Tech Debt
 - Critical: 0 todo, 4 done (JWT authentication completed)
 - High: 0 todo, 7 done — all high-priority items completed
-- Medium: 3 todo, 31 done, 1 wont-fix
+- Medium: 4 todo, 31 done, 1 wont-fix (B-M15 added: split chat.controller.ts)
 - Low: 0 todo, 15 done — all low-priority items completed
-- Features: 3 todo, 16 done (FEAT-1..14b + subtasks, FEAT-14b MCP Frontend UI is next)
-- Total tracked: 83 (see `docs/exec-plans/tech-debt-tracker.md`)
+- Features: 2 todo, 17 done (FEAT-10c done; FEAT-10d + FEAT-14b remaining)
+- Total tracked: 84 (see `docs/exec-plans/tech-debt-tracker.md`)
+
+## Sweep #19 Findings
+- All validation passing: lint 0 errors, typecheck 0 errors, 462 tests passing (43 files), build passing
+- Backend tests: 24 files, 270 tests (+3 files, +50 tests from FEAT-10a/10b WebSocket gateway + sharing + broadcast)
+- Frontend tests: 19 files, 192 tests (+1 file, +14 tests from FEAT-10c WebSocket client)
+- Total tests: 462 (up from 398, target: 100+ sustained, comfortably exceeded)
+- Completed since last sweep: FEAT-10a (WebSocket Gateway, PR #100), FEAT-10b (Conversation Sharing, PR #101), FEAT-10c (Frontend WebSocket Client, PR #102)
+- i18n: all 4 locales in sync (112 leaf keys each, up from 108 -- 4 new keys from FEAT-10a/10b/10c WebSocket + sharing)
+- Frontend bundle: index 396 KB (+48 KB from socket.io-client addition), vendor-mui 309 KB, vendor-i18n 63 KB, markdown 808 KB
+- Backend dist: 2 MB (increase from WebSocket gateway + sharing module additions)
+- Frontend deps increased from ~20 to ~27 (socket.io-client + 6 transitive dependencies)
+- Backend vulnerabilities increased to 48 (13 moderate, 35 high -- transitive deps, @nestjs/websockets + socket.io additions)
+- Frontend vulnerabilities increased to 20 (1 moderate, 19 high -- transitive deps)
+- New file size violation: chat.controller.ts (342 lines) -- added B-M15 to tracker (extract sharing routes or SSE utilities)
+- Updated B-M13 line count: chat.service.ts now 369 lines (was 316 -- sharing integration added ~53 lines)
+- 3 architecture exceptions in architecture.spec.ts: chat.service.ts, llm-stream.service.ts, chat.controller.ts -- all tracked
+- No console.log/warn/error in source (clean)
+- No dangerouslySetInnerHTML (clean)
+- No hardcoded secrets (clean)
+- No `any` types in non-test source files (clean)
+- No hardcoded user-facing strings in .tsx files (all use t())
+- No i18n gaps (all 4 locales perfectly in sync at 112 keys)
+- All cross-module imports follow approved patterns (chat->auth, chat->mcp, templates->auth, mcp->auth)
+- No raw HTML elements except known exception (hidden file input in FileAttachment.tsx)
+- All hex/rgba colors in theme.ts only (exempt per convention)
+- 172 total files scanned (backend/src + frontend/src), 43 test files
+- 0 auto-fix PRs needed, 1 new task added to tracker (B-M15)
+- Overall health: HEALTHY -- clean sweep, test coverage growing steadily
 
 ## Sweep #18 Findings
 - All validation passing: lint 0 errors, typecheck 0 errors, 397 tests passing (39 files), build passing
