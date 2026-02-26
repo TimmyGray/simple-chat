@@ -1,14 +1,14 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-26 (sweep #17)
+> Last updated: 2026-02-26 (sweep #18)
 
 ## Test Summary
 
 | Area | Test Files | Tests | Pass Rate |
 |------|-----------|-------|-----------|
-| Backend | 20 | 203 | 100% |
+| Backend | 21 | 219 | 100% |
 | Frontend | 18 | 178 | 100% |
-| **Total** | **38** | **381** | **100%** |
+| **Total** | **39** | **397** | **100%** |
 
 ## Lint Status
 
@@ -40,20 +40,76 @@
 | Area | Total | Outdated | Vulnerabilities |
 |------|-------|----------|----------------|
 | Root | 3 | 0 | 0 |
-| Backend | ~25 | n/a (npm cache EPERM) | 41 (12 moderate, 29 high — all in jest/babel transitive deps) |
+| Backend | ~26 | n/a (npm cache EPERM) | 8 (6 moderate, 2 high — transitive deps) |
 | Frontend | ~20 | n/a (npm cache EPERM) | 14 (1 moderate, 13 high — all in eslint/minimatch transitive deps) |
 
 ## Bundle Size
 - Backend: 1.1 MB (dist/)
-- Frontend: 7.0 MB (dist/ including source maps) — JS only: 347 KB index + 308 KB vendor-mui + 63 KB vendor-i18n + 808 KB lazy markdown chunk
+- Frontend: 7.0 MB (dist/ including source maps) — JS only: 348 KB index + 308 KB vendor-mui + 63 KB vendor-i18n + 808 KB lazy markdown chunk
 
 ## Tech Debt
 - Critical: 0 todo, 4 done (JWT authentication completed)
 - High: 0 todo, 7 done — all high-priority items completed
 - Medium: 1 todo, 31 done, 1 wont-fix
 - Low: 0 todo, 15 done — all low-priority items completed
-- Features: 3 todo, 15 done (FEAT-1..13 + subtasks, FEAT-13 Ollama was most recent)
-- Total tracked: 79 (see `docs/exec-plans/tech-debt-tracker.md`)
+- Features: 2 todo, 16 done (FEAT-1..14 + subtasks, FEAT-14 MCP Tool Integration was most recent)
+- Total tracked: 80 (see `docs/exec-plans/tech-debt-tracker.md`)
+
+## Sweep #18 Findings
+- All validation passing: lint 0 errors, typecheck 0 errors, 397 tests passing (39 files), build passing
+- Backend tests: 21 files, 219 tests (unchanged from audit #19)
+- Frontend tests: 18 files, 178 tests (unchanged from audit #19)
+- Total tests: 397 (unchanged, target: 100+ sustained, comfortably exceeded)
+- Completed since last sweep: FEAT-12 (Conversation Branching, PR #97), FEAT-14 (MCP Tool Integration backend, PR #98), B-M12 (toPdf refactor, PR #96)
+- i18n: all 4 locales in sync (108 leaf keys each, up from 106 — 2 new keys from FEAT-14 MCP tool integration)
+- Frontend bundle: index 348 KB (+1 KB from FEAT-14/B-M12 changes), vendor-mui 308 KB, vendor-i18n 63 KB, markdown 808 KB (all unchanged)
+- Backend dist: 1.2 MB (slight increase from MCP module addition)
+- No auto-fixable code violations found (codebase is clean)
+- No console.log/warn/error in source (clean)
+- No dangerouslySetInnerHTML (clean)
+- No hardcoded secrets (clean)
+- No `any` types in non-test source files (clean)
+- No hardcoded user-facing strings in .tsx files (all use t())
+- No i18n gaps (all 4 locales perfectly in sync at 108 keys)
+- All cross-module imports follow approved patterns (chat->auth, chat->mcp, templates->auth, mcp->auth)
+- No direct MongoDB collection access outside DatabaseService (clean)
+- No controllers containing business logic (all delegation to services)
+- No services importing Express Response type (controllers only, acceptable for SSE)
+- Hidden `<input type="file">` in FileAttachment.tsx has eslint-disable comment (known exception, no MUI equivalent)
+- All hex/rgba colors in theme.ts only (exempt per convention)
+- No window.alert() in source (clean)
+- 2 file size exceptions in architecture.spec.ts: chat.service.ts (316 lines), llm-stream.service.ts (315 lines) — both tracked with task IDs
+- Large React component renders (MessageBubble 254 lines, ChatInput 223 lines) are structural JSX, not imperative logic — acceptable per established convention
+- Long function bodies detected: TemplateFormDialog (53 lines at boundary), AdminTemplatePanel (72 lines) — both are React component render functions with JSX, not imperative code; acceptable per convention
+- Express Response imports in chat.controller.ts and upload.controller.ts for SSE/binary streaming — acceptable, NestJS has no built-in abstraction for these use cases
+- 159 total files scanned (backend/src + frontend/src), 40 test files
+- 0 auto-fix PRs needed, 0 new tasks added to tracker
+- Overall health: HEALTHY — clean sweep, all metrics stable
+
+## Audit #19 Findings
+- All validation passing: lint 0 errors, typecheck 0 errors, 397 tests passing (39 files), build passing
+- Backend tests: 21 files, 219 tests (+1 file, +16 tests — new mcp.service.spec.ts from FEAT-14)
+- Frontend tests: 18 files, 178 tests (unchanged — FEAT-14 frontend deferred to FEAT-14b)
+- Total tests: 397 (up from 381, target: 100+ sustained, comfortably exceeded)
+- Completed since last audit: FEAT-12 (Conversation Branching, PR #97), FEAT-14 (MCP Tool Integration backend, PR #98), B-M12 (toPdf refactor, PR #96)
+- MCP module code review:
+  - McpService: 277 lines, well-structured with lifecycle hooks, connection management, tool caching, 30s timeout
+  - McpController: admin-only CRUD with ParseObjectIdPipe, JWT+AdminGuard, rate-limited writes
+  - CreateMcpServerDto: proper validation (command regex, array max size, env string record validator)
+  - LlmStreamService: MCP tool-use streaming loop with MAX_TOOL_ITERATIONS=10, proper abort handling
+  - StreamEvent: extended with tool_call + tool_result discriminated union types
+  - Security: buildSafeEnv() restricts env inheritance to PATH/HOME/NODE_ENV/LANG only
+  - 10 new tests in mcp.service.spec.ts covering CRUD + tool operations
+  - Architecture test updated: mcp in DOMAIN_MODULES, chat->mcp cross-module import allowed
+- 2 file size exceptions in architecture.spec.ts: chat.service.ts (316 lines), llm-stream.service.ts (315 lines) — both tracked
+- New collection mcpServers with MongoDB JSON schema validation
+- DatabaseService extended with mcpServers() accessor and schema validation
+- Backend vulnerabilities reduced from 41 to 8 (package refresh during npm install)
+- No new anti-patterns, hardcoded secrets, or i18n gaps found
+- Architecture drift found: ARCHITECTURE.md missing McpModule, mcp-servers endpoints, mcpServers collection
+- DB schema drift found: docs/generated/db-schema.md missing mcpServers collection
+- Product sense staleness found: P1 items (FEAT-11, FEAT-12, FEAT-13) and P2 item (FEAT-14) all shipped but still listed as planned
+- All issues will be fixed in the companion doc-garden pass
 
 ## Sweep #17 Findings
 - All validation passing: lint 0 errors, typecheck 0 errors, 381 tests passing (38 files), build passing
