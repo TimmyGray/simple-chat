@@ -112,7 +112,7 @@ Each task has:
 | FEAT-9 | Keyboard Shortcuts | frontend | 1d | done | PR #92 merged. Cmd+N (new chat), Cmd+K (search), Escape (stop streaming/blur input). IS_MAC_PLATFORM constant. |
 | FEAT-10 | Real-Time Collaboration: WebSocket gateway, conversation sharing, real-time message sync, presence/typing indicators | fullstack | 5d | in-progress | All 4 subtasks. |
 | FEAT-10a | Backend WebSocket Gateway: Socket.IO gateway with JWT auth, room-based conversation channels, event broadcasting | backend | 1.5d | done | PR #100 merged. |
-| FEAT-10b | Conversation Sharing Model: participants field, invite/revoke endpoints, shared conversation queries, access control | backend | 1d | todo | Depends on FEAT-10a. |
+| FEAT-10b | Conversation Sharing Model: participants field, invite/revoke endpoints, shared conversation queries, access control | backend | 1d | done | PR #101 merged. SharingService, role-based access control, 22 unit tests. |
 | FEAT-10c | Frontend WebSocket Client: socket.io-client, useWebSocket hook, live message sync, typing indicators, connection status | frontend | 1.5d | todo | Depends on FEAT-10a. |
 | FEAT-10d | Frontend Sharing UI: share dialog, participant list, invite flow, collaborative presence indicators | frontend | 1d | todo | Depends on FEAT-10b + FEAT-10c. |
 | FEAT-11 | Image Input (Multi-modal Chat): paste/upload images to vision-capable models via OpenRouter multi-modal API | fullstack | 1-2d | done | PR #94 merged. Multi-modal content parts, AuthImage component, inline previews. |
