@@ -278,4 +278,73 @@ describe('LlmStreamService', () => {
     const messages = (createCall[0] as any).messages;
     expect(messages).toEqual([{ role: 'user', content: 'Hello' }]);
   });
+
+  describe('Ollama routing', () => {
+    function mockOllamaStream(chunks: any[]) {
+      const mockStream = {
+        [Symbol.asyncIterator]: async function* () {
+          for (const chunk of chunks) yield chunk;
+        },
+        controller: { abort: vi.fn() },
+      };
+      vi.spyOn(
+        service['ollamaClient']!.chat.completions,
+        'create',
+      ).mockResolvedValue(mockStream as any);
+      return mockStream;
+    }
+
+    it('should route ollama/ models to the Ollama client', async () => {
+      mockOllamaStream([
+        { choices: [{ delta: { content: 'Local response' } }] },
+      ]);
+      const events = await collectEvents(
+        service.stream(
+          '507f1f77bcf86cd799439011',
+          'ollama/llama3:latest',
+          mockUserId,
+        ),
+      );
+      expect(events[0]).toEqual({
+        type: 'content',
+        content: 'Local response',
+      });
+    });
+
+    it('should strip ollama/ prefix when calling Ollama API', async () => {
+      mockOllamaStream([
+        { choices: [{ delta: { content: 'Hi' } }] },
+      ]);
+      await collectEvents(
+        service.stream(
+          '507f1f77bcf86cd799439011',
+          'ollama/llama3:latest',
+          mockUserId,
+        ),
+      );
+      const createCall = vi.spyOn(
+        service['ollamaClient']!.chat.completions,
+        'create',
+      ).mock.calls[0];
+      expect((createCall[0] as any).model).toBe('llama3:latest');
+    });
+
+    it('should omit stream_options for Ollama models', async () => {
+      mockOllamaStream([
+        { choices: [{ delta: { content: 'Hi' } }] },
+      ]);
+      await collectEvents(
+        service.stream(
+          '507f1f77bcf86cd799439011',
+          'ollama/llama3:latest',
+          mockUserId,
+        ),
+      );
+      const createCall = vi.spyOn(
+        service['ollamaClient']!.chat.completions,
+        'create',
+      ).mock.calls[0];
+      expect((createCall[0] as any).stream_options).toBeUndefined();
+    });
+  });
 });

@@ -105,12 +105,18 @@ function mapOllamaModel(m: OllamaModel): ModelInfo {
   const supportsVision = families.some((f) => VISION_FAMILIES.has(f));
   const paramSize = m.details?.parameter_size ?? '';
 
+  const family = m.details?.family ?? 'unknown';
+  const quant = m.details?.quantization_level;
+  const description = quant
+    ? `Local model (${family}, ${quant})`
+    : `Local model (${family})`;
+
   return {
     id: `ollama/${m.name}`,
     name: `${m.name} ${paramSize}`.trim(),
-    description:
-      `Local model (${m.details?.family ?? 'unknown'}, ${m.details?.quantization_level ?? ''})`.trim(),
+    description,
     free: true,
+    // Ollama /api/tags doesn't provide context window size; 0 means unknown
     contextLength: 0,
     supportsVision,
     provider: 'ollama',
