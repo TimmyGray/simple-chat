@@ -15,7 +15,10 @@ import {
   MODEL_TAG_OPACITY,
   BLOCKQUOTE_OPACITY,
   CODE_FONT_SIZE,
+  IMAGE_PREVIEW_MAX_HEIGHT,
 } from '../../constants';
+import { getUploadUrl, isImageAttachment } from '../../api/client';
+import AuthImage from '../common/AuthImage';
 import MessageActions from './MessageActions';
 import MessageEditForm from './MessageEditForm';
 
@@ -156,10 +159,23 @@ function MessageBubble({ message, onEdit, onRegenerate, onStop, isStreaming }: M
                 : theme.palette.divider,
           }}
         >
-          {/* Attachments */}
-          {message.attachments && message.attachments.length > 0 && (
+          {/* Image attachments */}
+          {message.attachments?.some(isImageAttachment) && (
+            <Box sx={{ mb: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              {message.attachments.filter(isImageAttachment).map((att) => (
+                <AuthImage
+                  key={att.filePath}
+                  src={getUploadUrl(att.filePath)}
+                  alt={att.fileName}
+                  maxHeight={IMAGE_PREVIEW_MAX_HEIGHT}
+                />
+              ))}
+            </Box>
+          )}
+          {/* Non-image attachments */}
+          {message.attachments?.some((a) => !isImageAttachment(a)) && (
             <Box sx={{ mb: 1, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-              {message.attachments.map((att) => (
+              {message.attachments.filter((a) => !isImageAttachment(a)).map((att) => (
                 <Chip
                   key={att.filePath}
                   label={att.fileName}

@@ -125,6 +125,15 @@ export async function exportConversation(
   return response.data as Blob;
 }
 
+export function getUploadUrl(filePath: string): string {
+  const filename = filePath.split('/').pop() ?? filePath;
+  return `${BASE_URL}/uploads/${encodeURIComponent(filename)}`;
+}
+
+export function isImageAttachment(attachment: Attachment): boolean {
+  return attachment.fileType.startsWith('image/');
+}
+
 export async function uploadFiles(files: File[]): Promise<Attachment[]> {
   const formData = new FormData();
   files.forEach((file) => formData.append('files', file));

@@ -1,11 +1,13 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, TextField, Paper, Chip, Typography, Snackbar, Alert } from '@mui/material';
+import { Box, TextField, Paper, Chip, Typography, Snackbar, Alert, IconButton } from '@mui/material';
 import { alpha } from '@mui/material/styles';
+import CloseIcon from '@mui/icons-material/Close';
 import type { ModelInfo, Attachment, ModelId, Template, TemplateId } from '../../types';
 import ChatInputToolbar from './ChatInputToolbar';
 import * as api from '../../api/client';
-import { ATTACHMENT_CHIP_MAX_WIDTH, SNACKBAR_AUTO_HIDE_MS, INPUT_FONT_SIZE } from '../../constants';
+import AuthImage from '../common/AuthImage';
+import { ATTACHMENT_CHIP_MAX_WIDTH, SNACKBAR_AUTO_HIDE_MS, INPUT_FONT_SIZE, IMAGE_THUMB_SIZE } from '../../constants';
 
 const MAX_MESSAGE_LENGTH = 10_000;
 
@@ -146,26 +148,56 @@ export default function ChatInput({
           }}
         />
 
-        {/* Attachments row */}
-        {attachments.length > 0 && (
-          <Box
-            sx={{
-              px: 2,
-              pb: 0.5,
-              display: 'flex',
-              gap: 0.5,
-              flexWrap: 'wrap',
-            }}
-          >
-            {attachments.map((att, i) => (
-              <Chip
-                key={att.filePath}
-                label={att.fileName}
-                size="small"
-                onDelete={() => handleRemoveAttachment(i)}
-                sx={{ maxWidth: ATTACHMENT_CHIP_MAX_WIDTH }}
-              />
-            ))}
+        {/* Image attachment previews */}
+        {attachments.some(api.isImageAttachment) && (
+          <Box sx={{ px: 2, pb: 0.5, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            {attachments.map((att, i) =>
+              api.isImageAttachment(att) ? (
+                <Box key={att.filePath} sx={{ position: 'relative' }}>
+                  <AuthImage
+                    src={api.getUploadUrl(att.filePath)}
+                    alt={att.fileName}
+                    maxHeight={IMAGE_THUMB_SIZE}
+                    maxWidth={IMAGE_THUMB_SIZE}
+                    borderRadius={6}
+                  />
+                  <IconButton
+                    size="small"
+                    onClick={() => handleRemoveAttachment(i)}
+                    aria-label={t('common.delete')}
+                    sx={{
+                      position: 'absolute',
+                      top: -6,
+                      right: -6,
+                      width: 20,
+                      height: 20,
+                      backgroundColor: 'background.paper',
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      '&:hover': { backgroundColor: 'action.hover' },
+                    }}
+                  >
+                    <CloseIcon sx={{ fontSize: 12 }} />
+                  </IconButton>
+                </Box>
+              ) : null,
+            )}
+          </Box>
+        )}
+        {/* Non-image attachment chips */}
+        {attachments.some((a) => !api.isImageAttachment(a)) && (
+          <Box sx={{ px: 2, pb: 0.5, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+            {attachments.map((att, i) =>
+              !api.isImageAttachment(att) ? (
+                <Chip
+                  key={att.filePath}
+                  label={att.fileName}
+                  size="small"
+                  onDelete={() => handleRemoveAttachment(i)}
+                  sx={{ maxWidth: ATTACHMENT_CHIP_MAX_WIDTH }}
+                />
+              ) : null,
+            )}
           </Box>
         )}
 

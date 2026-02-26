@@ -76,6 +76,10 @@ export const MODIFIER_KEY = IS_MAC_PLATFORM ? '\u2318' : 'Ctrl+';
 export const SHORTCUT_HINT_FONT_SIZE = '0.7rem';
 export const SHORTCUT_HINT_OPACITY = 0.7;
 
+// ─── Image Preview ──────────────────────────────────────────
+export const IMAGE_PREVIEW_MAX_HEIGHT = 240;
+export const IMAGE_THUMB_SIZE = 80;
+
 // ─── Snackbar ───────────────────────────────────────────────
 export const SNACKBAR_AUTO_HIDE_MS = 6000;
 export const ERROR_SNACKBAR_AUTO_HIDE_MS = 4000;
