@@ -7,6 +7,7 @@ node_modules
 dist
 
 .claude/settings.local.json
+.claude/worktrees/
 
 # Playwright smoke test artifacts
 playwright-smoke-*.png

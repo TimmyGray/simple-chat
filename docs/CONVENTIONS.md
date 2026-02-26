@@ -34,7 +34,7 @@
 
 These rules are enforced by ESLint custom rules with remediation messages and structural architecture tests:
 
-1. **No cross-module imports:** Backend modules (`auth/`, `chat/`, `health/`, `models/`, `templates/`, `uploads/`) must not import from each other's internal files. Use NestJS DI instead.
+1. **No cross-module imports:** Backend modules (`auth/`, `chat/`, `health/`, `mcp/`, `models/`, `templates/`, `uploads/`) must not import from each other's internal files. Use NestJS DI instead.
 2. **No console.log:** Use the injected Pino logger (`Logger` from `@nestjs/common`)
 3. **No raw HTML in React:** Use MUI components (`Button`, `TextField`, `Select`, etc.)
 4. **No hardcoded colors:** Use `theme.palette.*` tokens
@@ -42,6 +42,7 @@ These rules are enforced by ESLint custom rules with remediation messages and st
 6. **No window.alert():** Use MUI `Snackbar` + `Alert` for user notifications. ESLint catches both `window.alert()` and bare `alert()`.
 7. **No hardcoded user-facing strings:** All strings must use `t()` from react-i18next. Error messages, prefixes, and labels included.
 8. **No inline `instanceof Error` checks:** Use `getErrorMessage(err, fallback)` from `utils/getErrorMessage` for consistent error extraction in catch blocks.
+9. **Lifecycle hook completeness:** Services managing persistent connections (transports, clients) must implement both `OnModuleInit` (startup recovery) and `OnModuleDestroy` (graceful shutdown). Architecture test enforces this.
 
 ## Environment
 

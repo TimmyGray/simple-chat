@@ -245,3 +245,40 @@ describe('Architecture: No Direct Collection Access', () => {
     ).toHaveLength(0);
   });
 });
+
+describe('Architecture: Lifecycle Hook Completeness', () => {
+  it('services with OnModuleInit must also implement OnModuleDestroy if they manage connections', () => {
+    const violations: string[] = [];
+    const files = getAllTsFiles(SRC_DIR);
+
+    for (const file of files) {
+      if (!file.endsWith('.service.ts')) continue;
+      const content = readFileSync(file, 'utf-8');
+      const relFile = relative(SRC_DIR, file);
+
+      // Check for connection/transport/client patterns that need cleanup
+      const hasConnectionPattern =
+        content.includes('Transport') ||
+        content.includes('.close(') ||
+        content.includes('.disconnect(') ||
+        content.includes('Client(');
+
+      const hasOnModuleInit = content.includes('OnModuleInit');
+      const hasOnModuleDestroy = content.includes('OnModuleDestroy');
+
+      if (hasConnectionPattern && hasOnModuleInit && !hasOnModuleDestroy) {
+        violations.push(
+          `${relFile} implements OnModuleInit with connection patterns but missing OnModuleDestroy. ` +
+            `REMEDIATION: Services managing persistent connections (transports, clients) must implement ` +
+            `both OnModuleInit (startup recovery) and OnModuleDestroy (graceful shutdown). ` +
+            `Add OnModuleDestroy to close/disconnect resources.`,
+        );
+      }
+    }
+
+    expect(
+      violations,
+      `Lifecycle hook violations:\n${violations.join('\n')}`,
+    ).toHaveLength(0);
+  });
+});
