@@ -73,7 +73,8 @@ AppModule
 │   └── FileExtractionService (PDF/text/CSV file content extraction)
 ├── ModelsModule
 │   ├── ModelsController (GET /api/models)
-│   └── ModelsService (fetches from OpenRouter, hourly refresh, fallback defaults)
+│   ├── ModelsService (fetches from OpenRouter, hourly refresh, fallback defaults)
+│   └── OllamaService (auto-detects Ollama, fetches local models, hourly refresh)
 ├── TemplatesModule (imports AuthModule)
 │   ├── TemplatesController (CRUD endpoints, admin-protected writes)
 │   └── TemplatesService (template CRUD, seed defaults on startup)
@@ -215,7 +216,7 @@ All `:id` parameters are validated by `ParseObjectIdPipe` (returns 400 for inval
 
 ### Key Backend Patterns
 
-- **LLM integration**: OpenAI SDK with `baseURL` pointed at OpenRouter (`https://openrouter.ai/api/v1`). Custom headers include `HTTP-Referer` and `X-Title`.
+- **LLM integration**: OpenAI SDK with `baseURL` pointed at OpenRouter (`https://openrouter.ai/api/v1`). Custom headers include `HTTP-Referer` and `X-Title`. A second OpenAI client is configured for Ollama (local models) at `OLLAMA_BASE_URL/v1`. Routing is based on model ID prefix: `ollama/` models use the Ollama client, all others use OpenRouter.
 - **SSE streaming**: The service returns an `AsyncGenerator<StreamEvent>` (discriminated union: `content`, `done`, `error`). The controller owns SSE headers, wire format (`data: {json}\n\n`), timeout, and disconnect detection via `AbortController`/`AbortSignal`.
 - **File uploads**: Multer with `diskStorage` to `./uploads/`. MIME whitelist: `application/pdf`, `text/plain`, `text/markdown`, `text/csv`, `image/png`, `image/jpeg`, `image/gif`, `image/webp`. Unique filenames via timestamp + random suffix.
 - **Upload cleanup**: `UploadsCleanupService` runs an hourly cron job that deletes files older than a configurable TTL (default 24 hours, set via `UPLOAD_TTL_HOURS`).
@@ -343,6 +344,7 @@ Language detection order: `localStorage` then `navigator`. Fallback: English. Th
 | `MONGO_POOL_SIZE_MAX`| No       | `10`                                       | Maximum connections in pool        |
 | `PORT`               | No       | `3001`                                     | Backend HTTP port                  |
 | `LLM_URL_KEY`        | No       | `https://openrouter.ai/api/v1`             | Override LLM base URL              |
+| `OLLAMA_BASE_URL`    | No       | `http://localhost:11434`                   | Ollama server URL for local models |
 | `CORS_ORIGIN`        | No       | `http://localhost:5173`                    | Allowed CORS origin                |
 | `UPLOAD_TTL_HOURS`   | No       | `24`                                       | Hours before uploaded files are cleaned up |
 | `JWT_EXPIRATION_SECONDS` | No   | `900`                                      | JWT token expiration in seconds    |

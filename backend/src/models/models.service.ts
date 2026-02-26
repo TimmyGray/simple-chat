@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Interval } from '@nestjs/schedule';
 import { getErrorMessage } from '../common/utils/get-error-message';
+import { OllamaService } from './ollama.service';
 
 export interface ModelInfo {
   id: string;
@@ -10,6 +11,7 @@ export interface ModelInfo {
   free: boolean;
   contextLength: number;
   supportsVision: boolean;
+  provider: 'openrouter' | 'ollama';
 }
 
 interface OpenRouterModel {
@@ -70,6 +72,7 @@ const FALLBACK_MODELS: ModelInfo[] = [
     free: true,
     contextLength: 200000,
     supportsVision: true,
+    provider: 'openrouter',
   },
   {
     id: 'google/gemma-3-12b-it:free',
@@ -78,6 +81,7 @@ const FALLBACK_MODELS: ModelInfo[] = [
     free: true,
     contextLength: 32768,
     supportsVision: true,
+    provider: 'openrouter',
   },
   {
     id: 'google/gemma-3-4b-it:free',
@@ -86,6 +90,7 @@ const FALLBACK_MODELS: ModelInfo[] = [
     free: true,
     contextLength: 32768,
     supportsVision: true,
+    provider: 'openrouter',
   },
   {
     id: 'arcee-ai/trinity-large-preview:free',
@@ -94,6 +99,7 @@ const FALLBACK_MODELS: ModelInfo[] = [
     free: true,
     contextLength: 131000,
     supportsVision: false,
+    provider: 'openrouter',
   },
   {
     id: 'stepfun/step-3.5-flash:free',
@@ -102,6 +108,7 @@ const FALLBACK_MODELS: ModelInfo[] = [
     free: true,
     contextLength: 256000,
     supportsVision: false,
+    provider: 'openrouter',
   },
 ];
 
@@ -110,18 +117,22 @@ export class ModelsService implements OnModuleInit {
   private readonly logger = new Logger(ModelsService.name);
   private cachedModels: ModelInfo[] = FALLBACK_MODELS;
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly ollamaService: OllamaService,
+  ) {}
 
   async onModuleInit(): Promise<void> {
     await this.refreshModels();
   }
 
   getModels(): ModelInfo[] {
-    return this.cachedModels;
+    const ollamaModels = this.ollamaService.getModels();
+    return [...ollamaModels, ...this.cachedModels];
   }
 
   getModelById(id: string): ModelInfo | undefined {
-    return this.cachedModels.find((m) => m.id === id);
+    return this.getModels().find((m) => m.id === id);
   }
 
   @Interval(REFRESH_INTERVAL_MS)
@@ -191,6 +202,7 @@ function mapToModelInfo(m: OpenRouterModel): ModelInfo {
     free: promptFree && completionFree,
     contextLength: m.context_length ?? 0,
     supportsVision: m.architecture?.modality?.includes('image') ?? false,
+    provider: 'openrouter',
   };
 }
 

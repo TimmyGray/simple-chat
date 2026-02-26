@@ -96,6 +96,7 @@
   },
   "models": {
     "free": "Gratis",
+    "local": "Local",
     "selectModel": "Seleccionar modelo"
   },
   "shortcuts": {

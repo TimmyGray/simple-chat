@@ -12,6 +12,7 @@ export const envValidationSchema = Joi.object({
   MONGO_POOL_SIZE_MAX: Joi.number().integer().min(1).max(200).default(10),
   PORT: Joi.number().integer().min(1).max(65535).default(3001),
   LLM_URL_KEY: Joi.string().uri().optional(),
+  OLLAMA_BASE_URL: Joi.string().uri().optional(),
   CORS_ORIGIN: Joi.string().optional(),
   UPLOAD_TTL_HOURS: Joi.number().integer().min(1).default(24),
   LOG_LEVEL: Joi.string()

@@ -26,6 +26,8 @@ export const FREE_CHIP_HEIGHT = 18;
 export const SELECT_FONT_SIZE = '0.8rem';
 export const MODEL_MENU_FONT_SIZE = '0.85rem';
 export const FREE_CHIP_FONT_SIZE = '0.65rem';
+export const LOCAL_CHIP_HEIGHT = 18;
+export const LOCAL_CHIP_FONT_SIZE = '0.65rem';
 
 // ─── Auth ───────────────────────────────────────────────────
 export const AUTH_LOGO_SIZE = 56;

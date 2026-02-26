@@ -15,6 +15,7 @@ const mockModels: ModelInfo[] = [
     free: false,
     contextLength: 8192,
     supportsVision: true,
+    provider: 'openrouter',
   },
   {
     id: asModelId('llama-3'),
@@ -23,6 +24,7 @@ const mockModels: ModelInfo[] = [
     free: true,
     contextLength: 4096,
     supportsVision: false,
+    provider: 'openrouter',
   },
 ];
 

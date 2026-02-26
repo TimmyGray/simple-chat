@@ -84,4 +84,5 @@ export interface ModelInfo {
   free: boolean;
   contextLength: number;
   supportsVision: boolean;
+  provider: 'openrouter' | 'ollama';
 }

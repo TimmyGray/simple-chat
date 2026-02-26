@@ -68,6 +68,7 @@ describe('LlmStreamService', () => {
               if (key === 'openrouter.baseUrl')
                 return 'https://openrouter.ai/api/v1';
               if (key === 'corsOrigin') return 'http://localhost:5173';
+              if (key === 'ollama.baseUrl') return 'http://localhost:11434';
               return null;
             }),
           },
@@ -93,7 +94,7 @@ describe('LlmStreamService', () => {
       },
       controller: { abort: vi.fn() },
     };
-    vi.spyOn(service['openai'].chat.completions, 'create').mockResolvedValue(
+    vi.spyOn(service['openrouterClient'].chat.completions, 'create').mockResolvedValue(
       mockStream as any,
     );
     return mockStream;
@@ -180,7 +181,7 @@ describe('LlmStreamService', () => {
   });
 
   it('should yield error event when LLM call fails', async () => {
-    vi.spyOn(service['openai'].chat.completions, 'create').mockRejectedValue(
+    vi.spyOn(service['openrouterClient'].chat.completions, 'create').mockRejectedValue(
       new Error('API rate limit exceeded'),
     );
     const events = await collectEvents(
@@ -211,7 +212,7 @@ describe('LlmStreamService', () => {
       const second = await gen.next();
       if (!second.done) yield second.value;
     };
-    vi.spyOn(service['openai'].chat.completions, 'create').mockResolvedValue(
+    vi.spyOn(service['openrouterClient'].chat.completions, 'create').mockResolvedValue(
       mockStream as any,
     );
 
@@ -256,7 +257,7 @@ describe('LlmStreamService', () => {
       ),
     );
 
-    const createCall = vi.spyOn(service['openai'].chat.completions, 'create')
+    const createCall = vi.spyOn(service['openrouterClient'].chat.completions, 'create')
       .mock.calls[0];
     const messages = (createCall[0] as any).messages;
     expect(messages[0]).toEqual({
@@ -272,7 +273,7 @@ describe('LlmStreamService', () => {
       service.stream('507f1f77bcf86cd799439011', 'openrouter/free', mockUserId),
     );
 
-    const createCall = vi.spyOn(service['openai'].chat.completions, 'create')
+    const createCall = vi.spyOn(service['openrouterClient'].chat.completions, 'create')
       .mock.calls[0];
     const messages = (createCall[0] as any).messages;
     expect(messages).toEqual([{ role: 'user', content: 'Hello' }]);

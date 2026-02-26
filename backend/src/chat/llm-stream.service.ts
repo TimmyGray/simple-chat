@@ -14,17 +14,20 @@ import {
   getErrorStack,
 } from '../common/utils/get-error-message';
 
+const OLLAMA_MODEL_PREFIX = 'ollama/';
+
 @Injectable()
 export class LlmStreamService {
   private readonly logger = new Logger(LlmStreamService.name);
-  private openai: OpenAI;
+  private readonly openrouterClient: OpenAI;
+  private readonly ollamaClient: OpenAI | null;
 
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly fileExtractionService: FileExtractionService,
     private configService: ConfigService,
   ) {
-    this.openai = new OpenAI({
+    this.openrouterClient = new OpenAI({
       apiKey: this.configService.get<string>('openrouter.apiKey'),
       baseURL: this.configService.get<string>('openrouter.baseUrl'),
       defaultHeaders: {
@@ -33,8 +36,37 @@ export class LlmStreamService {
       },
     });
     this.logger.log(
-      `OpenAI client initialized with baseURL: ${this.configService.get<string>('openrouter.baseUrl')}`,
+      `OpenRouter client initialized with baseURL: ${this.configService.get<string>('openrouter.baseUrl')}`,
     );
+
+    const ollamaBaseUrl = this.configService.get<string>('ollama.baseUrl');
+    if (ollamaBaseUrl) {
+      this.ollamaClient = new OpenAI({
+        apiKey: 'ollama',
+        baseURL: `${ollamaBaseUrl}/v1`,
+      });
+      this.logger.log(
+        `Ollama client initialized with baseURL: ${ollamaBaseUrl}/v1`,
+      );
+    } else {
+      this.ollamaClient = null;
+    }
+  }
+
+  private getClientAndModel(model: string): {
+    client: OpenAI;
+    modelName: string;
+  } {
+    if (model.startsWith(OLLAMA_MODEL_PREFIX)) {
+      if (!this.ollamaClient) {
+        throw new Error('Ollama is not configured');
+      }
+      return {
+        client: this.ollamaClient,
+        modelName: model.slice(OLLAMA_MODEL_PREFIX.length),
+      };
+    }
+    return { client: this.openrouterClient, modelName: model };
   }
 
   private async getSystemPrompt(
@@ -75,14 +107,16 @@ export class LlmStreamService {
     let fullContent = '';
     let usage: TokenUsage | undefined;
     try {
+      const { client, modelName } = this.getClientAndModel(model);
+      const isOllama = model.startsWith(OLLAMA_MODEL_PREFIX);
       this.logger.log(
-        `Starting LLM stream: model="${model}", messages=${llmMessages.length}, conversation=${conversationId}`,
+        `Starting LLM stream: model="${modelName}", provider=${isOllama ? 'ollama' : 'openrouter'}, messages=${llmMessages.length}, conversation=${conversationId}`,
       );
-      const stream = await this.openai.chat.completions.create({
-        model,
+      const stream = await client.chat.completions.create({
+        model: modelName,
         messages: llmMessages,
         stream: true,
-        stream_options: { include_usage: true },
+        ...(isOllama ? {} : { stream_options: { include_usage: true } }),
       });
       for await (const chunk of stream) {
         if (abortSignal?.aborted) {
