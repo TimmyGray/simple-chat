@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { ConfigService } from '@nestjs/config';
 import { ModelsService } from './models.service';
+import { OllamaService } from './ollama.service';
 
 function createConfigService(
   overrides: Record<string, string> = {},
@@ -11,6 +12,17 @@ function createConfigService(
     ...overrides,
   };
   return { get: (key: string) => defaults[key] } as unknown as ConfigService;
+}
+
+function createMockOllamaService(): OllamaService {
+  return {
+    getModels: () => [],
+    isAvailable: () => false,
+    getBaseUrl: () => 'http://localhost:11434',
+    isOllamaModel: () => false,
+    refreshModels: vi.fn(),
+    onModuleInit: vi.fn(),
+  } as unknown as OllamaService;
 }
 
 function makeOpenRouterResponse(models: Record<string, unknown>[]) {
@@ -73,7 +85,7 @@ describe('ModelsService', () => {
           sampleVisionModel,
         ]) as unknown as Response,
       );
-      service = new ModelsService(createConfigService());
+      service = new ModelsService(createConfigService(), createMockOllamaService());
       await service.onModuleInit();
     });
 
@@ -121,7 +133,7 @@ describe('ModelsService', () => {
   describe('with failed OpenRouter fetch', () => {
     beforeEach(async () => {
       vi.spyOn(global, 'fetch').mockRejectedValue(new Error('Network error'));
-      service = new ModelsService(createConfigService());
+      service = new ModelsService(createConfigService(), createMockOllamaService());
       await service.onModuleInit();
     });
 
@@ -143,7 +155,7 @@ describe('ModelsService', () => {
         ok: false,
         status: 401,
       } as unknown as Response);
-      service = new ModelsService(createConfigService());
+      service = new ModelsService(createConfigService(), createMockOllamaService());
       await service.onModuleInit();
     });
 
@@ -162,6 +174,7 @@ describe('ModelsService', () => {
           'openrouter.baseUrl': '',
           'openrouter.apiKey': '',
         }),
+        createMockOllamaService(),
       );
       await service.onModuleInit();
       expect(fetchSpy).not.toHaveBeenCalled();
@@ -178,7 +191,7 @@ describe('ModelsService', () => {
       vi.spyOn(global, 'fetch').mockResolvedValue(
         makeOpenRouterResponse([sampleOpenRouterModel]) as unknown as Response,
       );
-      service = new ModelsService(createConfigService());
+      service = new ModelsService(createConfigService(), createMockOllamaService());
       await service.onModuleInit();
     });
 
@@ -199,7 +212,7 @@ describe('ModelsService', () => {
       vi.spyOn(global, 'fetch').mockResolvedValue(
         makeOpenRouterResponse([sampleOpenRouterModel]) as unknown as Response,
       );
-      service = new ModelsService(createConfigService());
+      service = new ModelsService(createConfigService(), createMockOllamaService());
       await service.onModuleInit();
       expect(service.getModels()).toHaveLength(1);
 
@@ -217,7 +230,7 @@ describe('ModelsService', () => {
       vi.spyOn(global, 'fetch').mockResolvedValue(
         makeOpenRouterResponse([sampleOpenRouterModel]) as unknown as Response,
       );
-      service = new ModelsService(createConfigService());
+      service = new ModelsService(createConfigService(), createMockOllamaService());
       await service.onModuleInit();
       expect(service.getModels()).toHaveLength(1);
 
@@ -232,7 +245,7 @@ describe('ModelsService', () => {
       vi.spyOn(global, 'fetch').mockResolvedValue(
         makeOpenRouterResponse([sampleOpenRouterModel]) as unknown as Response,
       );
-      service = new ModelsService(createConfigService());
+      service = new ModelsService(createConfigService(), createMockOllamaService());
       await service.onModuleInit();
       expect(service.getModelById('google/gemma-3n-e2b-it:free')).toBeDefined();
     });
@@ -243,7 +256,7 @@ describe('ModelsService', () => {
           nonWhitelistedFreeModel,
         ]) as unknown as Response,
       );
-      service = new ModelsService(createConfigService());
+      service = new ModelsService(createConfigService(), createMockOllamaService());
       await service.onModuleInit();
       expect(service.getModels()).toHaveLength(0);
     });
@@ -252,7 +265,7 @@ describe('ModelsService', () => {
       vi.spyOn(global, 'fetch').mockResolvedValue(
         makeOpenRouterResponse([sampleVisionModel]) as unknown as Response,
       );
-      service = new ModelsService(createConfigService());
+      service = new ModelsService(createConfigService(), createMockOllamaService());
       await service.onModuleInit();
       expect(service.getModelById('test/vision-model')).toBeUndefined();
       expect(service.getModels()).toHaveLength(0);
@@ -266,7 +279,7 @@ describe('ModelsService', () => {
           sampleVisionModel,
         ]) as unknown as Response,
       );
-      service = new ModelsService(createConfigService());
+      service = new ModelsService(createConfigService(), createMockOllamaService());
       await service.onModuleInit();
       const models = service.getModels();
       expect(models).toHaveLength(1);
@@ -291,7 +304,7 @@ describe('ModelsService', () => {
       vi.spyOn(global, 'fetch').mockResolvedValue(
         makeOpenRouterResponse([qwenModel]) as unknown as Response,
       );
-      service = new ModelsService(createConfigService());
+      service = new ModelsService(createConfigService(), createMockOllamaService());
       await service.onModuleInit();
       const model = service.getModelById('qwen/qwen3-235b-a22b-thinking-2507');
       expect(model).toBeDefined();
@@ -306,7 +319,7 @@ describe('ModelsService', () => {
           { ...sampleOpenRouterModel, context_length: null },
         ]) as unknown as Response,
       );
-      service = new ModelsService(createConfigService());
+      service = new ModelsService(createConfigService(), createMockOllamaService());
       await service.onModuleInit();
       expect(service.getModels()[0].contextLength).toBe(0);
     });
@@ -317,7 +330,7 @@ describe('ModelsService', () => {
           { ...sampleOpenRouterModel, architecture: null },
         ]) as unknown as Response,
       );
-      service = new ModelsService(createConfigService());
+      service = new ModelsService(createConfigService(), createMockOllamaService());
       await service.onModuleInit();
       expect(service.getModels()[0].supportsVision).toBe(false);
     });
@@ -328,7 +341,7 @@ describe('ModelsService', () => {
           { ...sampleOpenRouterModel, name: '' },
         ]) as unknown as Response,
       );
-      service = new ModelsService(createConfigService());
+      service = new ModelsService(createConfigService(), createMockOllamaService());
       await service.onModuleInit();
       expect(service.getModels()[0].name).toBe('google/gemma-3n-e2b-it:free');
     });
@@ -339,7 +352,7 @@ describe('ModelsService', () => {
           { ...sampleOpenRouterModel, pricing: null },
         ]) as unknown as Response,
       );
-      service = new ModelsService(createConfigService());
+      service = new ModelsService(createConfigService(), createMockOllamaService());
       await service.onModuleInit();
       expect(service.getModels()[0].free).toBe(true);
     });

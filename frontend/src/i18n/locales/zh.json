@@ -96,6 +96,7 @@
   },
   "models": {
     "free": "免费",
+    "local": "本地",
     "selectModel": "选择模型"
   },
   "shortcuts": {

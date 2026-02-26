@@ -9,6 +9,8 @@ import {
   SELECT_FONT_SIZE,
   MODEL_MENU_FONT_SIZE,
   FREE_CHIP_FONT_SIZE,
+  LOCAL_CHIP_HEIGHT,
+  LOCAL_CHIP_FONT_SIZE,
 } from '../../constants';
 
 interface ModelSelectorProps {
@@ -56,7 +58,15 @@ export default function ModelSelector({
         {models.map((model) => (
           <MenuItem key={model.id} value={model.id} sx={{ fontSize: MODEL_MENU_FONT_SIZE }}>
             {model.name}
-            {model.free && (
+            {model.provider === 'ollama' && (
+              <Chip
+                label={t('models.local')}
+                size="small"
+                color="info"
+                sx={{ ml: 1, height: LOCAL_CHIP_HEIGHT, fontSize: LOCAL_CHIP_FONT_SIZE }}
+              />
+            )}
+            {model.free && model.provider !== 'ollama' && (
               <Chip
                 label={t('models.free')}
                 size="small"

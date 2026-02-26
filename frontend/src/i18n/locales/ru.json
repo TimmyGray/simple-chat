@@ -96,6 +96,7 @@
   },
   "models": {
     "free": "Бесплатно",
+    "local": "Локальная",
     "selectModel": "Выбрать модель"
   },
   "shortcuts": {

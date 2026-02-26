@@ -17,6 +17,7 @@ const mockModels = [
     free: true,
     contextLength: 1000000,
     supportsVision: true,
+    provider: 'openrouter' as const,
   },
 ];
 
