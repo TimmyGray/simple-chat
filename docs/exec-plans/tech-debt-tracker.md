@@ -115,7 +115,7 @@ Each task has:
 | FEAT-10 | Real-Time Collaboration: WebSocket gateway, conversation sharing, real-time message sync, presence/typing indicators | fullstack | 5d | in-progress | All 4 subtasks. |
 | FEAT-10a | Backend WebSocket Gateway: Socket.IO gateway with JWT auth, room-based conversation channels, event broadcasting | backend | 1.5d | done | PR #100 merged. |
 | FEAT-10b | Conversation Sharing Model: participants field, invite/revoke endpoints, shared conversation queries, access control | backend | 1d | done | PR #101 merged. SharingService, role-based access control, 22 unit tests. |
-| FEAT-10c | Frontend WebSocket Client: socket.io-client, useWebSocket hook, live message sync, typing indicators, connection status | frontend | 1.5d | todo | Depends on FEAT-10a. |
+| FEAT-10c | Frontend WebSocket Client: socket.io-client, useWebSocket hook, live message sync, typing indicators, connection status | frontend | 1.5d | done | PR #102 merged. Socket.IO client, useWebSocket hook, WebSocketContext, ConnectionStatus, real-time message sync, typing indicators. |
 | FEAT-10d | Frontend Sharing UI: share dialog, participant list, invite flow, collaborative presence indicators | frontend | 1d | todo | Depends on FEAT-10b + FEAT-10c. |
 | FEAT-11 | Image Input (Multi-modal Chat): paste/upload images to vision-capable models via OpenRouter multi-modal API | fullstack | 1-2d | done | PR #94 merged. Multi-modal content parts, AuthImage component, inline previews. |
 | FEAT-12 | Conversation Branching: fork conversations from any message to explore alternative paths with tree-based history | fullstack | 2-3d | done | PR #97. Fork-as-copy approach with `forkedFrom` back-reference. |
@@ -215,3 +215,5 @@ Each task has:
 | B-M12 | Refactor toPdf — extract renderPdfHeader + renderPdfMessage (PR #96) | 2026-02-26 |
 | FEAT-14 | MCP Tool Integration — backend module + tool-use streaming (PR #98) | 2026-02-26 |
 | FEAT-10a | Backend WebSocket Gateway — Socket.IO + JWT auth + room channels (PR #100) | 2026-02-26 |
+| FEAT-10b | Conversation Sharing Model — participants, invite/revoke, access control (PR #101) | 2026-02-26 |
+| FEAT-10c | Frontend WebSocket Client — socket.io-client, useWebSocket, real-time sync (PR #102) | 2026-02-26 |
