@@ -4,6 +4,7 @@ import { MongoServerError, ObjectId } from 'mongodb';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ChatService } from './chat.service';
 import { LlmStreamService } from './llm-stream.service';
+import { ChatBroadcastService } from './chat-broadcast.service';
 import { DatabaseService } from '../database/database.service';
 import type { StreamEvent } from './interfaces/stream-event.interface';
 
@@ -91,11 +92,22 @@ describe('ChatService', () => {
       stream: createMockStreamFn(defaultStreamEvents),
     };
 
+    const mockBroadcastService = {
+      emitUserMessageCreated: vi.fn(),
+      emitMessageUpdated: vi.fn(),
+      wrapStreamWithBroadcast: vi.fn().mockImplementation(async function* (
+        stream: AsyncGenerator<StreamEvent>,
+      ) {
+        yield* stream;
+      }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ChatService,
         { provide: DatabaseService, useValue: mockDatabaseService },
         { provide: LlmStreamService, useValue: mockLlmStreamService },
+        { provide: ChatBroadcastService, useValue: mockBroadcastService },
       ],
     }).compile();
 
@@ -474,6 +486,7 @@ describe('ChatService', () => {
             updatedAt: expect.any(Date),
           },
         },
+        { returnDocument: 'after' },
       );
     });
 
