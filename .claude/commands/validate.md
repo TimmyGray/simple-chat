@@ -2,6 +2,17 @@
 
 Run all validation checks and report results.
 
+## Pre-flight: Dependency Freshness
+
+Before running any checks, verify that `node_modules` is in sync with `package-lock.json` in both backend and frontend. This prevents false failures when new dependencies were added but not installed.
+
+```bash
+cd backend && npm ls --depth=0 2>&1 | grep -q 'missing:' && npm install; cd ..
+cd frontend && npm ls --depth=0 2>&1 | grep -q 'missing:' && npm install; cd ..
+```
+
+If any packages were installed, note it in the output: `Dependency sync: installed missing packages in <backend|frontend>`.
+
 ## Checks
 
 Run each check and record pass/fail:

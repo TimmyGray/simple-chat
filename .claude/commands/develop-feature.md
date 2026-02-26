@@ -88,7 +88,13 @@ Isolate the working tree so multiple `/develop-feature` agents can run concurren
    - Update phase completion status
 
 ### Phase 5: Validation + Staged-File Completeness
-1. Run validation checks — fix failures, max 3 retries per check:
+1. **Dependency freshness check** — ensure `node_modules` matches `package-lock.json`:
+   ```
+   cd backend && npm ls --depth=0 2>&1 | grep -q 'missing:' && npm install; cd ..
+   cd frontend && npm ls --depth=0 2>&1 | grep -q 'missing:' && npm install; cd ..
+   ```
+   This catches the case where new packages were added to `package.json` but `npm install` wasn't run (e.g., stale node_modules from a prior session).
+2. Run validation checks — fix failures, max 3 retries per check:
    ```
    npm run lint
    npm run typecheck

@@ -17,7 +17,8 @@
     "typecheck": "npm run typecheck:backend && npm run typecheck:frontend",
     "typecheck:backend": "cd backend && npm run typecheck",
     "typecheck:frontend": "cd frontend && npm run typecheck",
-    "validate": "npm run lint && npm run typecheck && npm run test && npm run build",
+    "deps:check": "cd backend && npm ls --depth=0 2>&1 | grep -q 'missing:' && npm install || true && cd ../frontend && npm ls --depth=0 2>&1 | grep -q 'missing:' && npm install || true",
+    "validate": "npm run deps:check && npm run lint && npm run typecheck && npm run test && npm run build",
     "prepare": "husky"
   },
   "devDependencies": {
