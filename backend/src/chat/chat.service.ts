@@ -9,6 +9,7 @@ import { ObjectId, MongoServerError } from 'mongodb';
 import { DatabaseService } from '../database/database.service';
 import { LlmStreamService } from './llm-stream.service';
 import { ChatBroadcastService } from './chat-broadcast.service';
+import { SharingService } from './sharing.service';
 import { ConversationDoc } from './interfaces/conversation.interface';
 import { MessageDoc } from './interfaces/message.interface';
 import type { StreamEvent } from './interfaces/stream-event.interface';
@@ -25,6 +26,7 @@ export class ChatService {
     private readonly databaseService: DatabaseService,
     private readonly llmStreamService: LlmStreamService,
     private readonly broadcastService: ChatBroadcastService,
+    private readonly sharingService: SharingService,
   ) {}
 
   async createConversation(
@@ -58,6 +60,13 @@ export class ChatService {
     id: string,
     userId: ObjectId,
   ): Promise<ConversationDoc> {
+    return this.sharingService.findAccessibleConversation(id, userId);
+  }
+
+  async getOwnConversation(
+    id: string,
+    userId: ObjectId,
+  ): Promise<ConversationDoc> {
     const conversation = await this.databaseService
       .conversations()
       .findOne({ _id: new ObjectId(id), userId });
@@ -73,6 +82,7 @@ export class ChatService {
     dto: UpdateConversationDto,
     userId: ObjectId,
   ): Promise<ConversationDoc> {
+    await this.getOwnConversation(id, userId);
     const conversation = await this.databaseService
       .conversations()
       .findOneAndUpdate(
@@ -81,7 +91,6 @@ export class ChatService {
         { returnDocument: 'after' },
       );
     if (!conversation) {
-      this.logger.warn(`Conversation not found for update: ${id}`);
       throw new NotFoundException('Conversation not found');
     }
     this.logger.log(`Conversation updated: ${id}`);
@@ -89,13 +98,7 @@ export class ChatService {
   }
 
   async deleteConversation(id: string, userId: ObjectId): Promise<void> {
-    const conversation = await this.databaseService
-      .conversations()
-      .findOne({ _id: new ObjectId(id), userId });
-    if (!conversation) {
-      this.logger.warn(`Conversation not found for deletion: ${id}`);
-      throw new NotFoundException('Conversation not found');
-    }
+    await this.getOwnConversation(id, userId);
     await this.databaseService
       .messages()
       .deleteMany({ conversationId: new ObjectId(id) });
@@ -124,7 +127,11 @@ export class ChatService {
     abortSignal?: AbortSignal,
     idempotencyKey?: string,
   ): AsyncGenerator<StreamEvent> {
-    const conversation = await this.getConversation(conversationId, userId);
+    const conversation = await this.sharingService.assertAccess(
+      conversationId,
+      userId,
+      'editor',
+    );
     const model = dto.model || conversation.model;
     const now = new Date();
     try {
@@ -200,7 +207,10 @@ export class ChatService {
     messageId: string,
     userId: ObjectId,
   ): Promise<ConversationDoc> {
-    const sourceConv = await this.getConversation(sourceConversationId, userId);
+    const sourceConv = await this.sharingService.findAccessibleConversation(
+      sourceConversationId,
+      userId,
+    );
     const convObjId = new ObjectId(sourceConversationId);
     const msgObjId = new ObjectId(messageId);
 
@@ -278,7 +288,11 @@ export class ChatService {
     userId: ObjectId,
     abortSignal?: AbortSignal,
   ): AsyncGenerator<StreamEvent> {
-    const conversation = await this.getConversation(conversationId, userId);
+    const conversation = await this.sharingService.assertAccess(
+      conversationId,
+      userId,
+      'editor',
+    );
     const convId = new ObjectId(conversationId);
     const message = await this.databaseService.messages().findOne({
       _id: new ObjectId(messageId),
@@ -324,7 +338,11 @@ export class ChatService {
     userId: ObjectId,
     abortSignal?: AbortSignal,
   ): AsyncGenerator<StreamEvent> {
-    const conversation = await this.getConversation(conversationId, userId);
+    const conversation = await this.sharingService.assertAccess(
+      conversationId,
+      userId,
+      'editor',
+    );
     const convId = new ObjectId(conversationId);
     const message = await this.databaseService.messages().findOne({
       _id: new ObjectId(messageId),

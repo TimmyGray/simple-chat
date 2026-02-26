@@ -45,6 +45,8 @@ const FILE_SIZE_EXCEPTIONS: Record<string, string> = {
     'FEAT-12 + FEAT-10a: forkConversation + broadcast integration; splitting tracked separately',
   'chat/llm-stream.service.ts':
     'FEAT-14a: MCP tool-use streaming loop adds ~25 lines; splitting tracked separately',
+  'chat/chat.controller.ts':
+    'FEAT-10b: sharing endpoints add ~45 lines; splitting tracked separately',
 };
 
 function getAllTsFiles(dir: string): string[] {

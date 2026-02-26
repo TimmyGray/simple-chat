@@ -5,6 +5,7 @@ import { sign } from 'jsonwebtoken';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ChatGateway } from './chat.gateway';
 import { DatabaseService } from '../database/database.service';
+import { SharingService } from './sharing.service';
 import { WS_SERVER_EVENT } from './interfaces/ws-events.interface';
 
 const JWT_SECRET = 'test-secret-key';
@@ -47,7 +48,7 @@ function makeToken(payload?: Record<string, unknown>): string {
 
 describe('ChatGateway', () => {
   let gateway: ChatGateway;
-  let mockConversationsCollection: any;
+  let mockSharingService: any;
 
   const mockConversation = {
     _id: new ObjectId(MOCK_CONV_ID),
@@ -59,12 +60,16 @@ describe('ChatGateway', () => {
   };
 
   beforeEach(async () => {
-    mockConversationsCollection = {
-      findOne: vi.fn().mockResolvedValue(mockConversation),
+    mockSharingService = {
+      findAccessibleConversation: vi
+        .fn()
+        .mockResolvedValue(mockConversation),
     };
 
     const mockDatabaseService = {
-      conversations: vi.fn().mockReturnValue(mockConversationsCollection),
+      conversations: vi.fn().mockReturnValue({
+        findOne: vi.fn().mockResolvedValue(mockConversation),
+      }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -80,6 +85,7 @@ describe('ChatGateway', () => {
           },
         },
         { provide: DatabaseService, useValue: mockDatabaseService },
+        { provide: SharingService, useValue: mockSharingService },
       ],
     }).compile();
 
@@ -187,7 +193,9 @@ describe('ChatGateway', () => {
     });
 
     it('should reject join when conversation not found', async () => {
-      mockConversationsCollection.findOne.mockResolvedValueOnce(null);
+      mockSharingService.findAccessibleConversation.mockRejectedValueOnce(
+        new Error('Conversation not found'),
+      );
       const client = createMockSocket({
         userId: MOCK_USER_ID,
         email: 'test@example.com',

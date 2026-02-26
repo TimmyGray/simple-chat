@@ -5,6 +5,14 @@ export interface ForkedFromRef {
   messageId: ObjectId;
 }
 
+export type ParticipantRole = 'viewer' | 'editor';
+
+export interface ParticipantRef {
+  userId: ObjectId;
+  role: ParticipantRole;
+  addedAt: Date;
+}
+
 export interface ConversationDoc {
   _id?: ObjectId;
   userId: ObjectId;
@@ -12,6 +20,7 @@ export interface ConversationDoc {
   model: string;
   templateId?: ObjectId;
   forkedFrom?: ForkedFromRef;
+  participants?: ParticipantRef[];
   createdAt: Date;
   updatedAt: Date;
 }

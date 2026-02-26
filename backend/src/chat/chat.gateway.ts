@@ -13,6 +13,7 @@ import { Server, Socket } from 'socket.io';
 import { verify } from 'jsonwebtoken';
 import { ObjectId } from 'mongodb';
 import { DatabaseService } from '../database/database.service';
+import { SharingService } from './sharing.service';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import type { MessageDoc } from '../types/documents';
 import {
@@ -50,6 +51,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly configService: ConfigService,
     private readonly databaseService: DatabaseService,
+    private readonly sharingService: SharingService,
   ) {}
 
   handleConnection(client: AuthenticatedSocket): void {
@@ -111,12 +113,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return { success: false };
     }
 
-    const conversation = await this.databaseService.conversations().findOne({
-      _id: new ObjectId(conversationId),
-      userId: new ObjectId(client.data.userId),
-    });
-
-    if (!conversation) {
+    try {
+      await this.sharingService.findAccessibleConversation(
+        conversationId,
+        new ObjectId(client.data.userId),
+      );
+    } catch {
       return { success: false };
     }
 

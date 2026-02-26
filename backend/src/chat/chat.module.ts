@@ -10,6 +10,7 @@ import { LlmStreamService } from './llm-stream.service';
 import { SearchService } from './search.service';
 import { ExportService } from './export.service';
 import { FileExtractionService } from './file-extraction.service';
+import { SharingService } from './sharing.service';
 
 @Module({
   imports: [AuthModule, McpModule],
@@ -22,6 +23,7 @@ import { FileExtractionService } from './file-extraction.service';
     SearchService,
     ExportService,
     FileExtractionService,
+    SharingService,
   ],
 })
 export class ChatModule {}

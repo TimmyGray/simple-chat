@@ -5,6 +5,7 @@ import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
 import { SearchService } from './search.service';
 import { ExportService } from './export.service';
+import { SharingService } from './sharing.service';
 
 describe('ChatController', () => {
   let controller: ChatController;
@@ -76,6 +77,19 @@ describe('ChatController', () => {
               contentType: 'text/markdown',
               fileName: 'test.md',
             }),
+          },
+        },
+        {
+          provide: SharingService,
+          useValue: {
+            inviteParticipant: vi.fn().mockResolvedValue({
+              userId: new ObjectId(),
+              role: 'viewer',
+              addedAt: new Date(),
+            }),
+            revokeParticipant: vi.fn().mockResolvedValue(undefined),
+            getParticipants: vi.fn().mockResolvedValue([]),
+            getSharedConversations: vi.fn().mockResolvedValue([]),
           },
         },
       ],
