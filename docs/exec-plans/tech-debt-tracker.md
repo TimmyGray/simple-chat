@@ -112,7 +112,7 @@ Each task has:
 | FEAT-9 | Keyboard Shortcuts | frontend | 1d | done | PR #92 merged. Cmd+N (new chat), Cmd+K (search), Escape (stop streaming/blur input). IS_MAC_PLATFORM constant. |
 | FEAT-10 | Real-Time Collaboration | fullstack | 5d | todo | WebSocket, shared conversations |
 | FEAT-11 | Image Input (Multi-modal Chat): paste/upload images to vision-capable models via OpenRouter multi-modal API | fullstack | 1-2d | done | PR #94 merged. Multi-modal content parts, AuthImage component, inline previews. |
-| FEAT-12 | Conversation Branching: fork conversations from any message to explore alternative paths with tree-based history | fullstack | 2-3d | todo | Power user feature. LobeChat and TypingMind have shipped this. Visual branch indicator + keyboard nav. |
+| FEAT-12 | Conversation Branching: fork conversations from any message to explore alternative paths with tree-based history | fullstack | 2-3d | done | PR #97. Fork-as-copy approach with `forkedFrom` back-reference. |
 | FEAT-13 | Ollama / Local Model Support: direct Ollama connection (OpenAI-compatible API) for fully offline, zero-cost usage | backend | 1-2d | done | PR #95 merged. OllamaService auto-detect, dual OpenAI client routing, provider badges. |
 | FEAT-14 | MCP Tool Integration: connect to MCP servers for external tools (web search, file systems, APIs) with inline tool-call UI | fullstack | 4-5d | todo | MCP is the new industry standard (Linux Foundation, adopted by OpenAI). All major competitors support it. |
 
