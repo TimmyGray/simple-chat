@@ -94,9 +94,10 @@ describe('LlmStreamService', () => {
       },
       controller: { abort: vi.fn() },
     };
-    vi.spyOn(service['openrouterClient'].chat.completions, 'create').mockResolvedValue(
-      mockStream as any,
-    );
+    vi.spyOn(
+      service['openrouterClient'].chat.completions,
+      'create',
+    ).mockResolvedValue(mockStream as any);
     return mockStream;
   }
 
@@ -181,9 +182,10 @@ describe('LlmStreamService', () => {
   });
 
   it('should yield error event when LLM call fails', async () => {
-    vi.spyOn(service['openrouterClient'].chat.completions, 'create').mockRejectedValue(
-      new Error('API rate limit exceeded'),
-    );
+    vi.spyOn(
+      service['openrouterClient'].chat.completions,
+      'create',
+    ).mockRejectedValue(new Error('API rate limit exceeded'));
     const events = await collectEvents(
       service.stream('507f1f77bcf86cd799439011', 'openrouter/free', mockUserId),
     );
@@ -212,9 +214,10 @@ describe('LlmStreamService', () => {
       const second = await gen.next();
       if (!second.done) yield second.value;
     };
-    vi.spyOn(service['openrouterClient'].chat.completions, 'create').mockResolvedValue(
-      mockStream as any,
-    );
+    vi.spyOn(
+      service['openrouterClient'].chat.completions,
+      'create',
+    ).mockResolvedValue(mockStream as any);
 
     const events = await collectEvents(
       service.stream(
@@ -257,8 +260,10 @@ describe('LlmStreamService', () => {
       ),
     );
 
-    const createCall = vi.spyOn(service['openrouterClient'].chat.completions, 'create')
-      .mock.calls[0];
+    const createCall = vi.spyOn(
+      service['openrouterClient'].chat.completions,
+      'create',
+    ).mock.calls[0];
     const messages = (createCall[0] as any).messages;
     expect(messages[0]).toEqual({
       role: 'system',
@@ -273,8 +278,10 @@ describe('LlmStreamService', () => {
       service.stream('507f1f77bcf86cd799439011', 'openrouter/free', mockUserId),
     );
 
-    const createCall = vi.spyOn(service['openrouterClient'].chat.completions, 'create')
-      .mock.calls[0];
+    const createCall = vi.spyOn(
+      service['openrouterClient'].chat.completions,
+      'create',
+    ).mock.calls[0];
     const messages = (createCall[0] as any).messages;
     expect(messages).toEqual([{ role: 'user', content: 'Hello' }]);
   });
@@ -312,9 +319,7 @@ describe('LlmStreamService', () => {
     });
 
     it('should strip ollama/ prefix when calling Ollama API', async () => {
-      mockOllamaStream([
-        { choices: [{ delta: { content: 'Hi' } }] },
-      ]);
+      mockOllamaStream([{ choices: [{ delta: { content: 'Hi' } }] }]);
       await collectEvents(
         service.stream(
           '507f1f77bcf86cd799439011',
@@ -330,9 +335,7 @@ describe('LlmStreamService', () => {
     });
 
     it('should omit stream_options for Ollama models', async () => {
-      mockOllamaStream([
-        { choices: [{ delta: { content: 'Hi' } }] },
-      ]);
+      mockOllamaStream([{ choices: [{ delta: { content: 'Hi' } }] }]);
       await collectEvents(
         service.stream(
           '507f1f77bcf86cd799439011',

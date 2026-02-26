@@ -1,14 +1,14 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-26 (audit #18)
+> Last updated: 2026-02-26 (sweep #17)
 
 ## Test Summary
 
 | Area | Test Files | Tests | Pass Rate |
 |------|-----------|-------|-----------|
-| Backend | 19 | 186 | 100% |
-| Frontend | 18 | 176 | 100% |
-| **Total** | **37** | **362** | **100%** |
+| Backend | 20 | 203 | 100% |
+| Frontend | 18 | 178 | 100% |
+| **Total** | **38** | **381** | **100%** |
 
 ## Lint Status
 
@@ -44,16 +44,49 @@
 | Frontend | ~20 | n/a (npm cache EPERM) | 14 (1 moderate, 13 high — all in eslint/minimatch transitive deps) |
 
 ## Bundle Size
-- Backend: 1.4 MB (dist/)
-- Frontend: 7.0 MB (dist/ including source maps) — JS only: 344 KB index + 308 KB vendor-mui + 63 KB vendor-i18n + 808 KB lazy markdown chunk
+- Backend: 1.1 MB (dist/)
+- Frontend: 7.0 MB (dist/ including source maps) — JS only: 347 KB index + 308 KB vendor-mui + 63 KB vendor-i18n + 808 KB lazy markdown chunk
 
 ## Tech Debt
 - Critical: 0 todo, 4 done (JWT authentication completed)
 - High: 0 todo, 7 done — all high-priority items completed
-- Medium: 0 todo, 31 done, 1 wont-fix — all medium items done
+- Medium: 1 todo, 31 done, 1 wont-fix
 - Low: 0 todo, 15 done — all low-priority items completed
-- Features: 5 todo, 13 done (FEAT-1..9 + subtasks, FEAT-9 Keyboard Shortcuts was most recent)
-- Total tracked: 76 (see `docs/exec-plans/tech-debt-tracker.md`)
+- Features: 3 todo, 15 done (FEAT-1..13 + subtasks, FEAT-13 Ollama was most recent)
+- Total tracked: 79 (see `docs/exec-plans/tech-debt-tracker.md`)
+
+## Sweep #17 Findings
+- All validation passing: lint 0 errors, typecheck 0 errors, 381 tests passing (38 files), build passing
+- Backend tests: 20 files, 203 tests (+17 tests, +1 file — new ollama.service.spec.ts from FEAT-13)
+- Frontend tests: 18 files, 178 tests (+2 tests from FEAT-11/FEAT-13 UI additions)
+- Total tests: 381 (up from 362, target: 100+ sustained, comfortably exceeded)
+- Completed since last sweep: FEAT-9 (Keyboard Shortcuts, PR #92), FEAT-11 (Image Input, PR #94), FEAT-13 (Ollama Local Models, PR #95)
+- i18n: all 4 locales in sync (106 leaf keys each, up from 103 — 3 new keys from FEAT-11 image input + FEAT-13 Ollama provider badges)
+- Frontend bundle: index 347 KB (+3 KB from Ollama/image input components), vendor-mui 308 KB, vendor-i18n 63 KB, markdown 808 KB (unchanged)
+- Backend dist shrunk: 1.4 MB -> 1.1 MB (likely NestJS build optimization)
+- No auto-fixable code violations found (codebase is clean)
+- No console.log/warn/error in source (clean)
+- No dangerouslySetInnerHTML (clean)
+- No hardcoded secrets (clean)
+- No `any` types in non-test source files (clean)
+- No hardcoded user-facing strings in .tsx files (all use t())
+- No i18n gaps (all 4 locales perfectly in sync)
+- All cross-module imports follow approved patterns (chat->auth for guards/decorators, templates->auth for guards)
+- No direct MongoDB collection access outside DatabaseService (clean)
+- No files exceed 300-line limit in production code (test files exempted per convention)
+- All hex/rgba colors in theme.ts only (exempt per convention)
+- No window.alert() in source (clean)
+- Hidden `<input type="file">` in FileAttachment.tsx has eslint-disable comment (no MUI equivalent, known exception)
+- Express Response type used in chat.controller.ts and upload.controller.ts for SSE/file streaming (acceptable — NestJS has no built-in SSE streaming abstraction that supports chunked binary exports)
+- `toPdf` function in export.service.ts is 85 lines (exceeds 50-line max) — added as B-M12 to tracker (medium priority)
+- Large React components (MessageBubble 249-line render, ChatInput 150-line render) are acceptable: component render functions are structural JSX, not imperative logic
+- New FEAT-13 code review (OllamaService, dual OpenAI client routing, provider badges):
+  - OllamaService: 124 lines, well-structured with health check, auto-detect, proper error handling
+  - LlmStreamService: correctly routes between OpenRouter/Ollama clients, no stream_options for Ollama (not supported)
+  - ModelSelector: shows "Local" chip for Ollama models, "Free" chip for free OpenRouter models
+  - 9 new tests for OllamaService covering all code paths
+- 153 total files scanned (backend/src + frontend/src), 38 test files
+- 1 new task added to tracker (B-M12: refactor toPdf function)
 
 ## Audit #18 Findings
 - All validation passing: lint 0 errors, typecheck 0 errors, 362 tests passing (37 files), build passing

@@ -71,6 +71,7 @@ Each task has:
 | F-M22 | Add aria-live to TypingIndicator | frontend | 0.1d | done | PR #59 merged. role="status" + aria-live="polite" + visually hidden i18n label. |
 | F-M23 | Localize "Error:" prefix in useMessages error display | frontend | 0.1d | done | Fixed in retrospective #2: uses t('errors.streamErrorPrefix') |
 | B-M11 | Update /develop-feature skill to use git worktree isolation for parallel execution | infra | 0.25d | done | PR #69 merged. Phase 1.5 uses EnterWorktree for isolated execution. |
+| B-M12 | Refactor toPdf in export.service.ts (85 lines, exceeds 50-line limit) | backend | 0.25d | todo | Extract PDF header/metadata and message rendering into helper methods. Sweep #17. |
 
 ## Low
 
