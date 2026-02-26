@@ -3,12 +3,14 @@ import { Collection, Db, Document, MongoServerError } from 'mongodb';
 import { DATABASE_CONNECTION } from './database.constants';
 import {
   ConversationDoc,
+  McpServerDoc,
   MessageDoc,
   TemplateDoc,
   UserDoc,
 } from '../types/documents';
 import {
   conversationsSchema,
+  mcpServersSchema,
   messagesSchema,
   templatesSchema,
   usersSchema,
@@ -44,6 +46,7 @@ export class DatabaseService implements OnModuleInit {
       { name: 'messages', validator: messagesSchema },
       { name: 'users', validator: usersSchema },
       { name: 'templates', validator: templatesSchema },
+      { name: 'mcpServers', validator: mcpServersSchema },
     ];
 
     for (const { name, validator } of schemas) {
@@ -96,5 +99,9 @@ export class DatabaseService implements OnModuleInit {
 
   templates(): Collection<TemplateDoc> {
     return this.db.collection<TemplateDoc>('templates');
+  }
+
+  mcpServers(): Collection<McpServerDoc> {
+    return this.db.collection<McpServerDoc>('mcpServers');
   }
 }

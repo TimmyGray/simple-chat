@@ -10,5 +10,7 @@ export type SseErrorCode = (typeof SSE_ERROR_CODE)[keyof typeof SSE_ERROR_CODE];
 
 export type StreamEvent =
   | { type: 'content'; content: string }
+  | { type: 'tool_call'; name: string; arguments: string }
+  | { type: 'tool_result'; name: string; content: string; isError: boolean }
   | { type: 'done'; usage?: TokenUsage }
   | { type: 'error'; code: SseErrorCode; message: string };

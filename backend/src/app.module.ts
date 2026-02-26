@@ -14,6 +14,7 @@ import { HealthModule } from './health/health.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { AuthModule } from './auth/auth.module';
 import { TemplatesModule } from './templates/templates.module';
+import { McpModule } from './mcp/mcp.module';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 import { TransformResponseInterceptor } from './common/interceptors/transform-response.interceptor';
 
@@ -56,6 +57,7 @@ import { TransformResponseInterceptor } from './common/interceptors/transform-re
     UploadsModule,
     AuthModule,
     TemplatesModule,
+    McpModule,
   ],
   providers: [
     {

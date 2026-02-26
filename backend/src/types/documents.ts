@@ -66,3 +66,14 @@ export interface UserDoc {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface McpServerDoc {
+  _id?: ObjectId;
+  name: string;
+  command: string;
+  args: string[];
+  env?: Record<string, string>;
+  enabled: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}

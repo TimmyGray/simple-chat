@@ -1,10 +1,12 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ObjectId } from 'mongodb';
 import OpenAI from 'openai';
+import type { ChatCompletionChunk } from 'openai/resources/chat/completions';
 import { DatabaseService } from '../database/database.service';
 import type { TokenUsage } from '../types/documents';
 import { FileExtractionService } from './file-extraction.service';
+import { McpService } from '../mcp/mcp.service';
 import {
   SSE_ERROR_CODE,
   type StreamEvent,
@@ -15,6 +17,13 @@ import {
 } from '../common/utils/get-error-message';
 
 const OLLAMA_MODEL_PREFIX = 'ollama/';
+const MAX_TOOL_ITERATIONS = 10;
+
+interface ToolCallAccumulator {
+  id: string;
+  name: string;
+  arguments: string;
+}
 
 @Injectable()
 export class LlmStreamService {
@@ -26,6 +35,7 @@ export class LlmStreamService {
     private readonly databaseService: DatabaseService,
     private readonly fileExtractionService: FileExtractionService,
     private configService: ConfigService,
+    @Optional() private readonly mcpService?: McpService,
   ) {
     this.openrouterClient = new OpenAI({
       apiKey: this.configService.get<string>('openrouter.apiKey'),
@@ -86,6 +96,26 @@ export class LlmStreamService {
     return template.content;
   }
 
+  private accumulateToolCalls(
+    delta: ChatCompletionChunk.Choice.Delta,
+    toolCalls: Map<number, ToolCallAccumulator>,
+  ): void {
+    if (!delta.tool_calls) return;
+    for (const tc of delta.tool_calls) {
+      if (!toolCalls.has(tc.index)) {
+        toolCalls.set(tc.index, {
+          id: tc.id ?? '',
+          name: tc.function?.name ?? '',
+          arguments: '',
+        });
+      }
+      const acc = toolCalls.get(tc.index)!;
+      if (tc.id) acc.id = tc.id;
+      if (tc.function?.name) acc.name = tc.function.name;
+      if (tc.function?.arguments) acc.arguments += tc.function.arguments;
+    }
+  }
+
   async *stream(
     conversationId: string,
     model: string,
@@ -104,41 +134,70 @@ export class LlmStreamService {
     if (systemPrompt) {
       llmMessages.unshift({ role: 'system', content: systemPrompt });
     }
+
+    const tools = this.mcpService?.getOpenAITools() ?? [];
     let fullContent = '';
     let usage: TokenUsage | undefined;
+
     try {
       const { client, modelName } = this.getClientAndModel(model);
       const isOllama = model.startsWith(OLLAMA_MODEL_PREFIX);
       this.logger.log(
-        `Starting LLM stream: model="${modelName}", provider=${isOllama ? 'ollama' : 'openrouter'}, messages=${llmMessages.length}, conversation=${conversationId}`,
+        `Starting LLM stream: model="${modelName}", provider=${isOllama ? 'ollama' : 'openrouter'}, messages=${llmMessages.length}, tools=${tools.length}, conversation=${conversationId}`,
       );
-      const stream = await client.chat.completions.create({
-        model: modelName,
-        messages: llmMessages,
-        stream: true,
-        ...(isOllama ? {} : { stream_options: { include_usage: true } }),
-      });
-      for await (const chunk of stream) {
-        if (abortSignal?.aborted) {
-          this.logger.log(
-            `Client disconnected during stream for conversation ${conversationId}`,
-          );
-          stream.controller.abort();
-          break;
+
+      const currentMessages = [
+        ...llmMessages,
+      ] as OpenAI.Chat.ChatCompletionMessageParam[];
+
+      for (let iteration = 0; iteration < MAX_TOOL_ITERATIONS; iteration++) {
+        const stream = await client.chat.completions.create({
+          model: modelName,
+          messages: currentMessages,
+          stream: true,
+          ...(tools.length > 0 ? { tools } : {}),
+          ...(isOllama ? {} : { stream_options: { include_usage: true } }),
+        });
+
+        let finishReason = '';
+        const toolCalls = new Map<number, ToolCallAccumulator>();
+
+        for await (const chunk of stream) {
+          if (abortSignal?.aborted) {
+            this.logger.log(
+              `Client disconnected during stream for conversation ${conversationId}`,
+            );
+            stream.controller.abort();
+            break;
+          }
+          const delta = chunk.choices[0]?.delta;
+          if (delta) {
+            const content = delta.content || '';
+            if (content) {
+              fullContent += content;
+              yield { type: 'content', content };
+            }
+            this.accumulateToolCalls(delta, toolCalls);
+          }
+          if (chunk.choices[0]?.finish_reason) {
+            finishReason = chunk.choices[0].finish_reason;
+          }
+          if (chunk.usage) {
+            usage = {
+              promptTokens: chunk.usage.prompt_tokens,
+              completionTokens: chunk.usage.completion_tokens,
+              totalTokens: chunk.usage.total_tokens,
+            };
+          }
         }
-        const content = chunk.choices[0]?.delta?.content || '';
-        if (content) {
-          fullContent += content;
-          yield { type: 'content', content };
-        }
-        if (chunk.usage) {
-          usage = {
-            promptTokens: chunk.usage.prompt_tokens,
-            completionTokens: chunk.usage.completion_tokens,
-            totalTokens: chunk.usage.total_tokens,
-          };
-        }
+
+        if (abortSignal?.aborted) break;
+
+        if (finishReason !== 'tool_calls' || toolCalls.size === 0) break;
+
+        yield* this.executeToolCalls(toolCalls, currentMessages);
       }
+
       if (fullContent.length > 0) {
         const assistantNow = new Date();
         await this.databaseService.messages().insertOne({
@@ -187,6 +246,45 @@ export class LlmStreamService {
         code: SSE_ERROR_CODE.LLM_FAILURE,
         message: getErrorMessage(error),
       };
+    }
+  }
+
+  private async *executeToolCalls(
+    toolCalls: Map<number, ToolCallAccumulator>,
+    currentMessages: OpenAI.Chat.ChatCompletionMessageParam[],
+  ): AsyncGenerator<StreamEvent> {
+    const assistantToolCalls = [...toolCalls.values()].map((tc) => ({
+      id: tc.id,
+      type: 'function' as const,
+      function: { name: tc.name, arguments: tc.arguments },
+    }));
+    currentMessages.push({
+      role: 'assistant',
+      content: null,
+      tool_calls: assistantToolCalls,
+    });
+
+    for (const tc of toolCalls.values()) {
+      yield { type: 'tool_call', name: tc.name, arguments: tc.arguments };
+      this.logger.debug(`Executing tool call: ${tc.name}`);
+
+      const result = await this.mcpService!.callTool(
+        tc.name,
+        JSON.parse(tc.arguments) as Record<string, unknown>,
+      );
+
+      yield {
+        type: 'tool_result',
+        name: tc.name,
+        content: result.content,
+        isError: result.isError,
+      };
+
+      currentMessages.push({
+        role: 'tool',
+        tool_call_id: tc.id,
+        content: result.content,
+      });
     }
   }
 }
