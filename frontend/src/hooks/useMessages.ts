@@ -117,6 +117,12 @@ export function useMessages(): UseMessagesReturn {
       setStreamingContent('');
       fullContentRef.current = '';
       abortRef.current = null;
+      // Re-fetch messages to replace optimistic UUIDs with real server ObjectIds.
+      // Without this, fork and regenerate fail because they need real _ids.
+      if (completed) {
+        const data = await api.getMessages(conversationId);
+        setMessages(data);
+      }
     }
   };
 

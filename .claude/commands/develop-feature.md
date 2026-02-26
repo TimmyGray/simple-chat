@@ -141,6 +141,14 @@ Use the ports allocated in Phase 0. This ensures multiple agents can run dev ser
    - Use `browser_take_screenshot` to capture evidence for the PR
    - **For bug fixes**: reproduce the bug scenario FIRST, then verify it's fixed after changes
 
+   **CRITICAL — End-to-end action verification:**
+   - Do NOT stop at "the page loads and looks correct"
+   - **Actually click every new button/action** added by this feature and verify the result
+   - After any streaming operation completes, verify that follow-up actions work (fork, regenerate, edit, etc.) — optimistic state can hide bugs that only surface on user interaction
+   - Use `browser_evaluate` to inspect React state if needed (e.g., verify message `_id` format, check for stale/optimistic data)
+   - Use `browser_network_requests` AFTER performing actions to confirm the expected API calls were made
+   - If an action silently does nothing (no error, no network call, no UI change), that's a **critical bug** — investigate
+
 5. **Check backend logs for errors**:
    - Read the backend process output
    - Flag any ERROR or WARN level log entries that occurred during the test
