@@ -183,11 +183,12 @@ export class LlmStreamService {
             finishReason = chunk.choices[0].finish_reason;
           }
           if (chunk.usage) {
-            usage = {
-              promptTokens: chunk.usage.prompt_tokens,
-              completionTokens: chunk.usage.completion_tokens,
-              totalTokens: chunk.usage.total_tokens,
-            };
+            if (!usage) {
+              usage = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
+            }
+            usage.promptTokens += chunk.usage.prompt_tokens;
+            usage.completionTokens += chunk.usage.completion_tokens;
+            usage.totalTokens += chunk.usage.total_tokens;
           }
         }
 
@@ -253,6 +254,11 @@ export class LlmStreamService {
     toolCalls: Map<number, ToolCallAccumulator>,
     currentMessages: OpenAI.Chat.ChatCompletionMessageParam[],
   ): AsyncGenerator<StreamEvent> {
+    if (!this.mcpService) {
+      this.logger.error('McpService unavailable during tool execution');
+      return;
+    }
+
     const assistantToolCalls = [...toolCalls.values()].map((tc) => ({
       id: tc.id,
       type: 'function' as const,
@@ -268,10 +274,29 @@ export class LlmStreamService {
       yield { type: 'tool_call', name: tc.name, arguments: tc.arguments };
       this.logger.debug(`Executing tool call: ${tc.name}`);
 
-      const result = await this.mcpService!.callTool(
-        tc.name,
-        JSON.parse(tc.arguments) as Record<string, unknown>,
-      );
+      let parsedArgs: Record<string, unknown>;
+      try {
+        parsedArgs = JSON.parse(tc.arguments) as Record<string, unknown>;
+      } catch {
+        this.logger.warn(
+          `Malformed tool arguments for ${tc.name}: ${tc.arguments}`,
+        );
+        const errorMsg = 'Failed to parse tool arguments: invalid JSON';
+        yield {
+          type: 'tool_result',
+          name: tc.name,
+          content: errorMsg,
+          isError: true,
+        };
+        currentMessages.push({
+          role: 'tool',
+          tool_call_id: tc.id,
+          content: errorMsg,
+        });
+        continue;
+      }
+
+      const result = await this.mcpService.callTool(tc.name, parsedArgs);
 
       yield {
         type: 'tool_result',

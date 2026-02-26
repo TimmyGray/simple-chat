@@ -3,6 +3,7 @@ import {
   Logger,
   NotFoundException,
   OnModuleDestroy,
+  OnModuleInit,
 } from '@nestjs/common';
 import { ObjectId } from 'mongodb';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -35,12 +36,18 @@ export interface McpToolResult {
 }
 
 @Injectable()
-export class McpService implements OnModuleDestroy {
+export class McpService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(McpService.name);
   private readonly connections = new Map<string, McpConnection>();
   private cachedTools: McpTool[] = [];
 
+  private static readonly TOOL_CALL_TIMEOUT_MS = 30_000;
+
   constructor(private readonly databaseService: DatabaseService) {}
+
+  async onModuleInit(): Promise<void> {
+    await this.connectEnabledServers();
+  }
 
   async onModuleDestroy(): Promise<void> {
     await this.disconnectAll();
@@ -177,7 +184,20 @@ export class McpService implements OnModuleDestroy {
       };
     }
     try {
-      const result = await conn.client.callTool({ name, arguments: args });
+      const result = await Promise.race([
+        conn.client.callTool({ name, arguments: args }),
+        new Promise<never>((_, reject) =>
+          setTimeout(
+            () =>
+              reject(
+                new Error(
+                  `Tool "${name}" timed out after ${McpService.TOOL_CALL_TIMEOUT_MS}ms`,
+                ),
+              ),
+            McpService.TOOL_CALL_TIMEOUT_MS,
+          ),
+        ),
+      ]);
       const textParts = (
         result.content as Array<{ type: string; text?: string }>
       )
@@ -196,14 +216,27 @@ export class McpService implements OnModuleDestroy {
     }
   }
 
+  private buildSafeEnv(
+    serverEnv?: Record<string, string>,
+  ): Record<string, string> {
+    const safeEnv: Record<string, string> = {
+      PATH: process.env.PATH ?? '',
+      HOME: process.env.HOME ?? '',
+      NODE_ENV: process.env.NODE_ENV ?? 'production',
+      LANG: process.env.LANG ?? 'en_US.UTF-8',
+    };
+    if (serverEnv) {
+      Object.assign(safeEnv, serverEnv);
+    }
+    return safeEnv;
+  }
+
   private async connectServer(id: string, server: McpServerDoc): Promise<void> {
     try {
       const transport = new StdioClientTransport({
         command: server.command,
         args: server.args,
-        env: server.env
-          ? ({ ...process.env, ...server.env } as Record<string, string>)
-          : (process.env as Record<string, string>),
+        env: this.buildSafeEnv(server.env),
       });
       const client = new Client({
         name: 'simple-chat',
