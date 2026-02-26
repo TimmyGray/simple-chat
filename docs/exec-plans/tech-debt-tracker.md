@@ -114,7 +114,7 @@ Each task has:
 | FEAT-11 | Image Input (Multi-modal Chat): paste/upload images to vision-capable models via OpenRouter multi-modal API | fullstack | 1-2d | done | PR #94 merged. Multi-modal content parts, AuthImage component, inline previews. |
 | FEAT-12 | Conversation Branching: fork conversations from any message to explore alternative paths with tree-based history | fullstack | 2-3d | done | PR #97. Fork-as-copy approach with `forkedFrom` back-reference. |
 | FEAT-13 | Ollama / Local Model Support: direct Ollama connection (OpenAI-compatible API) for fully offline, zero-cost usage | backend | 1-2d | done | PR #95 merged. OllamaService auto-detect, dual OpenAI client routing, provider badges. |
-| FEAT-14 | MCP Tool Integration: connect to MCP servers for external tools (web search, file systems, APIs) with inline tool-call UI | fullstack | 4-5d | todo | MCP is the new industry standard (Linux Foundation, adopted by OpenAI). All major competitors support it. |
+| FEAT-14 | MCP Tool Integration: connect to MCP servers for external tools (web search, file systems, APIs) with inline tool-call UI | fullstack | 4-5d | done | PR #98 merged (FEAT-14a: backend). McpModule with admin CRUD, tool-use streaming loop, security hardening. Frontend tool-call UI deferred to FEAT-14b. |
 
 ## Completed
 
@@ -206,3 +206,4 @@ Each task has:
 | FEAT-11 | Image Input — multi-modal chat with vision models (PR #94) | 2026-02-26 |
 | FEAT-13 | Ollama / Local Model Support — auto-detect, dual routing (PR #95) | 2026-02-26 |
 | B-M12 | Refactor toPdf — extract renderPdfHeader + renderPdfMessage (PR #96) | 2026-02-26 |
+| FEAT-14 | MCP Tool Integration — backend module + tool-use streaming (PR #98) | 2026-02-26 |
