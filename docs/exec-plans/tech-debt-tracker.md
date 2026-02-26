@@ -111,7 +111,7 @@ Each task has:
 | FEAT-8 | Dark/Light Theme Toggle | frontend | 1d | done | PR #79 merged. useThemeMode hook, ThemeModeProvider, ThemeToggle component, light/dark/system modes. |
 | FEAT-9 | Keyboard Shortcuts | frontend | 1d | done | PR #92 merged. Cmd+N (new chat), Cmd+K (search), Escape (stop streaming/blur input). IS_MAC_PLATFORM constant. |
 | FEAT-10 | Real-Time Collaboration: WebSocket gateway, conversation sharing, real-time message sync, presence/typing indicators | fullstack | 5d | in-progress | All 4 subtasks. |
-| FEAT-10a | Backend WebSocket Gateway: Socket.IO gateway with JWT auth, room-based conversation channels, event broadcasting | backend | 1.5d | in-progress | First subtask. |
+| FEAT-10a | Backend WebSocket Gateway: Socket.IO gateway with JWT auth, room-based conversation channels, event broadcasting | backend | 1.5d | done | PR #100 merged. |
 | FEAT-10b | Conversation Sharing Model: participants field, invite/revoke endpoints, shared conversation queries, access control | backend | 1d | todo | Depends on FEAT-10a. |
 | FEAT-10c | Frontend WebSocket Client: socket.io-client, useWebSocket hook, live message sync, typing indicators, connection status | frontend | 1.5d | todo | Depends on FEAT-10a. |
 | FEAT-10d | Frontend Sharing UI: share dialog, participant list, invite flow, collaborative presence indicators | frontend | 1d | todo | Depends on FEAT-10b + FEAT-10c. |
@@ -211,3 +211,4 @@ Each task has:
 | FEAT-13 | Ollama / Local Model Support — auto-detect, dual routing (PR #95) | 2026-02-26 |
 | B-M12 | Refactor toPdf — extract renderPdfHeader + renderPdfMessage (PR #96) | 2026-02-26 |
 | FEAT-14 | MCP Tool Integration — backend module + tool-use streaming (PR #98) | 2026-02-26 |
+| FEAT-10a | Backend WebSocket Gateway — Socket.IO + JWT auth + room channels (PR #100) | 2026-02-26 |
