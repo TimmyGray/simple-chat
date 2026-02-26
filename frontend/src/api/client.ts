@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Conversation, Message, ModelInfo, Attachment, AuthResponse, User, ConversationId, ModelId, Template, TemplateId, CreateTemplateDto, UpdateTemplateDto } from '../types';
+import type { Conversation, Message, ModelInfo, Attachment, AuthResponse, User, ConversationId, MessageId, ModelId, Template, TemplateId, CreateTemplateDto, UpdateTemplateDto } from '../types';
 
 export const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -97,6 +97,14 @@ export async function updateConversation(
 
 export async function deleteConversation(id: ConversationId): Promise<void> {
   await api.delete(`/conversations/${id}`);
+}
+
+export async function forkConversation(
+  conversationId: ConversationId,
+  messageId: MessageId,
+): Promise<Conversation> {
+  const { data } = await api.post(`/conversations/${conversationId}/fork/${messageId}`);
+  return data;
 }
 
 export async function getMessages(conversationId: ConversationId): Promise<Message[]> {

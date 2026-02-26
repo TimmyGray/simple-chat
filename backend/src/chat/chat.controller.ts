@@ -94,6 +94,18 @@ export class ChatController {
     return this.chatService.deleteConversation(id, user._id);
   }
 
+  @Post('conversations/:id/fork/:messageId')
+  @HttpCode(HttpStatus.CREATED)
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
+  forkConversation(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Param('messageId', ParseObjectIdPipe) messageId: string,
+  ) {
+    this.logger.log(`Forking conversation ${id} at message ${messageId}`);
+    return this.chatService.forkConversation(id, messageId, user._id);
+  }
+
   @Get('conversations/:id/messages')
   getMessages(
     @CurrentUser() user: AuthUser,

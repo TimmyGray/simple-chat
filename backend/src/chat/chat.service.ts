@@ -175,6 +175,64 @@ export class ChatService {
     );
   }
 
+  async forkConversation(
+    sourceConversationId: string,
+    messageId: string,
+    userId: ObjectId,
+  ): Promise<ConversationDoc> {
+    const sourceConv = await this.getConversation(sourceConversationId, userId);
+    const convObjId = new ObjectId(sourceConversationId);
+    const msgObjId = new ObjectId(messageId);
+
+    const forkMessage = await this.databaseService.messages().findOne({
+      _id: msgObjId,
+      conversationId: convObjId,
+    });
+    if (!forkMessage) throw new NotFoundException('Message not found');
+
+    const messagesToCopy = await this.databaseService
+      .messages()
+      .find({
+        conversationId: convObjId,
+        createdAt: { $lte: forkMessage.createdAt },
+      })
+      .sort({ createdAt: 1 })
+      .toArray();
+
+    const now = new Date();
+    const newConv: ConversationDoc = {
+      userId,
+      title: sourceConv.title,
+      model: sourceConv.model,
+      ...(sourceConv.templateId ? { templateId: sourceConv.templateId } : {}),
+      forkedFrom: { conversationId: convObjId, messageId: msgObjId },
+      createdAt: now,
+      updatedAt: now,
+    };
+    const result = await this.databaseService
+      .conversations()
+      .insertOne(newConv);
+    const savedConv: ConversationDoc = { _id: result.insertedId, ...newConv };
+
+    if (messagesToCopy.length > 0) {
+      const copiedMessages = messagesToCopy.map((msg) => ({
+        conversationId: result.insertedId,
+        role: msg.role,
+        content: msg.content,
+        attachments: msg.attachments,
+        ...(msg.model ? { model: msg.model } : {}),
+        createdAt: msg.createdAt,
+        updatedAt: now,
+      }));
+      await this.databaseService.messages().insertMany(copiedMessages);
+    }
+
+    this.logger.log(
+      `Conversation forked: ${String(savedConv._id)} from ${sourceConversationId} at message ${messageId}`,
+    );
+    return savedConv;
+  }
+
   async *editMessageAndStream(
     conversationId: string,
     messageId: string,

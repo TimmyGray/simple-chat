@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Box, Snackbar, Alert, Chip } from '@mui/material';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import type { Attachment, MessageId } from '../../types';
+import * as api from '../../api/client';
 import { useChatApp } from '../../contexts/ChatAppContext';
 import { useModel } from '../../contexts/ModelContext';
 import { useTemplate } from '../../contexts/TemplateContext';
@@ -17,6 +18,7 @@ export default function ChatArea() {
   const {
     selectedConversation: conversation,
     isOnline,
+    forkConversation,
     onConversationUpdate,
   } = useChatApp();
   const { models, selectedModel, changeModel } = useModel();
@@ -96,6 +98,24 @@ export default function ChatArea() {
     [conversation, regenerateMessage, onConversationUpdate],
   );
 
+  const handleForkMessage = useCallback(
+    async (messageId: MessageId) => {
+      if (!conversation) return;
+      // Optimistic messages use UUIDs; the fork API needs real MongoDB ObjectIds.
+      // Fetch persisted messages and resolve the real ID by position.
+      const idx = messages.findIndex((m) => m._id === messageId);
+      let realId = messageId;
+      if (idx >= 0) {
+        const persisted = await api.getMessages(conversation._id);
+        if (idx < persisted.length) {
+          realId = persisted[idx]._id;
+        }
+      }
+      await forkConversation(conversation._id, realId);
+    },
+    [conversation, messages, forkConversation],
+  );
+
   const conversationTemplateId = conversation?.templateId ?? null;
   const activeTemplateName = useMemo(() => {
     if (!conversationTemplateId) return null;
@@ -135,6 +155,7 @@ export default function ChatArea() {
         streamingContent={streamingContent}
         onEditMessage={handleEditMessage}
         onRegenerateMessage={handleRegenerateMessage}
+        onForkMessage={handleForkMessage}
         onStopStreaming={stopStreaming}
       />
       <ChatInput

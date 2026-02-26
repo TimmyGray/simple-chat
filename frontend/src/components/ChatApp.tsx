@@ -13,7 +13,7 @@ import Layout from './Layout';
 import SearchDialog from './common/SearchDialog';
 import { ERROR_SNACKBAR_AUTO_HIDE_MS } from '../constants';
 
-import type { User, ConversationId, ModelId, TemplateId } from '../types';
+import type { User, ConversationId, MessageId, ModelId, TemplateId } from '../types';
 import { asModelId } from '../types';
 import type { ChatAppContextValue } from '../contexts/ChatAppContext';
 import type { ModelContextValue } from '../contexts/ModelContext';
@@ -27,7 +27,7 @@ interface ChatAppProps {
 
 export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps) {
   const { t } = useTranslation();
-  const { conversations, loading: convsLoading, error: convsError, clearError: clearConvsError, refresh, create, remove } = useConversations();
+  const { conversations, loading: convsLoading, error: convsError, clearError: clearConvsError, refresh, create, remove, fork } = useConversations();
   const { models, error: modelsError, clearError: clearModelsError } = useModels();
   const { templates, error: templatesError, clearError: clearTemplatesError, refresh: refreshTemplates } = useTemplates();
   const isOnline = useOnlineStatus();
@@ -114,6 +114,18 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
     [remove, selectedId, handleSelectConversation, t],
   );
 
+  const handleForkConversation = useCallback(
+    async (conversationId: ConversationId, messageId: MessageId) => {
+      try {
+        const forked = await fork(conversationId, messageId);
+        handleSelectConversation(forked._id);
+      } catch {
+        setLocalError(t('errors.forkConversation'));
+      }
+    },
+    [fork, handleSelectConversation, t],
+  );
+
   const handleConversationUpdate = useCallback(() => {
     void refresh();
     void onRefreshUser();
@@ -137,6 +149,7 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
       selectConversation: handleSelectConversation,
       newChat: handleNewChat,
       deleteConversation: handleDelete,
+      forkConversation: handleForkConversation,
       onConversationUpdate: handleConversationUpdate,
       onTemplatesChanged: handleTemplatesChanged,
       openSearch: handleOpenSearch,
@@ -153,6 +166,7 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
       handleSelectConversation,
       handleNewChat,
       handleDelete,
+      handleForkConversation,
       handleConversationUpdate,
       handleTemplatesChanged,
       handleOpenSearch,

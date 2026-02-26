@@ -6,6 +6,7 @@ import RefreshOutlined from '@mui/icons-material/RefreshOutlined';
 import StopOutlined from '@mui/icons-material/StopOutlined';
 import ContentCopyOutlined from '@mui/icons-material/ContentCopyOutlined';
 import CheckOutlined from '@mui/icons-material/CheckOutlined';
+import ForkRightOutlined from '@mui/icons-material/ForkRightOutlined';
 import { useTranslation } from 'react-i18next';
 import {
   MESSAGE_ACTION_ICON_SIZE,
@@ -20,6 +21,7 @@ interface MessageActionsProps {
   onRegenerate?: () => void;
   onStop?: () => void;
   onCopy?: () => void;
+  onFork?: () => void;
 }
 
 const actionButtonSx = {
@@ -42,6 +44,7 @@ function MessageActions({
   onRegenerate,
   onStop,
   onCopy,
+  onFork,
 }: MessageActionsProps) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
@@ -120,6 +123,16 @@ function MessageActions({
           sx={actionButtonSx}
         >
           <RefreshOutlined sx={{ fontSize: MESSAGE_ACTION_ICON_SIZE }} />
+        </IconButton>
+      )}
+      {onFork && (
+        <IconButton
+          size="small"
+          onClick={onFork}
+          aria-label={t('chat.forkConversation')}
+          sx={actionButtonSx}
+        >
+          <ForkRightOutlined sx={{ fontSize: MESSAGE_ACTION_ICON_SIZE }} />
         </IconButton>
       )}
       {onCopy && (

@@ -26,6 +26,7 @@ describe('Database Schemas', () => {
         'title',
         'model',
         'templateId',
+        'forkedFrom',
         'createdAt',
         'updatedAt',
       ]);

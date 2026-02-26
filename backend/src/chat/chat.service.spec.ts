@@ -73,6 +73,7 @@ describe('ChatService', () => {
       }),
       findOne: vi.fn().mockResolvedValue(mockMessage),
       findOneAndUpdate: vi.fn().mockResolvedValue(mockMessage),
+      insertMany: vi.fn().mockResolvedValue({ insertedCount: 1 }),
       deleteMany: vi.fn().mockResolvedValue({ deletedCount: 1 }),
       countDocuments: vi.fn().mockResolvedValue(1),
     };
@@ -367,6 +368,85 @@ describe('ChatService', () => {
         'some-key',
       );
       await expect(collectEvents(gen)).rejects.toThrow('Connection lost');
+    });
+  });
+
+  describe('forkConversation', () => {
+    const mockAssistantMsg = {
+      _id: new ObjectId('507f1f77bcf86cd799439013'),
+      conversationId: mockObjectId,
+      role: 'assistant',
+      content: 'Hi there',
+      model: 'openrouter/free',
+      attachments: [],
+      createdAt: new Date('2026-01-01T00:01:00Z'),
+      updatedAt: new Date('2026-01-01T00:01:00Z'),
+    };
+
+    it('should create a new conversation with forkedFrom reference', async () => {
+      const result = await service.forkConversation(
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+        mockUserId,
+      );
+      expect(result).toBeDefined();
+      expect(result.forkedFrom).toBeDefined();
+      expect(result.forkedFrom!.conversationId).toEqual(mockObjectId);
+      expect(result.forkedFrom!.messageId).toEqual(mockMessageId);
+    });
+
+    it('should copy messages up to the fork point', async () => {
+      mockMessagesCollection.find = vi.fn().mockReturnValue({
+        sort: vi.fn().mockReturnValue({
+          toArray: vi.fn().mockResolvedValue([mockMessage, mockAssistantMsg]),
+        }),
+      });
+      mockMessagesCollection.insertMany = vi
+        .fn()
+        .mockResolvedValue({ insertedCount: 2 });
+
+      await service.forkConversation(
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+        mockUserId,
+      );
+      expect(mockMessagesCollection.insertMany).toHaveBeenCalledTimes(1);
+      const copiedMsgs = mockMessagesCollection.insertMany.mock.calls[0][0];
+      expect(copiedMsgs).toHaveLength(2);
+      expect(copiedMsgs[0].role).toBe('user');
+      expect(copiedMsgs[1].role).toBe('assistant');
+    });
+
+    it('should throw NotFoundException if message not found', async () => {
+      mockMessagesCollection.findOne = vi.fn().mockResolvedValue(null);
+      await expect(
+        service.forkConversation(
+          '507f1f77bcf86cd799439011',
+          '507f1f77bcf86cd799439012',
+          mockUserId,
+        ),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should preserve source conversation model and template', async () => {
+      const convWithTemplate = {
+        ...mockConversation,
+        templateId: new ObjectId('607f1f77bcf86cd799439050'),
+      };
+      mockConversationsCollection.findOne = vi
+        .fn()
+        .mockResolvedValue(convWithTemplate);
+
+      await service.forkConversation(
+        '507f1f77bcf86cd799439011',
+        '507f1f77bcf86cd799439012',
+        mockUserId,
+      );
+      const insertArg = mockConversationsCollection.insertOne.mock.calls[0][0];
+      expect(insertArg.model).toBe('openrouter/free');
+      expect(insertArg.templateId).toEqual(
+        new ObjectId('607f1f77bcf86cd799439050'),
+      );
     });
   });
 

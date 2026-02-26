@@ -42,11 +42,17 @@ export interface AuthResponse {
   accessToken: string;
 }
 
+export interface ForkedFromRef {
+  conversationId: ConversationId;
+  messageId: MessageId;
+}
+
 export interface Conversation {
   _id: ConversationId;
   title: string;
   model: ModelId;
   templateId?: TemplateId;
+  forkedFrom?: ForkedFromRef;
   createdAt: string;
   updatedAt: string;
 }
