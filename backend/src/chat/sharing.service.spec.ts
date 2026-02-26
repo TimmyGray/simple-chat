@@ -307,14 +307,11 @@ describe('SharingService', () => {
   });
 
   describe('getSharedConversations', () => {
-    it('should return conversations where user is a participant', async () => {
+    it('should return conversations where user is a participant (excluding owned)', async () => {
       const sharedConv = {
         _id: new ObjectId(),
         userId: new ObjectId(),
         title: 'Shared Chat',
-        participants: [
-          { userId: participantId, role: 'viewer', addedAt: new Date() },
-        ],
       };
       mockConversationsCollection.find = vi.fn().mockReturnValue({
         sort: vi.fn().mockReturnValue({
@@ -323,9 +320,13 @@ describe('SharingService', () => {
       });
       const result = await service.getSharedConversations(participantId);
       expect(result).toHaveLength(1);
-      expect(mockConversationsCollection.find).toHaveBeenCalledWith({
-        'participants.userId': participantId,
-      });
+      expect(mockConversationsCollection.find).toHaveBeenCalledWith(
+        {
+          'participants.userId': participantId,
+          userId: { $ne: participantId },
+        },
+        { projection: { participants: 0 } },
+      );
     });
   });
 

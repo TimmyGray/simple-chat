@@ -121,7 +121,10 @@ export class SharingService {
   async getSharedConversations(userId: ObjectId): Promise<ConversationDoc[]> {
     return this.databaseService
       .conversations()
-      .find({ 'participants.userId': userId })
+      .find(
+        { 'participants.userId': userId, userId: { $ne: userId } },
+        { projection: { participants: 0 } },
+      )
       .sort({ updatedAt: -1 })
       .toArray();
   }
@@ -163,8 +166,12 @@ export class SharingService {
       if (!participant) {
         throw new ForbiddenException('Access denied');
       }
-      if (requiredRole === 'editor' && participant.role === 'viewer') {
-        throw new ForbiddenException('Editor access required');
+      const roleRank: Record<ParticipantRole, number> = {
+        viewer: 0,
+        editor: 1,
+      };
+      if (roleRank[participant.role] < roleRank[requiredRole]) {
+        throw new ForbiddenException(`${requiredRole} access required`);
       }
     }
 

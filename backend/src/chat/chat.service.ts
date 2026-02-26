@@ -182,7 +182,7 @@ export class ChatService {
       await this.databaseService
         .conversations()
         .findOneAndUpdate(
-          { _id: new ObjectId(conversationId), userId },
+          { _id: new ObjectId(conversationId), userId: conversation.userId },
           { $set: { title, updatedAt: new Date() } },
         );
       this.logger.debug(

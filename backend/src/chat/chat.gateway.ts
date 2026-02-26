@@ -146,6 +146,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!client.data?.userId) return { success: false };
 
     const { conversationId } = payload;
+    if (!conversationId || !ObjectId.isValid(conversationId)) {
+      return { success: false };
+    }
+
     const room = `${ROOM_PREFIX}${conversationId}`;
     await client.leave(room);
 
@@ -168,6 +172,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!client.data?.userId) return;
 
     const room = `${ROOM_PREFIX}${payload.conversationId}`;
+    if (!client.rooms.has(room)) return;
+
     const typingPayload: WsTypingPayload = {
       conversationId: payload.conversationId,
       userId: client.data.userId,
@@ -184,6 +190,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!client.data?.userId) return;
 
     const room = `${ROOM_PREFIX}${payload.conversationId}`;
+    if (!client.rooms.has(room)) return;
+
     const typingPayload: WsTypingPayload = {
       conversationId: payload.conversationId,
       userId: client.data.userId,

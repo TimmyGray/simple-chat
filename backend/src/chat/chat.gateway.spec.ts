@@ -61,9 +61,7 @@ describe('ChatGateway', () => {
 
   beforeEach(async () => {
     mockSharingService = {
-      findAccessibleConversation: vi
-        .fn()
-        .mockResolvedValue(mockConversation),
+      findAccessibleConversation: vi.fn().mockResolvedValue(mockConversation),
     };
 
     const mockDatabaseService = {
@@ -250,20 +248,37 @@ describe('ChatGateway', () => {
       );
       expect(client._toFn).toHaveBeenCalledWith(`conversation:${MOCK_CONV_ID}`);
     });
-  });
 
-  describe('typing indicators', () => {
-    it('should broadcast typing:start to room', () => {
+    it('should reject leave with invalid conversationId', async () => {
       const client = createMockSocket({
         userId: MOCK_USER_ID,
         email: 'test@example.com',
       });
 
+      const result = await gateway.handleLeaveConversation(client as any, {
+        conversationId: 'invalid',
+      });
+
+      expect(result.success).toBe(false);
+      expect(client._leaveFn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('typing indicators', () => {
+    it('should broadcast typing:start when client is in room', () => {
+      const room = `conversation:${MOCK_CONV_ID}`;
+      const rooms = new Set([room]);
+      const client = createMockSocket({
+        userId: MOCK_USER_ID,
+        email: 'test@example.com',
+      });
+      (client as any).rooms = rooms;
+
       gateway.handleTypingStart(client as any, {
         conversationId: MOCK_CONV_ID,
       });
 
-      expect(client._toFn).toHaveBeenCalledWith(`conversation:${MOCK_CONV_ID}`);
+      expect(client._toFn).toHaveBeenCalledWith(room);
       const emitMock = client._toFn.mock.results[0].value.emit;
       expect(emitMock).toHaveBeenCalledWith(WS_SERVER_EVENT.TYPING_START, {
         conversationId: MOCK_CONV_ID,
@@ -272,23 +287,40 @@ describe('ChatGateway', () => {
       });
     });
 
-    it('should broadcast typing:stop to room', () => {
+    it('should broadcast typing:stop when client is in room', () => {
+      const room = `conversation:${MOCK_CONV_ID}`;
+      const rooms = new Set([room]);
       const client = createMockSocket({
         userId: MOCK_USER_ID,
         email: 'test@example.com',
       });
+      (client as any).rooms = rooms;
 
       gateway.handleTypingStop(client as any, {
         conversationId: MOCK_CONV_ID,
       });
 
-      expect(client._toFn).toHaveBeenCalledWith(`conversation:${MOCK_CONV_ID}`);
+      expect(client._toFn).toHaveBeenCalledWith(room);
       const emitMock = client._toFn.mock.results[0].value.emit;
       expect(emitMock).toHaveBeenCalledWith(WS_SERVER_EVENT.TYPING_STOP, {
         conversationId: MOCK_CONV_ID,
         userId: MOCK_USER_ID,
         email: 'test@example.com',
       });
+    });
+
+    it('should not broadcast typing when client is not in room', () => {
+      const client = createMockSocket({
+        userId: MOCK_USER_ID,
+        email: 'test@example.com',
+      });
+      (client as any).rooms = new Set();
+
+      gateway.handleTypingStart(client as any, {
+        conversationId: MOCK_CONV_ID,
+      });
+
+      expect(client._toFn).not.toHaveBeenCalled();
     });
 
     it('should not broadcast typing when client is unauthenticated', () => {
