@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { Box, Snackbar, Alert, Chip } from '@mui/material';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import type { Attachment, MessageId } from '../../types';
-import * as api from '../../api/client';
 import { useChatApp } from '../../contexts/ChatAppContext';
 import { useModel } from '../../contexts/ModelContext';
 import { useTemplate } from '../../contexts/TemplateContext';
@@ -102,18 +101,11 @@ export default function ChatArea() {
     async (messageId: MessageId) => {
       if (!conversation) return;
       // Optimistic messages use UUIDs; the fork API needs real MongoDB ObjectIds.
-      // Fetch persisted messages and resolve the real ID by position.
-      const idx = messages.findIndex((m) => m._id === messageId);
-      let realId = messageId;
-      if (idx >= 0) {
-        const persisted = await api.getMessages(conversation._id);
-        if (idx < persisted.length) {
-          realId = persisted[idx]._id;
-        }
-      }
-      await forkConversation(conversation._id, realId);
+      // Only allow forking persisted messages (24-char hex ObjectIds).
+      if (!/^[a-f\d]{24}$/i.test(messageId)) return;
+      await forkConversation(conversation._id, messageId);
     },
-    [conversation, messages, forkConversation],
+    [conversation, forkConversation],
   );
 
   const conversationTemplateId = conversation?.templateId ?? null;

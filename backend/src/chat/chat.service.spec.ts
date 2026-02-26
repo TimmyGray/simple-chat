@@ -68,6 +68,9 @@ describe('ChatService', () => {
       insertOne: vi.fn().mockResolvedValue({ insertedId: mockMessageId }),
       find: vi.fn().mockReturnValue({
         sort: vi.fn().mockReturnValue({
+          limit: vi.fn().mockReturnValue({
+            toArray: vi.fn().mockResolvedValue([mockMessage]),
+          }),
           toArray: vi.fn().mockResolvedValue([mockMessage]),
         }),
       }),
@@ -398,6 +401,9 @@ describe('ChatService', () => {
     it('should copy messages up to the fork point', async () => {
       mockMessagesCollection.find = vi.fn().mockReturnValue({
         sort: vi.fn().mockReturnValue({
+          limit: vi.fn().mockReturnValue({
+            toArray: vi.fn().mockResolvedValue([mockMessage, mockAssistantMsg]),
+          }),
           toArray: vi.fn().mockResolvedValue([mockMessage, mockAssistantMsg]),
         }),
       });

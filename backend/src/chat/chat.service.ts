@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   Logger,
@@ -190,14 +191,25 @@ export class ChatService {
     });
     if (!forkMessage) throw new NotFoundException('Message not found');
 
+    const MAX_FORK_MESSAGES = 1000;
     const messagesToCopy = await this.databaseService
       .messages()
       .find({
         conversationId: convObjId,
-        createdAt: { $lte: forkMessage.createdAt },
+        $or: [
+          { createdAt: { $lt: forkMessage.createdAt } },
+          { createdAt: forkMessage.createdAt, _id: { $lte: msgObjId } },
+        ],
       })
-      .sort({ createdAt: 1 })
+      .sort({ createdAt: 1, _id: 1 })
+      .limit(MAX_FORK_MESSAGES + 1)
       .toArray();
+
+    if (messagesToCopy.length > MAX_FORK_MESSAGES) {
+      throw new BadRequestException(
+        `Cannot fork: conversation exceeds ${MAX_FORK_MESSAGES} messages`,
+      );
+    }
 
     const now = new Date();
     const newConv: ConversationDoc = {
@@ -224,7 +236,14 @@ export class ChatService {
         createdAt: msg.createdAt,
         updatedAt: now,
       }));
-      await this.databaseService.messages().insertMany(copiedMessages);
+      try {
+        await this.databaseService.messages().insertMany(copiedMessages);
+      } catch (error) {
+        await this.databaseService
+          .conversations()
+          .deleteOne({ _id: result.insertedId });
+        throw error;
+      }
     }
 
     this.logger.log(
