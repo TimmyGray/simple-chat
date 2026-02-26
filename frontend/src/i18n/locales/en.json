@@ -55,6 +55,12 @@
   "network": {
     "offline": "You are offline. Check your internet connection."
   },
+  "websocket": {
+    "connected": "Connected",
+    "connecting": "Connecting...",
+    "disconnected": "Disconnected",
+    "typingUsers": "{{users}} typing..."
+  },
   "theme": {
     "label": "Theme",
     "light": "Light",

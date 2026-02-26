@@ -6,9 +6,11 @@ import { useConversations } from '../hooks/useConversations';
 import { useModels } from '../hooks/useModels';
 import { useTemplates } from '../hooks/useTemplates';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
+import { useWebSocket } from '../hooks/useWebSocket';
 import { ChatAppProvider } from '../contexts/ChatAppContext';
 import { ModelProvider } from '../contexts/ModelContext';
 import { TemplateProvider } from '../contexts/TemplateContext';
+import { WebSocketProvider } from '../contexts/WebSocketContext';
 import Layout from './Layout';
 import SearchDialog from './common/SearchDialog';
 import { ERROR_SNACKBAR_AUTO_HIDE_MS } from '../constants';
@@ -18,6 +20,7 @@ import { asModelId } from '../types';
 import type { ChatAppContextValue } from '../contexts/ChatAppContext';
 import type { ModelContextValue } from '../contexts/ModelContext';
 import type { TemplateContextValue } from '../contexts/TemplateContext';
+import type { WebSocketContextValue } from '../contexts/WebSocketContext';
 
 interface ChatAppProps {
   user: User;
@@ -31,6 +34,7 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
   const { models, error: modelsError, clearError: clearModelsError } = useModels();
   const { templates, error: templatesError, clearError: clearTemplatesError, refresh: refreshTemplates } = useTemplates();
   const isOnline = useOnlineStatus();
+  const ws = useWebSocket(true);
 
   const [selectedId, setSelectedId] = useState<ConversationId | null>(null);
   const [selectedModel, setSelectedModel] = useState<ModelId>(asModelId('openrouter/free'));
@@ -192,15 +196,30 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
     [templates, selectedTemplateId],
   );
 
+  const wsContextValue = useMemo<WebSocketContextValue>(
+    () => ({
+      socket: ws.socket,
+      connectionStatus: ws.connectionStatus,
+      reconnectCount: ws.reconnectCount,
+      joinConversation: ws.joinConversation,
+      leaveConversation: ws.leaveConversation,
+      emitTypingStart: ws.emitTypingStart,
+      emitTypingStop: ws.emitTypingStop,
+    }),
+    [ws.socket, ws.connectionStatus, ws.reconnectCount, ws.joinConversation, ws.leaveConversation, ws.emitTypingStart, ws.emitTypingStop],
+  );
+
   return (
     <>
-      <ChatAppProvider value={chatContextValue}>
-        <ModelProvider value={modelContextValue}>
-          <TemplateProvider value={templateContextValue}>
-            <Layout />
-          </TemplateProvider>
-        </ModelProvider>
-      </ChatAppProvider>
+      <WebSocketProvider value={wsContextValue}>
+        <ChatAppProvider value={chatContextValue}>
+          <ModelProvider value={modelContextValue}>
+            <TemplateProvider value={templateContextValue}>
+              <Layout />
+            </TemplateProvider>
+          </ModelProvider>
+        </ChatAppProvider>
+      </WebSocketProvider>
       <SearchDialog
         open={searchOpen}
         onClose={() => setSearchOpen(false)}

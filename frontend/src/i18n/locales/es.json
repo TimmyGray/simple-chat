@@ -55,6 +55,12 @@
   "network": {
     "offline": "No hay conexión a internet. Verifica tu conexión."
   },
+  "websocket": {
+    "connected": "Conectado",
+    "connecting": "Conectando...",
+    "disconnected": "Desconectado",
+    "typingUsers": "{{users}} escribiendo..."
+  },
   "theme": {
     "label": "Tema",
     "light": "Claro",
