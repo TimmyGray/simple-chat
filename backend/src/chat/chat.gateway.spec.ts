@@ -5,6 +5,7 @@ import { sign } from 'jsonwebtoken';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ChatGateway } from './chat.gateway';
 import { DatabaseService } from '../database/database.service';
+import { SharingService } from './sharing.service';
 import { WS_SERVER_EVENT } from './interfaces/ws-events.interface';
 
 const JWT_SECRET = 'test-secret-key';
@@ -47,7 +48,7 @@ function makeToken(payload?: Record<string, unknown>): string {
 
 describe('ChatGateway', () => {
   let gateway: ChatGateway;
-  let mockConversationsCollection: any;
+  let mockSharingService: any;
 
   const mockConversation = {
     _id: new ObjectId(MOCK_CONV_ID),
@@ -59,12 +60,14 @@ describe('ChatGateway', () => {
   };
 
   beforeEach(async () => {
-    mockConversationsCollection = {
-      findOne: vi.fn().mockResolvedValue(mockConversation),
+    mockSharingService = {
+      findAccessibleConversation: vi.fn().mockResolvedValue(mockConversation),
     };
 
     const mockDatabaseService = {
-      conversations: vi.fn().mockReturnValue(mockConversationsCollection),
+      conversations: vi.fn().mockReturnValue({
+        findOne: vi.fn().mockResolvedValue(mockConversation),
+      }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -80,6 +83,7 @@ describe('ChatGateway', () => {
           },
         },
         { provide: DatabaseService, useValue: mockDatabaseService },
+        { provide: SharingService, useValue: mockSharingService },
       ],
     }).compile();
 
@@ -187,7 +191,9 @@ describe('ChatGateway', () => {
     });
 
     it('should reject join when conversation not found', async () => {
-      mockConversationsCollection.findOne.mockResolvedValueOnce(null);
+      mockSharingService.findAccessibleConversation.mockRejectedValueOnce(
+        new Error('Conversation not found'),
+      );
       const client = createMockSocket({
         userId: MOCK_USER_ID,
         email: 'test@example.com',
@@ -242,20 +248,37 @@ describe('ChatGateway', () => {
       );
       expect(client._toFn).toHaveBeenCalledWith(`conversation:${MOCK_CONV_ID}`);
     });
-  });
 
-  describe('typing indicators', () => {
-    it('should broadcast typing:start to room', () => {
+    it('should reject leave with invalid conversationId', async () => {
       const client = createMockSocket({
         userId: MOCK_USER_ID,
         email: 'test@example.com',
       });
 
+      const result = await gateway.handleLeaveConversation(client as any, {
+        conversationId: 'invalid',
+      });
+
+      expect(result.success).toBe(false);
+      expect(client._leaveFn).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('typing indicators', () => {
+    it('should broadcast typing:start when client is in room', () => {
+      const room = `conversation:${MOCK_CONV_ID}`;
+      const rooms = new Set([room]);
+      const client = createMockSocket({
+        userId: MOCK_USER_ID,
+        email: 'test@example.com',
+      });
+      (client as any).rooms = rooms;
+
       gateway.handleTypingStart(client as any, {
         conversationId: MOCK_CONV_ID,
       });
 
-      expect(client._toFn).toHaveBeenCalledWith(`conversation:${MOCK_CONV_ID}`);
+      expect(client._toFn).toHaveBeenCalledWith(room);
       const emitMock = client._toFn.mock.results[0].value.emit;
       expect(emitMock).toHaveBeenCalledWith(WS_SERVER_EVENT.TYPING_START, {
         conversationId: MOCK_CONV_ID,
@@ -264,23 +287,40 @@ describe('ChatGateway', () => {
       });
     });
 
-    it('should broadcast typing:stop to room', () => {
+    it('should broadcast typing:stop when client is in room', () => {
+      const room = `conversation:${MOCK_CONV_ID}`;
+      const rooms = new Set([room]);
       const client = createMockSocket({
         userId: MOCK_USER_ID,
         email: 'test@example.com',
       });
+      (client as any).rooms = rooms;
 
       gateway.handleTypingStop(client as any, {
         conversationId: MOCK_CONV_ID,
       });
 
-      expect(client._toFn).toHaveBeenCalledWith(`conversation:${MOCK_CONV_ID}`);
+      expect(client._toFn).toHaveBeenCalledWith(room);
       const emitMock = client._toFn.mock.results[0].value.emit;
       expect(emitMock).toHaveBeenCalledWith(WS_SERVER_EVENT.TYPING_STOP, {
         conversationId: MOCK_CONV_ID,
         userId: MOCK_USER_ID,
         email: 'test@example.com',
       });
+    });
+
+    it('should not broadcast typing when client is not in room', () => {
+      const client = createMockSocket({
+        userId: MOCK_USER_ID,
+        email: 'test@example.com',
+      });
+      (client as any).rooms = new Set();
+
+      gateway.handleTypingStart(client as any, {
+        conversationId: MOCK_CONV_ID,
+      });
+
+      expect(client._toFn).not.toHaveBeenCalled();
     });
 
     it('should not broadcast typing when client is unauthenticated', () => {

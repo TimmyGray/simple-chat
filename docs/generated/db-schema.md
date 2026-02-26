@@ -14,11 +14,13 @@
 | model | string | yes | LLM model identifier (default: "openrouter/free") |
 | templateId | ObjectId | no | Reference to templates._id (system prompt template) |
 | forkedFrom | object | no | Fork origin: `{ conversationId: ObjectId, messageId: ObjectId }` |
+| participants | ParticipantRef[] | no | Shared access: `[{ userId: ObjectId, role: "viewer"\|"editor", addedAt: Date }]` |
 | createdAt | Date | yes | Creation timestamp |
 | updatedAt | Date | yes | Last update timestamp |
 
 **Indexes:**
 - `{ userId: 1, updatedAt: -1 }` — list user's conversations sorted by recent activity
+- `{ "participants.userId": 1, updatedAt: -1 }` (sparse) — list conversations shared with a user
 
 **Source:** `backend/src/chat/interfaces/conversation.interface.ts`
 

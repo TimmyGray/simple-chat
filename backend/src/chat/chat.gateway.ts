@@ -13,6 +13,7 @@ import { Server, Socket } from 'socket.io';
 import { verify } from 'jsonwebtoken';
 import { ObjectId } from 'mongodb';
 import { DatabaseService } from '../database/database.service';
+import { SharingService } from './sharing.service';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import type { MessageDoc } from '../types/documents';
 import {
@@ -50,6 +51,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly configService: ConfigService,
     private readonly databaseService: DatabaseService,
+    private readonly sharingService: SharingService,
   ) {}
 
   handleConnection(client: AuthenticatedSocket): void {
@@ -111,12 +113,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return { success: false };
     }
 
-    const conversation = await this.databaseService.conversations().findOne({
-      _id: new ObjectId(conversationId),
-      userId: new ObjectId(client.data.userId),
-    });
-
-    if (!conversation) {
+    try {
+      await this.sharingService.findAccessibleConversation(
+        conversationId,
+        new ObjectId(client.data.userId),
+      );
+    } catch {
       return { success: false };
     }
 
@@ -144,6 +146,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!client.data?.userId) return { success: false };
 
     const { conversationId } = payload;
+    if (!conversationId || !ObjectId.isValid(conversationId)) {
+      return { success: false };
+    }
+
     const room = `${ROOM_PREFIX}${conversationId}`;
     await client.leave(room);
 
@@ -166,6 +172,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!client.data?.userId) return;
 
     const room = `${ROOM_PREFIX}${payload.conversationId}`;
+    if (!client.rooms.has(room)) return;
+
     const typingPayload: WsTypingPayload = {
       conversationId: payload.conversationId,
       userId: client.data.userId,
@@ -182,6 +190,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!client.data?.userId) return;
 
     const room = `${ROOM_PREFIX}${payload.conversationId}`;
+    if (!client.rooms.has(room)) return;
+
     const typingPayload: WsTypingPayload = {
       conversationId: payload.conversationId,
       userId: client.data.userId,

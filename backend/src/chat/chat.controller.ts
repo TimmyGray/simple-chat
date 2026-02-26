@@ -19,12 +19,14 @@ import type { Request, Response } from 'express';
 import { ChatService } from './chat.service';
 import { SearchService } from './search.service';
 import { ExportService } from './export.service';
+import { SharingService } from './sharing.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { UpdateConversationDto } from './dto/update-conversation.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 import { EditMessageDto } from './dto/edit-message.dto';
 import { SearchConversationsDto } from './dto/search-conversations.dto';
 import { ExportConversationDto } from './dto/export-conversation.dto';
+import { InviteParticipantDto } from './dto/invite-participant.dto';
 import {
   SSE_ERROR_CODE,
   type StreamEvent,
@@ -44,6 +46,7 @@ export class ChatController {
     private readonly chatService: ChatService,
     private readonly searchService: SearchService,
     private readonly exportService: ExportService,
+    private readonly sharingService: SharingService,
   ) {}
 
   @Get('conversations')
@@ -104,6 +107,49 @@ export class ChatController {
   ) {
     this.logger.log(`Forking conversation ${id} at message ${messageId}`);
     return this.chatService.forkConversation(id, messageId, user._id);
+  }
+
+  @Get('conversations/shared')
+  getSharedConversations(@CurrentUser() user: AuthUser) {
+    this.logger.debug('GET /conversations/shared');
+    return this.sharingService.getSharedConversations(user._id);
+  }
+
+  @Get('conversations/:id/participants')
+  getParticipants(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseObjectIdPipe) id: string,
+  ) {
+    this.logger.debug(`GET /conversations/${id}/participants`);
+    return this.sharingService.getParticipants(id, user._id);
+  }
+
+  @Post('conversations/:id/participants')
+  @HttpCode(HttpStatus.CREATED)
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
+  inviteParticipant(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() dto: InviteParticipantDto,
+  ) {
+    this.logger.log(`Inviting ${dto.email} to conversation ${id}`);
+    return this.sharingService.inviteParticipant(
+      id,
+      user._id,
+      dto.email,
+      dto.role,
+    );
+  }
+
+  @Delete('conversations/:id/participants/:userId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  revokeParticipant(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Param('userId', ParseObjectIdPipe) userId: string,
+  ) {
+    this.logger.log(`Revoking participant ${userId} from conversation ${id}`);
+    return this.sharingService.revokeParticipant(id, user._id, userId);
   }
 
   @Get('conversations/:id/messages')

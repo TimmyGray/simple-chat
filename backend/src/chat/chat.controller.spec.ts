@@ -5,6 +5,7 @@ import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
 import { SearchService } from './search.service';
 import { ExportService } from './export.service';
+import { SharingService } from './sharing.service';
 
 describe('ChatController', () => {
   let controller: ChatController;
@@ -76,6 +77,19 @@ describe('ChatController', () => {
               contentType: 'text/markdown',
               fileName: 'test.md',
             }),
+          },
+        },
+        {
+          provide: SharingService,
+          useValue: {
+            inviteParticipant: vi.fn().mockResolvedValue({
+              userId: new ObjectId(),
+              role: 'viewer',
+              addedAt: new Date(),
+            }),
+            revokeParticipant: vi.fn().mockResolvedValue(undefined),
+            getParticipants: vi.fn().mockResolvedValue([]),
+            getSharedConversations: vi.fn().mockResolvedValue([]),
           },
         },
       ],
@@ -446,6 +460,82 @@ describe('ChatController', () => {
         dto,
         mockUserId,
         expect.any(AbortSignal),
+      );
+    });
+  });
+
+  describe('getSharedConversations', () => {
+    it('should delegate to sharingService with userId', async () => {
+      const sharingService = (controller as any).sharingService;
+      sharingService.getSharedConversations.mockResolvedValue([
+        mockConversation,
+      ]);
+
+      const result = await controller.getSharedConversations(mockUser);
+
+      expect(result).toEqual([mockConversation]);
+      expect(sharingService.getSharedConversations).toHaveBeenCalledWith(
+        mockUserId,
+      );
+    });
+  });
+
+  describe('getParticipants', () => {
+    it('should delegate to sharingService with id and userId', async () => {
+      const sharingService = (controller as any).sharingService;
+      const mockParticipants = [
+        { userId: new ObjectId(), role: 'viewer', addedAt: new Date() },
+      ];
+      sharingService.getParticipants.mockResolvedValue(mockParticipants);
+
+      const result = await controller.getParticipants(
+        mockUser,
+        '507f1f77bcf86cd799439011',
+      );
+
+      expect(result).toEqual(mockParticipants);
+      expect(sharingService.getParticipants).toHaveBeenCalledWith(
+        '507f1f77bcf86cd799439011',
+        mockUserId,
+      );
+    });
+  });
+
+  describe('inviteParticipant', () => {
+    it('should delegate to sharingService with correct params', async () => {
+      const sharingService = (controller as any).sharingService;
+      const dto = { email: 'invited@example.com', role: 'editor' as const };
+
+      await controller.inviteParticipant(
+        mockUser,
+        '507f1f77bcf86cd799439011',
+        dto,
+      );
+
+      expect(sharingService.inviteParticipant).toHaveBeenCalledWith(
+        '507f1f77bcf86cd799439011',
+        mockUserId,
+        'invited@example.com',
+        'editor',
+      );
+    });
+  });
+
+  describe('revokeParticipant', () => {
+    it('should delegate to sharingService with correct params', async () => {
+      const sharingService = (controller as any).sharingService;
+      const targetUserId = new ObjectId().toHexString();
+
+      await controller.revokeParticipant(
+        mockUser,
+        '507f1f77bcf86cd799439011',
+        targetUserId,
+      );
+
+      expect(sharingService.revokeParticipant).toHaveBeenCalledWith(
+        '507f1f77bcf86cd799439011',
+        mockUserId,
+        targetUserId,
       );
     });
   });
