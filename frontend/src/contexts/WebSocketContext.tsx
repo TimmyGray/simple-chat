@@ -7,6 +7,7 @@ import type { ConversationId } from '../types';
 export interface WebSocketContextValue {
   socket: Socket | null;
   connectionStatus: ConnectionStatus;
+  reconnectCount: number;
   joinConversation: (conversationId: ConversationId) => void;
   leaveConversation: (conversationId: ConversationId) => void;
   emitTypingStart: (conversationId: ConversationId) => void;

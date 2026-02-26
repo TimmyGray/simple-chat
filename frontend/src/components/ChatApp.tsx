@@ -200,12 +200,13 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
     () => ({
       socket: ws.socket,
       connectionStatus: ws.connectionStatus,
+      reconnectCount: ws.reconnectCount,
       joinConversation: ws.joinConversation,
       leaveConversation: ws.leaveConversation,
       emitTypingStart: ws.emitTypingStart,
       emitTypingStop: ws.emitTypingStop,
     }),
-    [ws.socket, ws.connectionStatus, ws.joinConversation, ws.leaveConversation, ws.emitTypingStart, ws.emitTypingStop],
+    [ws.socket, ws.connectionStatus, ws.reconnectCount, ws.joinConversation, ws.leaveConversation, ws.emitTypingStart, ws.emitTypingStop],
   );
 
   return (

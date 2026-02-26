@@ -29,7 +29,7 @@ export default function ChatArea() {
   } = useChatApp();
   const { models, selectedModel, changeModel } = useModel();
   const { templates, selectedTemplateId, changeTemplate } = useTemplate();
-  const { socket, connectionStatus, joinConversation, leaveConversation, emitTypingStart, emitTypingStop } = useWebSocketContext();
+  const { socket, connectionStatus, reconnectCount, joinConversation, leaveConversation, emitTypingStart, emitTypingStop } = useWebSocketContext();
   const { t } = useTranslation();
 
   const {
@@ -76,12 +76,17 @@ export default function ChatArea() {
     }
   }, [conversationId, fetchMessages, clear]);
 
-  // Join/leave WebSocket rooms on conversation change
+  // Join/leave WebSocket rooms on conversation change + re-join after reconnect
   const prevConversationIdRef = useRef(conversationId);
   useEffect(() => {
     const prev = prevConversationIdRef.current;
     if (prev && prev !== conversationId) {
       leaveConversation(prev);
+      // Clean up typing timeout from previous conversation
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = null;
+      }
     }
     if (conversationId) {
       joinConversation(conversationId);
@@ -92,7 +97,7 @@ export default function ChatArea() {
         leaveConversation(conversationId);
       }
     };
-  }, [conversationId, joinConversation, leaveConversation]);
+  }, [conversationId, reconnectCount, joinConversation, leaveConversation]);
 
   // Listen for WebSocket events
   useEffect(() => {

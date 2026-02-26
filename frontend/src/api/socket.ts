@@ -81,12 +81,12 @@ export function toDeletedIds(payload: WsMessageDeletedPayload): { conversationId
 }
 
 /** WebSocket URL is the root server (not /api) */
-const WS_URL = BASE_URL.replace('/api', '');
+const WS_URL = BASE_URL.endsWith('/api') ? BASE_URL.slice(0, -4) : BASE_URL;
 
 /** Create a new Socket.IO client instance (not yet connected) */
 export function createSocket(): Socket {
   return io(WS_URL, {
-    auth: { token: getStoredToken() },
+    auth: (cb) => { cb({ token: getStoredToken() }); },
     autoConnect: false,
     reconnection: true,
     reconnectionAttempts: 10,

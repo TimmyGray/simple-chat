@@ -58,6 +58,7 @@ describe('useWebSocket', () => {
     expect(mockSocket.connect).toHaveBeenCalledOnce();
     expect(mockSocket.on).toHaveBeenCalledWith('connect', expect.any(Function));
     expect(mockSocket.on).toHaveBeenCalledWith('disconnect', expect.any(Function));
+    expect(mockSocket.on).toHaveBeenCalledWith('connect_error', expect.any(Function));
   });
 
   it('updates status to connected on connect event', () => {
@@ -95,6 +96,37 @@ describe('useWebSocket', () => {
     });
 
     expect(result.current.connectionStatus).toBe('disconnected');
+  });
+
+  it('updates status to disconnected on connect_error', () => {
+    const { result } = renderHook(() => useWebSocket(true));
+
+    const errorHandler = mockSocket.on.mock.calls.find(
+      (args) => args[0] === 'connect_error',
+    )?.[1];
+
+    act(() => {
+      errorHandler?.();
+    });
+
+    expect(result.current.connectionStatus).toBe('disconnected');
+  });
+
+  it('increments reconnectCount on reconnect', () => {
+    const { result } = renderHook(() => useWebSocket(true));
+
+    expect(result.current.reconnectCount).toBe(0);
+
+    const reconnectHandler = mockSocket.io.on.mock.calls.find(
+      (args) => args[0] === 'reconnect',
+    )?.[1];
+
+    act(() => {
+      reconnectHandler?.();
+    });
+
+    expect(result.current.reconnectCount).toBe(1);
+    expect(result.current.connectionStatus).toBe('connected');
   });
 
   it('disconnects when authentication changes to false', () => {
