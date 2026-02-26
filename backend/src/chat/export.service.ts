@@ -200,65 +200,68 @@ export class ExportService {
       doc.on('error', reject);
 
       try {
-        // Title
-        doc.fontSize(20).text(conversation.title, { align: 'center' });
-        doc.moveDown(0.5);
-
-        // Metadata
-        doc
-          .fontSize(10)
-          .fillColor(PDF_COLORS.metadata)
-          .text(`Model: ${conversation.model}`, { align: 'center' });
-        doc.text(`Created: ${this.formatDate(conversation.createdAt)}`, {
-          align: 'center',
-        });
-        doc.text(`Messages: ${messages.length}`, { align: 'center' });
-        doc.moveDown(1);
-
-        // Separator
-        doc
-          .strokeColor(PDF_COLORS.separator)
-          .moveTo(50, doc.y)
-          .lineTo(545, doc.y)
-          .stroke();
-        doc.moveDown(0.5);
-
-        // Messages
+        this.renderPdfHeader(doc, conversation, messages.length);
         for (const msg of messages) {
-          const isUser = msg.role === 'user';
-          const role = isUser ? 'User' : 'Assistant';
-          const time = this.formatDate(msg.createdAt);
-
-          // Role header
-          doc
-            .fontSize(12)
-            .fillColor(isUser ? PDF_COLORS.userRole : PDF_COLORS.assistantRole)
-            .text(role, { continued: true });
-          doc.fontSize(8).fillColor(PDF_COLORS.timestamp).text(`  ${time}`);
-
-          // Content
-          doc.fontSize(10).fillColor(PDF_COLORS.content).text(msg.content, {
-            width: 495,
-            lineGap: 2,
-          });
-
-          // Attachments
-          if (msg.attachments?.length) {
-            doc
-              .fontSize(8)
-              .fillColor(PDF_COLORS.attachment)
-              .text(
-                `Attachments: ${msg.attachments.map((a) => a.fileName).join(', ')}`,
-              );
-          }
-
-          doc.moveDown(0.5);
+          this.renderPdfMessage(doc, msg);
         }
-
         doc.end();
       } catch (err) {
         reject(new Error(getErrorMessage(err)));
       }
     });
+  }
+
+  private renderPdfHeader(
+    doc: PDFKit.PDFDocument,
+    conversation: ConversationDoc,
+    messageCount: number,
+  ): void {
+    doc.fontSize(20).text(conversation.title, { align: 'center' });
+    doc.moveDown(0.5);
+
+    doc
+      .fontSize(10)
+      .fillColor(PDF_COLORS.metadata)
+      .text(`Model: ${conversation.model}`, { align: 'center' });
+    doc.text(`Created: ${this.formatDate(conversation.createdAt)}`, {
+      align: 'center',
+    });
+    doc.text(`Messages: ${messageCount}`, { align: 'center' });
+    doc.moveDown(1);
+
+    doc
+      .strokeColor(PDF_COLORS.separator)
+      .moveTo(50, doc.y)
+      .lineTo(545, doc.y)
+      .stroke();
+    doc.moveDown(0.5);
+  }
+
+  private renderPdfMessage(doc: PDFKit.PDFDocument, msg: MessageDoc): void {
+    const isUser = msg.role === 'user';
+    const role = isUser ? 'User' : 'Assistant';
+    const time = this.formatDate(msg.createdAt);
+
+    doc
+      .fontSize(12)
+      .fillColor(isUser ? PDF_COLORS.userRole : PDF_COLORS.assistantRole)
+      .text(role, { continued: true });
+    doc.fontSize(8).fillColor(PDF_COLORS.timestamp).text(`  ${time}`);
+
+    doc.fontSize(10).fillColor(PDF_COLORS.content).text(msg.content, {
+      width: 495,
+      lineGap: 2,
+    });
+
+    if (msg.attachments?.length) {
+      doc
+        .fontSize(8)
+        .fillColor(PDF_COLORS.attachment)
+        .text(
+          `Attachments: ${msg.attachments.map((a) => a.fileName).join(', ')}`,
+        );
+    }
+
+    doc.moveDown(0.5);
   }
 }
