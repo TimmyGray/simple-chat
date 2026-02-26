@@ -266,6 +266,16 @@ export class ChatController {
         case 'content':
           res.write(`data: ${JSON.stringify({ content: event.content })}\n\n`);
           break;
+        case 'tool_call':
+          res.write(
+            `data: ${JSON.stringify({ tool_call: { name: event.name, arguments: event.arguments } })}\n\n`,
+          );
+          break;
+        case 'tool_result':
+          res.write(
+            `data: ${JSON.stringify({ tool_result: { name: event.name, content: event.content, isError: event.isError } })}\n\n`,
+          );
+          break;
         case 'done':
           if (event.usage) {
             res.write(`data: ${JSON.stringify({ usage: event.usage })}\n\n`);

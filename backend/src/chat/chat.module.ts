@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
+import { McpModule } from '../mcp/mcp.module';
 import { ChatController } from './chat.controller';
 import { UploadController } from './upload.controller';
 import { ChatService } from './chat.service';
@@ -9,7 +10,7 @@ import { ExportService } from './export.service';
 import { FileExtractionService } from './file-extraction.service';
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, McpModule],
   controllers: [ChatController, UploadController],
   providers: [
     ChatService,

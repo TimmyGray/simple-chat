@@ -101,6 +101,24 @@ export const templatesSchema: Document = {
   },
 };
 
+export const mcpServersSchema: Document = {
+  $jsonSchema: {
+    bsonType: 'object',
+    required: ['name', 'command', 'args', 'enabled', 'createdAt', 'updatedAt'],
+    properties: {
+      _id: { bsonType: 'objectId' },
+      name: { bsonType: 'string' },
+      command: { bsonType: 'string' },
+      args: { bsonType: 'array', items: { bsonType: 'string' } },
+      env: { bsonType: 'object' },
+      enabled: { bsonType: 'bool' },
+      createdAt: { bsonType: 'date' },
+      updatedAt: { bsonType: 'date' },
+    },
+    additionalProperties: false,
+  },
+};
+
 export const usersSchema: Document = {
   $jsonSchema: {
     bsonType: 'object',

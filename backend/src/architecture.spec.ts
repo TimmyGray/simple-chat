@@ -23,6 +23,7 @@ const DOMAIN_MODULES = [
   'auth',
   'chat',
   'health',
+  'mcp',
   'models',
   'templates',
   'uploads',
@@ -40,7 +41,10 @@ const MAX_FILE_LINES = 300;
  * Remove the exception when the task is completed.
  */
 const FILE_SIZE_EXCEPTIONS: Record<string, string> = {
-  'chat/chat.service.ts': 'FEAT-12: forkConversation adds ~20 lines; splitting tracked separately',
+  'chat/chat.service.ts':
+    'FEAT-12: forkConversation adds ~20 lines; splitting tracked separately',
+  'chat/llm-stream.service.ts':
+    'FEAT-14a: MCP tool-use streaming loop adds ~25 lines; splitting tracked separately',
 };
 
 function getAllTsFiles(dir: string): string[] {
@@ -123,12 +127,15 @@ describe('Architecture: Module Boundaries', () => {
           if (targetModule === mod) continue;
           if (SHARED_MODULES.includes(targetModule)) continue;
 
-          // Allow auth imports from chat and templates (need JwtAuthGuard)
+          // Allow auth imports from chat, templates, and mcp (need JwtAuthGuard/AdminGuard)
           if (
-            (mod === 'chat' || mod === 'templates') &&
+            (mod === 'chat' || mod === 'templates' || mod === 'mcp') &&
             targetModule === 'auth'
           )
             continue;
+
+          // Allow mcp imports from chat (LlmStreamService uses McpService for tool calling)
+          if (mod === 'chat' && targetModule === 'mcp') continue;
 
           violations.push(
             `${relFile} imports from ${targetModule}/ (via "${imp}"). ` +

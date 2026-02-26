@@ -67,12 +67,16 @@ export default tseslint.config(
             group: ['../templates/*'],
             message: 'Cross-module import detected. Do not import from templates/ internals. Use NestJS dependency injection: import TemplatesModule in your module.ts and inject TemplatesService via constructor.',
           },
+          {
+            group: ['../mcp/*'],
+            message: 'Cross-module import detected. Do not import from mcp/ internals. Use NestJS dependency injection: import McpModule in your module.ts and inject McpService via constructor.',
+          },
         ],
       }],
     },
   },
   {
-    // chat/ is allowed to import from auth/ (guards, decorators, interfaces)
+    // chat/ is allowed to import from auth/ (guards, decorators) and mcp/ (tool calling)
     files: ['src/chat/**/*.ts'],
     rules: {
       'no-restricted-imports': ['error', {
@@ -122,6 +126,40 @@ export default tseslint.config(
           {
             group: ['../models/*'],
             message: 'Cross-module import detected. Do not import from models/ internals.',
+          },
+          {
+            group: ['../mcp/*'],
+            message: 'Cross-module import detected. Do not import from mcp/ internals.',
+          },
+        ],
+      }],
+    },
+  },
+  {
+    // mcp/ is allowed to import from auth/ (guards, decorators)
+    files: ['src/mcp/**/*.ts'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [
+          {
+            group: ['../chat/*'],
+            message: 'Cross-module import detected. Do not import from chat/ internals.',
+          },
+          {
+            group: ['../uploads/*'],
+            message: 'Cross-module import detected. Do not import from uploads/ internals.',
+          },
+          {
+            group: ['../health/*'],
+            message: 'Cross-module import detected. Do not import from health/ internals.',
+          },
+          {
+            group: ['../models/*'],
+            message: 'Cross-module import detected. Do not import from models/ internals.',
+          },
+          {
+            group: ['../templates/*'],
+            message: 'Cross-module import detected. Do not import from templates/ internals.',
           },
         ],
       }],

@@ -22,16 +22,18 @@
   },
   "devDependencies": {
     "concurrently": "^9.1.0",
+    "eslint": "^9.39.3",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7"
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.1"
   },
   "lint-staged": {
     "backend/src/**/*.ts": [
-      "eslint --fix --config backend/eslint.config.mjs",
+      "bash -c 'cd backend && npx eslint --fix \"$@\"' _",
       "prettier --write"
     ],
     "frontend/src/**/*.{ts,tsx}": [
-      "eslint --fix --config frontend/eslint.config.js"
+      "bash -c 'cd frontend && npx eslint --fix \"$@\"' _"
     ]
   }
 }
