@@ -29,13 +29,11 @@ Simple Chat is a self-hosted, privacy-first AI chat application that gives users
 No remaining P0 items.
 
 ### Should Have (P1) — High impact, moderate effort
-1. **Image Input (Multi-modal Chat)** — Paste/upload images to vision-capable models
-2. **Conversation Branching** — Fork conversations from any message to explore alternatives
-3. **Ollama / Local Model Support** — Direct Ollama connection for fully offline, zero-cost usage
+No remaining P1 items.
 
 ### Nice to Have (P2) — Polish and delight
-4. **MCP Tool Integration** — Connect to MCP servers for external tools (web search, APIs, file systems)
-5. **Real-time Collaboration** — WebSocket-based shared conversations for teams
+1. **Real-time Collaboration** — WebSocket-based shared conversations for teams
+2. **MCP Frontend UI** — Inline tool-call display with collapsible results (FEAT-14b, backend done)
 
 ### Shipped
 - **Authentication** — JWT auth + userId-scoped data (FEAT-1)
@@ -47,6 +45,10 @@ No remaining P0 items.
 - **Streaming Response Controls** — Stop/copy/retry buttons (FEAT-7)
 - **Dark/Light Theme Toggle** — Light/dark/system modes (FEAT-8)
 - **Keyboard Shortcuts** — Cmd+N (new chat), Cmd+K (search), Escape (stop/blur) (FEAT-9)
+- **Image Input (Multi-modal Chat)** — Paste/upload images to vision-capable models (FEAT-11)
+- **Conversation Branching** — Fork conversations from any message to explore alternatives (FEAT-12)
+- **Ollama / Local Model Support** — Direct Ollama connection for fully offline, zero-cost usage (FEAT-13)
+- **MCP Tool Integration (Backend)** — Connect to MCP servers for external tools with admin CRUD and tool-use streaming (FEAT-14)
 
 ## Design Principles
 1. **Simple first** — Don't build features users haven't asked for

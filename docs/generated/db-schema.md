@@ -97,6 +97,23 @@
 
 **Source:** `backend/src/templates/interfaces/template.interface.ts`
 
+### Collection: mcpServers
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| _id | ObjectId | auto | Primary key |
+| name | string | yes | Display name for the MCP server |
+| command | string | yes | Executable command to launch the server process |
+| args | string[] | yes | Command-line arguments for the server |
+| env | Record<string, string> | no | Environment variables for the server process |
+| enabled | boolean | yes | Whether to auto-connect on startup |
+| createdAt | Date | yes | Creation timestamp |
+| updatedAt | Date | yes | Last update timestamp |
+
+**Indexes:** None (small collection, scanned in full)
+
+**Source:** `backend/src/types/documents.ts` (McpServerDoc interface)
+
 ## Schema Validation
 
 MongoDB JSON Schema validators are applied to all collections at startup via `collMod` commands in `DatabaseService.onModuleInit()`.
