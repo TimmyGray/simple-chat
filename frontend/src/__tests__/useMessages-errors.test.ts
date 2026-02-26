@@ -2,7 +2,7 @@ import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useMessages } from '../hooks/useMessages';
 import * as api from '../api/client';
-import { asConversationId } from '../types';
+import { asConversationId, asMessageId } from '../types';
 
 vi.mock('../api/client');
 
@@ -11,6 +11,8 @@ const CONV_ID = asConversationId('conv-1');
 describe('useMessages — additional error scenarios', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // After streaming completes, useMessages re-fetches to replace optimistic UUIDs
+    vi.mocked(api.getMessages).mockResolvedValue([]);
   });
 
   // ---- CORS errors ----
@@ -61,6 +63,10 @@ describe('useMessages — additional error scenarios', () => {
   // ---- sendMessage catch — does not set error when stream completed ----
 
   it('does not set error state when stream completed before catch', async () => {
+    vi.mocked(api.getMessages).mockResolvedValue([
+      { _id: asMessageId('real-1'), conversationId: CONV_ID, role: 'user', content: 'Hi', attachments: [], createdAt: '2026-01-01T00:00:00Z' },
+      { _id: asMessageId('real-2'), conversationId: CONV_ID, role: 'assistant', content: 'response', attachments: [], createdAt: '2026-01-01T00:00:01Z' },
+    ]);
     vi.mocked(api.sendMessageStream).mockImplementation(
       async (_convId, _content, _model, _attachments, onChunk, onDone) => {
         onChunk?.('response');
@@ -78,7 +84,7 @@ describe('useMessages — additional error scenarios', () => {
 
     // completed flag was true, so error is not set
     expect(result.current.error).toBeNull();
-    // But the assistant message from onDone is present
+    // After re-fetch, assistant message has real server ID
     const assistant = result.current.messages.find((m) => m.role === 'assistant');
     expect(assistant?.content).toBe('response');
   });
@@ -174,6 +180,12 @@ describe('useMessages — additional error scenarios', () => {
         onChunk?.('Success');
         onDone?.();
       });
+    // After second send completes, re-fetch returns all persisted messages
+    vi.mocked(api.getMessages).mockResolvedValue([
+      { _id: asMessageId('real-1'), conversationId: CONV_ID, role: 'user', content: 'First', attachments: [], createdAt: '2026-01-01T00:00:00Z' },
+      { _id: asMessageId('real-2'), conversationId: CONV_ID, role: 'user', content: 'Second', attachments: [], createdAt: '2026-01-01T00:00:01Z' },
+      { _id: asMessageId('real-3'), conversationId: CONV_ID, role: 'assistant', content: 'Success', attachments: [], createdAt: '2026-01-01T00:00:02Z' },
+    ]);
 
     const { result } = renderHook(() => useMessages());
 
@@ -188,7 +200,7 @@ describe('useMessages — additional error scenarios', () => {
       await result.current.sendMessage(CONV_ID, 'Second');
     });
     expect(result.current.error).toBeNull();
-    // Should have messages from both attempts: user1, user2, assistant2
+    // After re-fetch: user1, user2, assistant
     expect(result.current.messages).toHaveLength(3);
   });
 });

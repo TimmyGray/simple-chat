@@ -27,6 +27,19 @@ export const conversationsSchema: Document = {
         },
         additionalProperties: false,
       },
+      participants: {
+        bsonType: 'array',
+        items: {
+          bsonType: 'object',
+          required: ['userId', 'role', 'addedAt'],
+          properties: {
+            userId: { bsonType: 'objectId' },
+            role: { bsonType: 'string', enum: ['viewer', 'editor'] },
+            addedAt: { bsonType: 'date' },
+          },
+          additionalProperties: false,
+        },
+      },
       createdAt: { bsonType: 'date' },
       updatedAt: { bsonType: 'date' },
     },

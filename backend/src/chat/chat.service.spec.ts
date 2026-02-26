@@ -4,6 +4,8 @@ import { MongoServerError, ObjectId } from 'mongodb';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ChatService } from './chat.service';
 import { LlmStreamService } from './llm-stream.service';
+import { ChatBroadcastService } from './chat-broadcast.service';
+import { SharingService } from './sharing.service';
 import { DatabaseService } from '../database/database.service';
 import type { StreamEvent } from './interfaces/stream-event.interface';
 
@@ -12,6 +14,7 @@ describe('ChatService', () => {
   let mockConversationsCollection: any;
   let mockMessagesCollection: any;
   let mockLlmStreamService: any;
+  let mockSharingService: any;
 
   const mockObjectId = new ObjectId('507f1f77bcf86cd799439011');
   const mockMessageId = new ObjectId('507f1f77bcf86cd799439012');
@@ -91,11 +94,29 @@ describe('ChatService', () => {
       stream: createMockStreamFn(defaultStreamEvents),
     };
 
+    const mockBroadcastService = {
+      emitUserMessageCreated: vi.fn(),
+      emitMessageUpdated: vi.fn(),
+      wrapStreamWithBroadcast: vi.fn().mockImplementation(async function* (
+        stream: AsyncGenerator<StreamEvent>,
+      ) {
+        yield* stream;
+      }),
+    };
+
+    mockSharingService = {
+      findAccessibleConversation: vi.fn().mockResolvedValue(mockConversation),
+      assertAccess: vi.fn().mockResolvedValue(mockConversation),
+      isOwner: vi.fn().mockReturnValue(true),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ChatService,
         { provide: DatabaseService, useValue: mockDatabaseService },
         { provide: LlmStreamService, useValue: mockLlmStreamService },
+        { provide: ChatBroadcastService, useValue: mockBroadcastService },
+        { provide: SharingService, useValue: mockSharingService },
       ],
     }).compile();
 
@@ -152,14 +173,18 @@ describe('ChatService', () => {
     });
 
     it('should throw NotFoundException when not found', async () => {
-      mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
+      mockSharingService.findAccessibleConversation = vi
+        .fn()
+        .mockRejectedValue(new NotFoundException('Conversation not found'));
       await expect(
         service.getConversation('507f1f77bcf86cd799439011', mockUserId),
       ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw NotFoundException when user does not own the conversation', async () => {
-      mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
+      mockSharingService.findAccessibleConversation = vi
+        .fn()
+        .mockRejectedValue(new NotFoundException('Conversation not found'));
       await expect(
         service.getConversation('507f1f77bcf86cd799439011', otherUserId),
       ).rejects.toThrow(NotFoundException);
@@ -257,8 +282,10 @@ describe('ChatService', () => {
       expect(mockMessagesCollection.find).toHaveBeenCalled();
     });
 
-    it('should throw NotFoundException if conversation not owned by user', async () => {
-      mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
+    it('should throw NotFoundException if conversation not accessible by user', async () => {
+      mockSharingService.findAccessibleConversation = vi
+        .fn()
+        .mockRejectedValue(new NotFoundException('Conversation not found'));
       await expect(
         service.getMessages('507f1f77bcf86cd799439011', otherUserId),
       ).rejects.toThrow(NotFoundException);
@@ -308,7 +335,9 @@ describe('ChatService', () => {
     });
 
     it('should throw NotFoundException for non-existent conversation', async () => {
-      mockConversationsCollection.findOne = vi.fn().mockResolvedValue(null);
+      mockSharingService.assertAccess = vi
+        .fn()
+        .mockRejectedValue(new NotFoundException('Conversation not found'));
       const gen = service.sendMessageAndStream(
         '507f1f77bcf86cd799439011',
         { content: 'Test' },
@@ -439,7 +468,7 @@ describe('ChatService', () => {
         ...mockConversation,
         templateId: new ObjectId('607f1f77bcf86cd799439050'),
       };
-      mockConversationsCollection.findOne = vi
+      mockSharingService.findAccessibleConversation = vi
         .fn()
         .mockResolvedValue(convWithTemplate);
 
@@ -474,6 +503,7 @@ describe('ChatService', () => {
             updatedAt: expect.any(Date),
           },
         },
+        { returnDocument: 'after' },
       );
     });
 

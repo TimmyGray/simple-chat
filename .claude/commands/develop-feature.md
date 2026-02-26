@@ -88,7 +88,13 @@ Isolate the working tree so multiple `/develop-feature` agents can run concurren
    - Update phase completion status
 
 ### Phase 5: Validation + Staged-File Completeness
-1. Run validation checks — fix failures, max 3 retries per check:
+1. **Dependency freshness check** — ensure `node_modules` matches `package-lock.json`:
+   ```
+   cd backend && npm ls --depth=0 2>&1 | grep -q 'missing:' && npm install; cd ..
+   cd frontend && npm ls --depth=0 2>&1 | grep -q 'missing:' && npm install; cd ..
+   ```
+   This catches the case where new packages were added to `package.json` but `npm install` wasn't run (e.g., stale node_modules from a prior session).
+2. Run validation checks — fix failures, max 3 retries per check:
    ```
    npm run lint
    npm run typecheck
@@ -134,6 +140,14 @@ Use the ports allocated in Phase 0. This ensures multiple agents can run dev ser
      - SSE connections establish correctly (for streaming features)
    - Use `browser_take_screenshot` to capture evidence for the PR
    - **For bug fixes**: reproduce the bug scenario FIRST, then verify it's fixed after changes
+
+   **CRITICAL — End-to-end action verification:**
+   - Do NOT stop at "the page loads and looks correct"
+   - **Actually click every new button/action** added by this feature and verify the result
+   - After any streaming operation completes, verify that follow-up actions work (fork, regenerate, edit, etc.) — optimistic state can hide bugs that only surface on user interaction
+   - Use `browser_evaluate` to inspect React state if needed (e.g., verify message `_id` format, check for stale/optimistic data)
+   - Use `browser_network_requests` AFTER performing actions to confirm the expected API calls were made
+   - If an action silently does nothing (no error, no network call, no UI change), that's a **critical bug** — investigate
 
 5. **Check backend logs for errors**:
    - Read the backend process output

@@ -33,6 +33,8 @@ const mockMessages: Message[] = [
 describe('useMessages', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // After streaming completes, useMessages re-fetches to replace optimistic UUIDs
+    vi.mocked(api.getMessages).mockResolvedValue([]);
   });
 
   // ---- Initial state ----
@@ -160,6 +162,11 @@ describe('useMessages', () => {
   });
 
   it('accumulates streaming content via onChunk', async () => {
+    const serverMessages: Message[] = [
+      { _id: asMessageId('real-1'), conversationId: CONV_ID, role: 'user', content: 'Hi', attachments: [], createdAt: '2026-01-01T00:00:00Z' },
+      { _id: asMessageId('real-2'), conversationId: CONV_ID, role: 'assistant', content: 'Hello World', attachments: [], createdAt: '2026-01-01T00:00:01Z' },
+    ];
+    vi.mocked(api.getMessages).mockResolvedValue(serverMessages);
     vi.mocked(api.sendMessageStream).mockImplementation(
       async (_convId, _content, _model, _attachments, onChunk, onDone) => {
         onChunk?.('Hello');
@@ -178,7 +185,7 @@ describe('useMessages', () => {
     expect(result.current.streaming).toBe(false);
     expect(result.current.streamingContent).toBe('');
 
-    // Assistant message should have full accumulated content
+    // After re-fetch, messages have real server IDs
     const assistantMsg = result.current.messages.find((m) => m.role === 'assistant');
     expect(assistantMsg).toBeDefined();
     expect(assistantMsg!.content).toBe('Hello World');
@@ -212,6 +219,11 @@ describe('useMessages', () => {
   });
 
   it('adds assistant message on stream completion', async () => {
+    const serverMessages: Message[] = [
+      { _id: asMessageId('real-1'), conversationId: CONV_ID, role: 'user', content: 'Hi', attachments: [], createdAt: '2026-01-01T00:00:00Z' },
+      { _id: asMessageId('real-2'), conversationId: CONV_ID, role: 'assistant', content: 'Response text', model: MODEL_ID, attachments: [], createdAt: '2026-01-01T00:00:01Z' },
+    ];
+    vi.mocked(api.getMessages).mockResolvedValue(serverMessages);
     vi.mocked(api.sendMessageStream).mockImplementation(
       async (_convId, _content, _model, _attachments, onChunk, onDone) => {
         onChunk?.('Response text');
