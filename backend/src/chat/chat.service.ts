@@ -8,6 +8,7 @@ import {
 import { ObjectId, MongoServerError } from 'mongodb';
 import { DatabaseService } from '../database/database.service';
 import { LlmStreamService } from './llm-stream.service';
+import { ChatBroadcastService } from './chat-broadcast.service';
 import { ConversationDoc } from './interfaces/conversation.interface';
 import { MessageDoc } from './interfaces/message.interface';
 import type { StreamEvent } from './interfaces/stream-event.interface';
@@ -23,6 +24,7 @@ export class ChatService {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly llmStreamService: LlmStreamService,
+    private readonly broadcastService: ChatBroadcastService,
   ) {}
 
   async createConversation(
@@ -149,6 +151,19 @@ export class ChatService {
       throw error;
     }
     this.logger.debug(`User message saved for conversation ${conversationId}`);
+    this.broadcastService.emitUserMessageCreated(
+      conversationId,
+      {
+        conversationId: new ObjectId(conversationId),
+        role: 'user',
+        content: dto.content,
+        attachments: dto.attachments || [],
+        createdAt: now,
+        updatedAt: now,
+        ...(idempotencyKey ? { idempotencyKey } : {}),
+      },
+      userId.toHexString(),
+    );
     const messageCount = await this.databaseService
       .messages()
       .countDocuments({ conversationId: new ObjectId(conversationId) });
@@ -167,12 +182,16 @@ export class ChatService {
         `Auto-titled conversation ${conversationId}: "${title}"`,
       );
     }
-    yield* this.llmStreamService.stream(
+    yield* this.broadcastService.wrapStreamWithBroadcast(
+      this.llmStreamService.stream(
+        conversationId,
+        model,
+        userId,
+        abortSignal,
+        conversation.templateId,
+      ),
       conversationId,
-      model,
-      userId,
-      abortSignal,
-      conversation.templateId,
+      userId.toHexString(),
     );
   }
 
@@ -267,23 +286,35 @@ export class ChatService {
       role: 'user',
     });
     if (!message) throw new NotFoundException('Message not found');
-    await this.databaseService.messages().findOneAndUpdate(
+    const updatedMsg = await this.databaseService.messages().findOneAndUpdate(
       { _id: new ObjectId(messageId) },
       {
         $set: { content: dto.content, isEdited: true, updatedAt: new Date() },
       },
+      { returnDocument: 'after' },
     );
+    if (updatedMsg) {
+      this.broadcastService.emitMessageUpdated(
+        conversationId,
+        updatedMsg,
+        userId.toHexString(),
+      );
+    }
     await this.databaseService.messages().deleteMany({
       conversationId: convId,
       createdAt: { $gt: message.createdAt },
     });
     const model = dto.model || conversation.model;
-    yield* this.llmStreamService.stream(
+    yield* this.broadcastService.wrapStreamWithBroadcast(
+      this.llmStreamService.stream(
+        conversationId,
+        model,
+        userId,
+        abortSignal,
+        conversation.templateId,
+      ),
       conversationId,
-      model,
-      userId,
-      abortSignal,
-      conversation.templateId,
+      userId.toHexString(),
     );
   }
 
@@ -305,12 +336,16 @@ export class ChatService {
       conversationId: convId,
       createdAt: { $gte: message.createdAt },
     });
-    yield* this.llmStreamService.stream(
+    yield* this.broadcastService.wrapStreamWithBroadcast(
+      this.llmStreamService.stream(
+        conversationId,
+        conversation.model,
+        userId,
+        abortSignal,
+        conversation.templateId,
+      ),
       conversationId,
-      conversation.model,
-      userId,
-      abortSignal,
-      conversation.templateId,
+      userId.toHexString(),
     );
   }
 }

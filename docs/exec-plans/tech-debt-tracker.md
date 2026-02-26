@@ -110,7 +110,11 @@ Each task has:
 | FEAT-7 | Streaming Response Controls (stop/copy/retry) | frontend | 1d | done | PR #82 merged. Stop button during streaming, copy-to-clipboard on all messages, 4 new tests. |
 | FEAT-8 | Dark/Light Theme Toggle | frontend | 1d | done | PR #79 merged. useThemeMode hook, ThemeModeProvider, ThemeToggle component, light/dark/system modes. |
 | FEAT-9 | Keyboard Shortcuts | frontend | 1d | done | PR #92 merged. Cmd+N (new chat), Cmd+K (search), Escape (stop streaming/blur input). IS_MAC_PLATFORM constant. |
-| FEAT-10 | Real-Time Collaboration | fullstack | 5d | todo | WebSocket, shared conversations |
+| FEAT-10 | Real-Time Collaboration: WebSocket gateway, conversation sharing, real-time message sync, presence/typing indicators | fullstack | 5d | in-progress | All 4 subtasks. |
+| FEAT-10a | Backend WebSocket Gateway: Socket.IO gateway with JWT auth, room-based conversation channels, event broadcasting | backend | 1.5d | in-progress | First subtask. |
+| FEAT-10b | Conversation Sharing Model: participants field, invite/revoke endpoints, shared conversation queries, access control | backend | 1d | todo | Depends on FEAT-10a. |
+| FEAT-10c | Frontend WebSocket Client: socket.io-client, useWebSocket hook, live message sync, typing indicators, connection status | frontend | 1.5d | todo | Depends on FEAT-10a. |
+| FEAT-10d | Frontend Sharing UI: share dialog, participant list, invite flow, collaborative presence indicators | frontend | 1d | todo | Depends on FEAT-10b + FEAT-10c. |
 | FEAT-11 | Image Input (Multi-modal Chat): paste/upload images to vision-capable models via OpenRouter multi-modal API | fullstack | 1-2d | done | PR #94 merged. Multi-modal content parts, AuthImage component, inline previews. |
 | FEAT-12 | Conversation Branching: fork conversations from any message to explore alternative paths with tree-based history | fullstack | 2-3d | done | PR #97. Fork-as-copy approach with `forkedFrom` back-reference. |
 | FEAT-13 | Ollama / Local Model Support: direct Ollama connection (OpenAI-compatible API) for fully offline, zero-cost usage | backend | 1-2d | done | PR #95 merged. OllamaService auto-detect, dual OpenAI client routing, provider badges. |

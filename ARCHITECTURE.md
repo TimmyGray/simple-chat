@@ -66,7 +66,9 @@ AppModule
 │   └── AdminGuard (admin-only route protection)
 ├── ChatModule (imports AuthModule, McpModule)
 │   ├── ChatController (REST + SSE endpoints, JWT-protected)
+│   ├── ChatGateway (Socket.IO WebSocket gateway, JWT auth, room-based conversations)
 │   ├── ChatService (conversations CRUD, userId-scoped)
+│   ├── ChatBroadcastService (WebSocket event broadcasting for real-time sync)
 │   ├── LlmStreamService (LLM streaming via OpenAI SDK + OpenRouter, MCP tool-use loop)
 │   ├── SearchService (full-text conversation/message search)
 │   ├── ExportService (conversation export: Markdown, JSON, PDF)
@@ -227,6 +229,7 @@ All `:id` parameters are validated by `ParseObjectIdPipe` (returns 400 for inval
 - **Correlation IDs**: `CorrelationIdMiddleware` assigns a UUID to every request (or validates an incoming one). Pino logger includes it in all log entries.
 - **Env validation**: Joi schema in `env.validation.ts` validates all environment variables at startup. `OPENROUTER_API_KEY` is required; others have sensible defaults.
 - **Rate limiting**: Default 60 req/min via `ThrottlerGuard` (APP_GUARD). Streaming endpoint: 10/min. Upload endpoint: 20/min.
+- **WebSocket (Socket.IO)**: `ChatGateway` provides real-time collaboration via Socket.IO. JWT authentication via handshake `auth.token` field. Room-based architecture: clients join `conversation:<id>` rooms to receive live updates. Events: `message:created`, `message:updated`, `message:deleted`, `typing:start`, `typing:stop`, `user:joined`, `user:left`. `ChatBroadcastService` wraps LLM streams to broadcast assistant messages to other connected clients. CORS configured to match the same origin as the REST API.
 
 ---
 
@@ -378,6 +381,7 @@ Language detection order: `localStorage` then `navigator`. Fallback: English. Th
 | Scheduling    | @nestjs/schedule (cron)                             |
 | File Upload   | Multer (via @nestjs/platform-express)               |
 | PDF Parsing   | pdf-parse                                           |
+| WebSocket     | Socket.IO (via @nestjs/platform-socket.io)          |
 | Testing       | Vitest + unplugin-swc                               |
 
 ### Frontend
