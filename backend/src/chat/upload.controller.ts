@@ -1,20 +1,41 @@
 import {
   Controller,
   Post,
+  Get,
+  Param,
+  Res,
   Logger,
   HttpCode,
   HttpStatus,
   UseGuards,
   UseInterceptors,
   UploadedFiles,
+  NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Throttle } from '@nestjs/throttler';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { basename, extname, join, resolve, sep } from 'path';
+import { existsSync } from 'fs';
+import { createReadStream } from 'fs';
+import type { Response } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 const uploadLogger = new Logger('FileUpload');
+const UPLOADS_DIR = resolve('./uploads');
+
+const MIME_MAP: Record<string, string> = {
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.webp': 'image/webp',
+  '.pdf': 'application/pdf',
+  '.txt': 'text/plain',
+  '.md': 'text/markdown',
+  '.csv': 'text/csv',
+};
 
 @Controller('api')
 @UseGuards(JwtAuthGuard)
@@ -66,5 +87,28 @@ export class UploadController {
       filePath: file.path,
       fileSize: file.size,
     }));
+  }
+
+  @Get('uploads/:filename')
+  @Throttle({ default: { ttl: 60000, limit: 60 } })
+  serveUploadedFile(@Param('filename') filename: string, @Res() res: Response) {
+    const safeName = basename(filename);
+    const fullPath = join(UPLOADS_DIR, safeName);
+
+    if (!fullPath.startsWith(UPLOADS_DIR + sep)) {
+      throw new ForbiddenException('Access denied');
+    }
+    if (!existsSync(fullPath)) {
+      throw new NotFoundException('File not found');
+    }
+
+    const ext = extname(safeName).toLowerCase();
+    const contentType = MIME_MAP[ext] ?? 'application/octet-stream';
+
+    res.set({
+      'Content-Type': contentType,
+      'Cache-Control': 'private, max-age=86400',
+    });
+    createReadStream(fullPath).pipe(res);
   }
 }

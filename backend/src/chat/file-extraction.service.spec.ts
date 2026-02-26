@@ -88,16 +88,16 @@ describe('FileExtractionService', () => {
       expect(result).toBe('PDF content here');
     });
 
-    it('should return binary placeholder for unknown file types', async () => {
+    it('should return binary placeholder for non-text, non-image file types', async () => {
       vi.mocked(fs.existsSync).mockReturnValue(true);
 
       const result = await service.extractFileContent({
-        filePath: `${UPLOADS_DIR}/image.png`,
-        fileType: 'image/png',
-        fileName: 'image.png',
+        filePath: `${UPLOADS_DIR}/archive.zip`,
+        fileType: 'application/zip',
+        fileName: 'archive.zip',
       });
 
-      expect(result).toBe('[Binary file: image.png]');
+      expect(result).toBe('[Binary file: archive.zip]');
     });
 
     it('should return null when file does not exist', async () => {
@@ -233,6 +233,123 @@ describe('FileExtractionService', () => {
 
       expect(result).toEqual([{ role: 'assistant', content: 'Response' }]);
       expect(fs.existsSync).not.toHaveBeenCalled();
+    });
+
+    it('should build multi-modal content parts for image attachments', async () => {
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFileSync).mockReturnValue(Buffer.from('fake-png'));
+
+      const messages: MessageDoc[] = [
+        baseMessage({
+          content: 'What is in this image?',
+          attachments: [
+            {
+              fileName: 'photo.png',
+              fileType: 'image/png',
+              filePath: `${UPLOADS_DIR}/photo.png`,
+              fileSize: 1000,
+            },
+          ],
+        }),
+      ];
+
+      const result = await service.buildLlmMessages(messages);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].role).toBe('user');
+      const content = result[0].content as any[];
+      expect(Array.isArray(content)).toBe(true);
+      expect(content).toHaveLength(2);
+      expect(content[0]).toEqual({
+        type: 'text',
+        text: 'What is in this image?',
+      });
+      expect(content[1].type).toBe('image_url');
+      expect(content[1].image_url.url).toMatch(/^data:image\/png;base64,/);
+    });
+
+    it('should mix text attachments and images in multi-modal content', async () => {
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFileSync).mockImplementation((filePath: any) => {
+        if (String(filePath).endsWith('.txt')) return 'text data';
+        return Buffer.from('image-bytes');
+      });
+
+      const messages: MessageDoc[] = [
+        baseMessage({
+          content: 'Analyze these',
+          attachments: [
+            {
+              fileName: 'notes.txt',
+              fileType: 'text/plain',
+              filePath: `${UPLOADS_DIR}/notes.txt`,
+              fileSize: 50,
+            },
+            {
+              fileName: 'chart.jpeg',
+              fileType: 'image/jpeg',
+              filePath: `${UPLOADS_DIR}/chart.jpeg`,
+              fileSize: 2000,
+            },
+          ],
+        }),
+      ];
+
+      const result = await service.buildLlmMessages(messages);
+
+      expect(result).toHaveLength(1);
+      const content = result[0].content as any[];
+      expect(Array.isArray(content)).toBe(true);
+      expect(content).toHaveLength(2);
+      // Text part should include original text + extracted text attachment
+      expect(content[0].type).toBe('text');
+      expect(content[0].text).toContain('Analyze these');
+      expect(content[0].text).toContain('[Attached file: notes.txt]');
+      expect(content[0].text).toContain('text data');
+      // Image part
+      expect(content[1].type).toBe('image_url');
+      expect(content[1].image_url.url).toMatch(/^data:image\/jpeg;base64,/);
+    });
+
+    it('should use plain text format when only non-image attachments', async () => {
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      vi.mocked(fs.readFileSync).mockReturnValue('file data');
+
+      const messages: MessageDoc[] = [
+        baseMessage({
+          content: 'Check this',
+          attachments: [
+            {
+              fileName: 'data.csv',
+              fileType: 'text/csv',
+              filePath: `${UPLOADS_DIR}/data.csv`,
+              fileSize: 100,
+            },
+          ],
+        }),
+      ];
+
+      const result = await service.buildLlmMessages(messages);
+
+      expect(result).toHaveLength(1);
+      // Should be a plain string, not an array
+      expect(typeof result[0].content).toBe('string');
+      expect(result[0].content).toContain('[Attached file: data.csv]');
+    });
+  });
+
+  describe('isImageFile', () => {
+    it('should return true for image MIME types', () => {
+      expect(service.isImageFile('image/png')).toBe(true);
+      expect(service.isImageFile('image/jpeg')).toBe(true);
+      expect(service.isImageFile('image/gif')).toBe(true);
+      expect(service.isImageFile('image/webp')).toBe(true);
+    });
+
+    it('should return false for non-image MIME types', () => {
+      expect(service.isImageFile('text/plain')).toBe(false);
+      expect(service.isImageFile('application/pdf')).toBe(false);
+      expect(service.isImageFile('text/csv')).toBe(false);
     });
   });
 });
