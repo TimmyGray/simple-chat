@@ -75,6 +75,8 @@ Each task has:
 | B-M13 | Split chat.service.ts (369 lines, exceeds 300-line limit) | backend | 0.5d | done | PR #106 merged. Extracted ConversationForkService (369→289 lines). |
 | B-M14 | Split llm-stream.service.ts (315 lines, exceeds 300-line limit) | backend | 0.5d | todo | MCP tool-use loop adds ~25 lines from FEAT-14a. Extract tool execution into a dedicated ToolExecutionService. |
 | B-M15 | Split chat.controller.ts (342 lines, exceeds 300-line limit) | backend | 0.5d | todo | Sharing endpoints add ~45 lines from FEAT-10b. Extract sharing routes into a SharingController or SSE helpers into a utility. |
+| F-M24 | Fix react-hooks/exhaustive-deps warnings in useMessages.ts (3 warnings) | frontend | 0.25d | todo | sendMessage/editMessage/regenerateMessage have empty dep arrays but reference runStreamOperation. Wrap runStreamOperation in useCallback or add eslint-disable with justification. |
+| F-M25 | Split ChatArea.tsx (304 lines, exceeds 300-line limit) | frontend | 0.25d | todo | Just barely over limit. Extract WebSocket event handlers or Snackbar into a sub-component. |
 
 ## Low
 
