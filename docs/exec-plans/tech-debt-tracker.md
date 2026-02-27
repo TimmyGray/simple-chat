@@ -75,7 +75,7 @@ Each task has:
 | B-M13 | Split chat.service.ts (369 lines, exceeds 300-line limit) | backend | 0.5d | done | PR #106 merged. Extracted ConversationForkService (369→289 lines). |
 | B-M14 | Split llm-stream.service.ts (315 lines, exceeds 300-line limit) | backend | 0.5d | done | PR #107 merged. Extracted ToolExecutionService (315→233 lines). |
 | B-M15 | Split chat.controller.ts (342 lines, exceeds 300-line limit) | backend | 0.5d | done | PR #108 merged. Extracted SharingController + sse-stream.helper.ts (348→215 lines). |
-| F-M24 | Fix react-hooks/exhaustive-deps warnings in useMessages.ts (3 warnings) | frontend | 0.25d | todo | sendMessage/editMessage/regenerateMessage have empty dep arrays but reference runStreamOperation. Wrap runStreamOperation in useCallback or add eslint-disable with justification. |
+| F-M24 | Fix react-hooks/exhaustive-deps warnings in useMessages.ts (3 warnings) | frontend | 0.25d | done | PR #109 merged. Wrapped runStreamOperation in useCallback, added to dep arrays of sendMessage/editMessage/regenerateMessage. |
 | F-M25 | Split ChatArea.tsx (304 lines, exceeds 300-line limit) | frontend | 0.25d | todo | Just barely over limit. Extract WebSocket event handlers or Snackbar into a sub-component. |
 
 ## Low
@@ -225,3 +225,4 @@ Each task has:
 | B-M13 | Split chat.service.ts — extract ConversationForkService (PR #106) | 2026-02-27 |
 | B-M14 | Split llm-stream.service.ts — extract ToolExecutionService (PR #107) | 2026-02-27 |
 | B-M15 | Split chat.controller.ts — extract SharingController + sse-stream.helper (PR #108) | 2026-02-27 |
+| F-M24 | Fix react-hooks/exhaustive-deps warnings in useMessages (PR #109) | 2026-02-27 |
