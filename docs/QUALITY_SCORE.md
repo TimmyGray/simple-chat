@@ -1,6 +1,6 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-27 (audit #20 + sweep #21)
+> Last updated: 2026-02-27 (audit #21 + sweep #21)
 
 ## Test Summary
 
@@ -50,10 +50,28 @@
 ## Tech Debt
 - Critical: 0 todo, 4 done (JWT authentication completed)
 - High: 0 todo, 7 done — all high-priority items completed
-- Medium: 1 todo, 34 done, 1 wont-fix (F-M25 remaining)
+- Medium: 0 todo, 35 done, 1 wont-fix — all medium-priority items completed (F-M25 done in PR #110)
 - Low: 0 todo, 15 done — all low-priority items completed
 - Features: 0 todo, 19 done — all features completed (FEAT-10d + FEAT-14b done)
 - Total tracked: 86 (see `docs/exec-plans/tech-debt-tracker.md`)
+
+## Audit #21 Findings
+- All validation passing: lint 0 errors, 0 warnings, typecheck 0 errors, 494 tests passing (48 files), build passing
+- Backend tests: 27 files, 282 tests (unchanged)
+- Frontend tests: 21 files, 212 tests (unchanged)
+- Total tests: 494 (unchanged, target: 100+ sustained, comfortably exceeded)
+- Completed since last audit: F-M25 (Split ChatArea.tsx, PR #110 -- extracted useConversationWebSocket hook, 304 to 190 lines)
+- All file size violations resolved: no non-test source file exceeds 300 lines
+- All tech debt items complete: 0 todo across all priorities, 86 total tracked items
+- Architecture drift found and fixed: ARCHITECTURE.md Module Graph updated (added SharingController, ConversationForkService, ToolExecutionService, UploadController), State Management table updated (added useConversationWebSocket hook)
+- DB schema: no drift, TypeScript interfaces match docs/generated/db-schema.md exactly
+- No new vulnerabilities (root: 0, backend: transitive-only, frontend: transitive-only)
+- Bundle: Backend 1.3 MB, Frontend 7.3 MB (unchanged)
+- No console.log/warn/error in source (clean)
+- No hardcoded secrets (clean)
+- No TODO/FIXME/HACK comments in source (clean)
+- All user-facing strings use t() for i18n
+- Overall health: HEALTHY -- all tasks complete, zero tech debt remaining, architecture docs refreshed
 
 ## Audit #20 Findings
 - All validation passing: lint 0 errors (3 warnings), typecheck 0 errors, 482 tests passing (46 files), build passing
