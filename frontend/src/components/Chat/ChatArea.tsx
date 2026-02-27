@@ -8,8 +8,7 @@ import { useModel } from '../../contexts/ModelContext';
 import { useTemplate } from '../../contexts/TemplateContext';
 import { useWebSocketContext } from '../../contexts/WebSocketContext';
 import { useMessages } from '../../hooks/useMessages';
-import { WS_SERVER_EVENT, toFrontendMessage, toDeletedIds } from '../../api/socket';
-import type { WsMessagePayload, WsMessageDeletedPayload, WsTypingPayload } from '../../api/socket';
+import { useConversationWebSocket } from '../../hooks/useConversationWebSocket';
 import MessageList from './MessageList';
 import ChatInput from './ChatInput';
 import ExportMenu from './ExportMenu';
@@ -17,9 +16,6 @@ import ShareButton from './ShareButton';
 import ConnectionStatus from './ConnectionStatus';
 import EmptyState from '../common/EmptyState';
 import { ERROR_SNACKBAR_AUTO_HIDE_MS } from '../../constants';
-
-const TYPING_DEBOUNCE_MS = 3000;
-const TYPING_TIMEOUT_MS = 5000;
 
 export default function ChatArea() {
   const {
@@ -31,7 +27,7 @@ export default function ChatArea() {
   } = useChatApp();
   const { models, selectedModel, changeModel } = useModel();
   const { templates, selectedTemplateId, changeTemplate } = useTemplate();
-  const { socket, connectionStatus, reconnectCount, joinConversation, leaveConversation, emitTypingStart, emitTypingStop } = useWebSocketContext();
+  const { emitTypingStop } = useWebSocketContext();
   const { t } = useTranslation();
 
   const {
@@ -52,9 +48,13 @@ export default function ChatArea() {
   } = useMessages();
 
   const [exportError, setExportError] = useState<string | null>(null);
-  const [remoteTypingUsers, setRemoteTypingUsers] = useState<string[]>([]);
-  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
-  const typingTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  const conversationId = conversation?._id ?? null;
+
+  const { connectionStatus, remoteTypingUsers, handleTyping } = useConversationWebSocket(
+    conversationId,
+    { addRemoteMessage, updateRemoteMessage, removeRemoteMessage },
+  );
 
   // Escape key stops streaming when active
   useEffect(() => {
@@ -69,8 +69,6 @@ export default function ChatArea() {
     return () => document.removeEventListener('keydown', handler);
   }, [streaming, stopStreaming]);
 
-  const conversationId = conversation?._id ?? null;
-
   useEffect(() => {
     if (conversationId) {
       void fetchMessages(conversationId);
@@ -79,110 +77,7 @@ export default function ChatArea() {
     }
   }, [conversationId, fetchMessages, clear]);
 
-  // Join/leave WebSocket rooms on conversation change + re-join after reconnect
-  const prevConversationIdRef = useRef(conversationId);
-  useEffect(() => {
-    const prev = prevConversationIdRef.current;
-    if (prev && prev !== conversationId) {
-      leaveConversation(prev);
-      // Clean up typing timeout from previous conversation
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-        typingTimeoutRef.current = null;
-      }
-    }
-    if (conversationId) {
-      joinConversation(conversationId);
-    }
-    prevConversationIdRef.current = conversationId;
-    return () => {
-      if (conversationId) {
-        leaveConversation(conversationId);
-      }
-    };
-  }, [conversationId, reconnectCount, joinConversation, leaveConversation]);
-
-  // Listen for WebSocket events
-  useEffect(() => {
-    if (!socket || !conversationId) return;
-
-    const handleMessageCreated = (payload: WsMessagePayload) => {
-      const { conversationId: msgConvId, message } = toFrontendMessage(payload);
-      if (msgConvId === conversationId) {
-        addRemoteMessage(message);
-      }
-    };
-
-    const handleMessageUpdated = (payload: WsMessagePayload) => {
-      const { conversationId: msgConvId, message } = toFrontendMessage(payload);
-      if (msgConvId === conversationId) {
-        updateRemoteMessage(message);
-      }
-    };
-
-    const handleMessageDeleted = (payload: WsMessageDeletedPayload) => {
-      const { conversationId: msgConvId, messageId } = toDeletedIds(payload);
-      if (msgConvId === conversationId) {
-        removeRemoteMessage(messageId);
-      }
-    };
-
-    const handleTypingStart = (payload: WsTypingPayload) => {
-      if (payload.conversationId !== conversationId) return;
-      setRemoteTypingUsers((prev) =>
-        prev.includes(payload.email) ? prev : [...prev, payload.email],
-      );
-      // Auto-clear after timeout (safety net)
-      const existing = typingTimersRef.current.get(payload.userId);
-      if (existing) clearTimeout(existing);
-      typingTimersRef.current.set(
-        payload.userId,
-        setTimeout(() => {
-          setRemoteTypingUsers((prev) => prev.filter((e) => e !== payload.email));
-          typingTimersRef.current.delete(payload.userId);
-        }, TYPING_TIMEOUT_MS),
-      );
-    };
-
-    const handleTypingStop = (payload: WsTypingPayload) => {
-      if (payload.conversationId !== conversationId) return;
-      setRemoteTypingUsers((prev) => prev.filter((e) => e !== payload.email));
-      const timer = typingTimersRef.current.get(payload.userId);
-      if (timer) {
-        clearTimeout(timer);
-        typingTimersRef.current.delete(payload.userId);
-      }
-    };
-
-    socket.on(WS_SERVER_EVENT.MESSAGE_CREATED, handleMessageCreated);
-    socket.on(WS_SERVER_EVENT.MESSAGE_UPDATED, handleMessageUpdated);
-    socket.on(WS_SERVER_EVENT.MESSAGE_DELETED, handleMessageDeleted);
-    socket.on(WS_SERVER_EVENT.TYPING_START, handleTypingStart);
-    socket.on(WS_SERVER_EVENT.TYPING_STOP, handleTypingStop);
-
-    const timers = typingTimersRef.current;
-    return () => {
-      socket.off(WS_SERVER_EVENT.MESSAGE_CREATED, handleMessageCreated);
-      socket.off(WS_SERVER_EVENT.MESSAGE_UPDATED, handleMessageUpdated);
-      socket.off(WS_SERVER_EVENT.MESSAGE_DELETED, handleMessageDeleted);
-      socket.off(WS_SERVER_EVENT.TYPING_START, handleTypingStart);
-      socket.off(WS_SERVER_EVENT.TYPING_STOP, handleTypingStop);
-      timers.forEach((timer) => clearTimeout(timer));
-      timers.clear();
-      setRemoteTypingUsers([]);
-    };
-  }, [socket, conversationId, addRemoteMessage, updateRemoteMessage, removeRemoteMessage]);
-
-  // Typing emission with debounce
-  const handleTyping = useCallback(() => {
-    if (!conversationId) return;
-    emitTypingStart(conversationId);
-    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    typingTimeoutRef.current = setTimeout(() => {
-      emitTypingStop(conversationId);
-      typingTimeoutRef.current = null;
-    }, TYPING_DEBOUNCE_MS);
-  }, [conversationId, emitTypingStart, emitTypingStop]);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   const handleSend = useCallback(
     async (content: string, attachments: Attachment[]) => {
