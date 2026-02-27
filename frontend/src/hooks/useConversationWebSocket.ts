@@ -18,6 +18,7 @@ interface UseConversationWebSocketReturn {
   connectionStatus: ConnectionStatus;
   remoteTypingUsers: string[];
   handleTyping: () => void;
+  cancelTyping: () => void;
 }
 
 /**
@@ -148,5 +149,15 @@ export function useConversationWebSocket(
     }, TYPING_DEBOUNCE_MS);
   }, [conversationId, emitTypingStart, emitTypingStop]);
 
-  return { connectionStatus, remoteTypingUsers, handleTyping };
+  // Cancel typing debounce and immediately emit stop (used on message send)
+  const cancelTyping = useCallback(() => {
+    if (!conversationId) return;
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+      emitTypingStop(conversationId);
+    }
+  }, [conversationId, emitTypingStop]);
+
+  return { connectionStatus, remoteTypingUsers, handleTyping, cancelTyping };
 }

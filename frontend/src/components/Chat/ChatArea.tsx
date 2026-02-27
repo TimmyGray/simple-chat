@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Snackbar, Alert, Chip } from '@mui/material';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
@@ -6,7 +6,6 @@ import type { Attachment, MessageId } from '../../types';
 import { useChatApp } from '../../contexts/ChatAppContext';
 import { useModel } from '../../contexts/ModelContext';
 import { useTemplate } from '../../contexts/TemplateContext';
-import { useWebSocketContext } from '../../contexts/WebSocketContext';
 import { useMessages } from '../../hooks/useMessages';
 import { useConversationWebSocket } from '../../hooks/useConversationWebSocket';
 import MessageList from './MessageList';
@@ -27,7 +26,6 @@ export default function ChatArea() {
   } = useChatApp();
   const { models, selectedModel, changeModel } = useModel();
   const { templates, selectedTemplateId, changeTemplate } = useTemplate();
-  const { emitTypingStop } = useWebSocketContext();
   const { t } = useTranslation();
 
   const {
@@ -51,7 +49,7 @@ export default function ChatArea() {
 
   const conversationId = conversation?._id ?? null;
 
-  const { connectionStatus, remoteTypingUsers, handleTyping } = useConversationWebSocket(
+  const { connectionStatus, remoteTypingUsers, handleTyping, cancelTyping } = useConversationWebSocket(
     conversationId,
     { addRemoteMessage, updateRemoteMessage, removeRemoteMessage },
   );
@@ -77,17 +75,10 @@ export default function ChatArea() {
     }
   }, [conversationId, fetchMessages, clear]);
 
-  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
-
   const handleSend = useCallback(
     async (content: string, attachments: Attachment[]) => {
       if (!conversation) return;
-      // Stop typing indicator on send
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-        typingTimeoutRef.current = null;
-        emitTypingStop(conversation._id);
-      }
+      cancelTyping();
       await sendMessage(
         conversation._id,
         content,
@@ -96,7 +87,7 @@ export default function ChatArea() {
       );
       onConversationUpdate();
     },
-    [conversation, selectedModel, sendMessage, onConversationUpdate, emitTypingStop],
+    [conversation, selectedModel, sendMessage, onConversationUpdate, cancelTyping],
   );
 
   const handleEditMessage = useCallback(
