@@ -73,7 +73,7 @@ Each task has:
 | B-M11 | Update /develop-feature skill to use git worktree isolation for parallel execution | infra | 0.25d | done | PR #69 merged. Phase 1.5 uses EnterWorktree for isolated execution. |
 | B-M12 | Refactor toPdf in export.service.ts (85 lines, exceeds 50-line limit) | backend | 0.25d | done | PR #96 merged. Extracted renderPdfHeader + renderPdfMessage helpers. |
 | B-M13 | Split chat.service.ts (369 lines, exceeds 300-line limit) | backend | 0.5d | done | PR #106 merged. Extracted ConversationForkService (369→289 lines). |
-| B-M14 | Split llm-stream.service.ts (315 lines, exceeds 300-line limit) | backend | 0.5d | todo | MCP tool-use loop adds ~25 lines from FEAT-14a. Extract tool execution into a dedicated ToolExecutionService. |
+| B-M14 | Split llm-stream.service.ts (315 lines, exceeds 300-line limit) | backend | 0.5d | done | PR #107 merged. Extracted ToolExecutionService (315→233 lines). |
 | B-M15 | Split chat.controller.ts (342 lines, exceeds 300-line limit) | backend | 0.5d | todo | Sharing endpoints add ~45 lines from FEAT-10b. Extract sharing routes into a SharingController or SSE helpers into a utility. |
 | F-M24 | Fix react-hooks/exhaustive-deps warnings in useMessages.ts (3 warnings) | frontend | 0.25d | todo | sendMessage/editMessage/regenerateMessage have empty dep arrays but reference runStreamOperation. Wrap runStreamOperation in useCallback or add eslint-disable with justification. |
 | F-M25 | Split ChatArea.tsx (304 lines, exceeds 300-line limit) | frontend | 0.25d | todo | Just barely over limit. Extract WebSocket event handlers or Snackbar into a sub-component. |
@@ -223,3 +223,4 @@ Each task has:
 | FEAT-10d | Frontend Sharing UI — ShareDialog, ShareButton, useSharing hook (PR #103) | 2026-02-27 |
 | FEAT-14b | MCP Frontend UI — inline tool-call display, SSE parsing, streaming (PR #104) | 2026-02-27 |
 | B-M13 | Split chat.service.ts — extract ConversationForkService (PR #106) | 2026-02-27 |
+| B-M14 | Split llm-stream.service.ts — extract ToolExecutionService (PR #107) | 2026-02-27 |
