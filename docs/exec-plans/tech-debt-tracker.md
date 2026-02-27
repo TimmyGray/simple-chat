@@ -122,7 +122,7 @@ Each task has:
 | FEAT-12 | Conversation Branching: fork conversations from any message to explore alternative paths with tree-based history | fullstack | 2-3d | done | PR #97. Fork-as-copy approach with `forkedFrom` back-reference. |
 | FEAT-13 | Ollama / Local Model Support: direct Ollama connection (OpenAI-compatible API) for fully offline, zero-cost usage | backend | 1-2d | done | PR #95 merged. OllamaService auto-detect, dual OpenAI client routing, provider badges. |
 | FEAT-14 | MCP Tool Integration: connect to MCP servers for external tools (web search, file systems, APIs) with inline tool-call UI | fullstack | 4-5d | done | PR #98 merged (FEAT-14a: backend). McpModule with admin CRUD, tool-use streaming loop, security hardening. Frontend tool-call UI deferred to FEAT-14b. |
-| FEAT-14b | MCP Frontend UI: inline tool-call display with collapsible results, tool status indicators during streaming | frontend | 1-2d | todo | Backend streams tool_call + tool_result SSE events; frontend needs UI components to display them. |
+| FEAT-14b | MCP Frontend UI: inline tool-call display with collapsible results, tool status indicators during streaming | frontend | 1-2d | done | PR #104 merged. ToolCallDisplay component, SSE tool_call/tool_result parsing, streaming accumulation, 7 tests. |
 
 ## Completed
 
@@ -218,3 +218,5 @@ Each task has:
 | FEAT-10a | Backend WebSocket Gateway — Socket.IO + JWT auth + room channels (PR #100) | 2026-02-26 |
 | FEAT-10b | Conversation Sharing Model — participants, invite/revoke, access control (PR #101) | 2026-02-26 |
 | FEAT-10c | Frontend WebSocket Client — socket.io-client, useWebSocket, real-time sync (PR #102) | 2026-02-26 |
+| FEAT-10d | Frontend Sharing UI — ShareDialog, ShareButton, useSharing hook (PR #103) | 2026-02-27 |
+| FEAT-14b | MCP Frontend UI — inline tool-call display, SSE parsing, streaming (PR #104) | 2026-02-27 |
