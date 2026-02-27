@@ -109,8 +109,6 @@
     "invitePlaceholder": "输入邮箱地址",
     "roleViewer": "查看者",
     "roleEditor": "编辑者",
-    "owner": "所有者",
-    "remove": "移除",
     "removeParticipant": "移除参与者",
     "noParticipants": "暂无参与者",
     "inviteSuccess": "邀请已发送",
@@ -153,7 +151,6 @@
     "fetchParticipants": "获取参与者列表失败",
     "inviteParticipant": "邀请参与者失败",
     "revokeParticipant": "移除参与者失败",
-    "fetchSharedConversations": "获取共享对话失败",
     "corsOrNetwork": "无法连接服务器。请检查后端是否正在运行以及 CORS 是否配置正确。",
     "sse": {
       "STREAM_TIMEOUT": "响应时间过长，已超时。",

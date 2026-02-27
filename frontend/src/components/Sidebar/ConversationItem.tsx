@@ -32,21 +32,23 @@ export default function ConversationItem({
     <ListItem
       disablePadding
       secondaryAction={
-        <IconButton
-          edge="end"
-          size="small"
-          aria-label={t('common.delete')}
-          onClick={onDelete}
-          className="delete-btn"
-          sx={{
-            color: 'text.secondary',
-            '&:hover': { color: 'error.main' },
-            opacity: 0,
-            transition: 'opacity 0.2s',
-          }}
-        >
-          <DeleteOutlineIcon fontSize="small" />
-        </IconButton>
+        !shared && (
+          <IconButton
+            edge="end"
+            size="small"
+            aria-label={t('common.delete')}
+            onClick={onDelete}
+            className="delete-btn"
+            sx={{
+              color: 'text.secondary',
+              '&:hover': { color: 'error.main' },
+              opacity: 0,
+              transition: 'opacity 0.2s',
+            }}
+          >
+            <DeleteOutlineIcon fontSize="small" />
+          </IconButton>
+        )
       }
       sx={{
         mb: 0.5,

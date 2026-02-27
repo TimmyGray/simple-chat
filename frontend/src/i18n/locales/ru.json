@@ -109,8 +109,6 @@
     "invitePlaceholder": "Введите адрес электронной почты",
     "roleViewer": "Наблюдатель",
     "roleEditor": "Редактор",
-    "owner": "Владелец",
-    "remove": "Удалить",
     "removeParticipant": "Удалить участника",
     "noParticipants": "Участников пока нет",
     "inviteSuccess": "Приглашение отправлено",
@@ -153,7 +151,6 @@
     "fetchParticipants": "Не удалось загрузить участников",
     "inviteParticipant": "Не удалось пригласить участника",
     "revokeParticipant": "Не удалось удалить участника",
-    "fetchSharedConversations": "Не удалось загрузить общие диалоги",
     "corsOrNetwork": "Не удаётся подключиться к серверу. Убедитесь, что сервер запущен и CORS настроен правильно.",
     "sse": {
       "STREAM_TIMEOUT": "Ответ занял слишком много времени.",

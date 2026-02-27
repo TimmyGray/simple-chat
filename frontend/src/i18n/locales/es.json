@@ -109,8 +109,6 @@
     "invitePlaceholder": "Ingresa el correo electrónico",
     "roleViewer": "Lector",
     "roleEditor": "Editor",
-    "owner": "Propietario",
-    "remove": "Eliminar",
     "removeParticipant": "Eliminar participante",
     "noParticipants": "No hay participantes aún",
     "inviteSuccess": "Invitación enviada",
@@ -153,7 +151,6 @@
     "fetchParticipants": "Error al obtener los participantes",
     "inviteParticipant": "Error al invitar al participante",
     "revokeParticipant": "Error al eliminar al participante",
-    "fetchSharedConversations": "Error al obtener las conversaciones compartidas",
     "corsOrNetwork": "No se puede conectar al servidor. Verifica que el backend esté en ejecución y que CORS esté configurado correctamente.",
     "sse": {
       "STREAM_TIMEOUT": "La respuesta tardó demasiado y se agotó el tiempo.",

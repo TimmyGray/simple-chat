@@ -109,8 +109,6 @@
     "invitePlaceholder": "Enter email address",
     "roleViewer": "Viewer",
     "roleEditor": "Editor",
-    "owner": "Owner",
-    "remove": "Remove",
     "removeParticipant": "Remove participant",
     "noParticipants": "No participants yet",
     "inviteSuccess": "Invitation sent",
@@ -153,7 +151,6 @@
     "fetchParticipants": "Failed to fetch participants",
     "inviteParticipant": "Failed to invite participant",
     "revokeParticipant": "Failed to remove participant",
-    "fetchSharedConversations": "Failed to fetch shared conversations",
     "corsOrNetwork": "Cannot reach the server. Check that the backend is running and CORS is configured correctly.",
     "sse": {
       "STREAM_TIMEOUT": "The response took too long and timed out.",

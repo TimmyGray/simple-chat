@@ -29,6 +29,11 @@ import type { ConversationId, ParticipantRole } from '../../types';
 import { useSharing } from '../../hooks/useSharing';
 import { ICON_SIZE_SM, LOADING_SPINNER_LG, ERROR_SNACKBAR_AUTO_HIDE_MS } from '../../constants';
 
+const ROLE_LABEL_KEYS: Record<ParticipantRole, string> = {
+  viewer: 'sharing.roleViewer',
+  editor: 'sharing.roleEditor',
+};
+
 interface ShareDialogProps {
   open: boolean;
   conversationId: ConversationId;
@@ -163,7 +168,7 @@ export default function ShareDialog({ open, conversationId, currentUserId, onClo
                           )}
                         </Typography>
                         <Chip
-                          label={t(`sharing.role${participant.role.charAt(0).toUpperCase()}${participant.role.slice(1)}`)}
+                          label={t(ROLE_LABEL_KEYS[participant.role])}
                           size="small"
                           variant="outlined"
                           color={participant.role === 'editor' ? 'primary' : 'default'}
