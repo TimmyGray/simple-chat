@@ -39,6 +39,7 @@ export default function ChatArea() {
     loading,
     streaming,
     streamingContent,
+    streamingToolCalls,
     fetchMessages,
     sendMessage,
     editMessage,
@@ -269,6 +270,7 @@ export default function ChatArea() {
         loading={loading}
         streaming={streaming}
         streamingContent={streamingContent}
+        streamingToolCalls={streamingToolCalls}
         onEditMessage={handleEditMessage}
         onRegenerateMessage={handleRegenerateMessage}
         onForkMessage={handleForkMessage}

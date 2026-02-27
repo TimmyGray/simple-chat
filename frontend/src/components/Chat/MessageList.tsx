@@ -1,7 +1,7 @@
 import { useRef, useMemo, useEffect, useCallback } from 'react';
 import { Box, CircularProgress } from '@mui/material';
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
-import type { Message, MessageId } from '../../types';
+import type { Message, MessageId, ToolCallEntry } from '../../types';
 import { asMessageId, asConversationId } from '../../types';
 import MessageBubble from './MessageBubble';
 import TypingIndicator from './TypingIndicator';
@@ -19,6 +19,7 @@ interface MessageListProps {
   loading: boolean;
   streaming: boolean;
   streamingContent: string;
+  streamingToolCalls?: ToolCallEntry[];
   onEditMessage?: (messageId: MessageId, content: string) => void;
   onRegenerateMessage?: (messageId: MessageId) => void;
   onForkMessage?: (messageId: MessageId) => void;
@@ -31,6 +32,7 @@ export default function MessageList({
   loading,
   streaming,
   streamingContent,
+  streamingToolCalls,
   onEditMessage,
   onRegenerateMessage,
   onForkMessage,
@@ -40,8 +42,9 @@ export default function MessageList({
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const isAtBottomRef = useRef(true);
 
+  const hasStreamingToolCalls = streamingToolCalls && streamingToolCalls.length > 0;
   const items = useMemo(() => {
-    if (!streaming || !streamingContent) return messages;
+    if (!streaming || (!streamingContent && !hasStreamingToolCalls)) return messages;
     return [
       ...messages,
       {
@@ -51,9 +54,10 @@ export default function MessageList({
         content: streamingContent,
         attachments: [],
         createdAt: new Date().toISOString(),
+        ...(hasStreamingToolCalls ? { toolCalls: streamingToolCalls } : {}),
       },
     ];
-  }, [messages, streaming, streamingContent]);
+  }, [messages, streaming, streamingContent, hasStreamingToolCalls, streamingToolCalls]);
 
   // Throttle scroll-to-bottom during streaming (F-M2)
   const lastScrollRef = useRef(0);
@@ -140,7 +144,7 @@ export default function MessageList({
       components={{
         Header: () => <Box sx={{ height: LIST_SPACER_HEIGHT }} />,
         Footer: () =>
-          streaming && !streamingContent ? (
+          streaming && !streamingContent && !hasStreamingToolCalls ? (
             <Box sx={{ px: { xs: 2, md: 3, lg: 4 }, pb: 2 }}>
               <TypingIndicator />
             </Box>

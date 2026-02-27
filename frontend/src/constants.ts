@@ -82,6 +82,11 @@ export const SHORTCUT_HINT_OPACITY = 0.7;
 export const IMAGE_PREVIEW_MAX_HEIGHT = 240;
 export const IMAGE_THUMB_SIZE = 80;
 
+// ─── Tool Calls ─────────────────────────────────────────────
+export const TOOL_CALL_ICON_SIZE = 16;
+export const TOOL_CALL_SPINNER_SIZE = 14;
+export const TOOL_RESULT_MAX_HEIGHT = 200;
+
 // ─── Snackbar ───────────────────────────────────────────────
 export const SNACKBAR_AUTO_HIDE_MS = 6000;
 export const ERROR_SNACKBAR_AUTO_HIDE_MS = 4000;

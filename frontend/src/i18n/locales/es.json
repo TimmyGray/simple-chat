@@ -115,6 +115,15 @@
     "you": "(tú)",
     "sharedWithYou": "Compartido"
   },
+  "tools": {
+    "calling": "Llamando a {{name}}…",
+    "completed": "{{name}} completado",
+    "error": "{{name}} falló",
+    "arguments": "Argumentos",
+    "result": "Resultado",
+    "showDetails": "Mostrar detalles",
+    "hideDetails": "Ocultar detalles"
+  },
   "models": {
     "free": "Gratis",
     "local": "Local",

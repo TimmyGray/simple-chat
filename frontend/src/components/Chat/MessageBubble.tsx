@@ -21,6 +21,7 @@ import { getUploadUrl, isImageAttachment } from '../../api/client';
 import AuthImage from '../common/AuthImage';
 import MessageActions from './MessageActions';
 import MessageEditForm from './MessageEditForm';
+import ToolCallDisplay from './ToolCallDisplay';
 
 const LazyMarkdownRenderer = lazy(() => import('./MarkdownRenderer'));
 
@@ -190,6 +191,11 @@ function MessageBubble({ message, onEdit, onRegenerate, onFork, onStop, isStream
                 />
               ))}
             </Box>
+          )}
+
+          {/* Tool calls (assistant messages only) */}
+          {!isUser && message.toolCalls && message.toolCalls.length > 0 && (
+            <ToolCallDisplay toolCalls={message.toolCalls} />
           )}
 
           {/* Content */}

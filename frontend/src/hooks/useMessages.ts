@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Message, Attachment, ConversationId, MessageId, ModelId } from '../types';
+import type { Message, Attachment, ConversationId, MessageId, ModelId, ToolCallEntry, ToolCallEvent, ToolResultEvent } from '../types';
 import { asMessageId } from '../types';
 import * as api from '../api/client';
 import { getErrorMessage } from '../utils/getErrorMessage';
@@ -10,6 +10,7 @@ export interface UseMessagesReturn {
   loading: boolean;
   streaming: boolean;
   streamingContent: string;
+  streamingToolCalls: ToolCallEntry[];
   error: string | null;
   fetchMessages: (conversationId: ConversationId) => Promise<void>;
   sendMessage: (conversationId: ConversationId, content: string, model?: ModelId, attachments?: Attachment[]) => Promise<void>;
@@ -31,9 +32,11 @@ export function useMessages(): UseMessagesReturn {
   const [loading, setLoading] = useState(false);
   const [streaming, setStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
+  const [streamingToolCalls, setStreamingToolCalls] = useState<ToolCallEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const fullContentRef = useRef('');
+  const toolCallsRef = useRef<ToolCallEntry[]>([]);
 
   const fetchMessages = useCallback(async (conversationId: ConversationId) => {
     setLoading(true);
@@ -53,6 +56,30 @@ export function useMessages(): UseMessagesReturn {
     abortRef.current?.abort();
   }, []);
 
+  const handleToolCall = useCallback((tc: ToolCallEvent) => {
+    const entry: ToolCallEntry = { name: tc.name, arguments: tc.arguments };
+    toolCallsRef.current = [...toolCallsRef.current, entry];
+    setStreamingToolCalls(toolCallsRef.current);
+  }, []);
+
+  const handleToolResult = useCallback((tr: ToolResultEvent) => {
+    const calls = toolCallsRef.current;
+    // Find the last entry matching this tool name that has no result yet
+    let idx = -1;
+    for (let i = calls.length - 1; i >= 0; i--) {
+      if (calls[i].name === tr.name && !calls[i].result) {
+        idx = i;
+        break;
+      }
+    }
+    if (idx !== -1) {
+      const updated = [...calls];
+      updated[idx] = { ...updated[idx], result: { content: tr.content, isError: tr.isError } };
+      toolCallsRef.current = updated;
+      setStreamingToolCalls(toolCallsRef.current);
+    }
+  }, []);
+
   /** Shared streaming boilerplate for send, edit, and regenerate operations. */
   const runStreamOperation = async (
     conversationId: ConversationId,
@@ -61,6 +88,8 @@ export function useMessages(): UseMessagesReturn {
       onDone: () => void,
       onError: (message: string, code?: string) => void,
       signal: AbortSignal,
+      onToolCall: (tc: ToolCallEvent) => void,
+      onToolResult: (tr: ToolResultEvent) => void,
     ) => Promise<void>,
     errorI18nKey: string,
     doneMessageExtra?: Partial<Message>,
@@ -68,10 +97,12 @@ export function useMessages(): UseMessagesReturn {
     setError(null);
     setStreaming(true);
     setStreamingContent('');
+    setStreamingToolCalls([]);
 
     const abortController = new AbortController();
     abortRef.current = abortController;
     fullContentRef.current = '';
+    toolCallsRef.current = [];
     let completed = false;
 
     try {
@@ -89,6 +120,7 @@ export function useMessages(): UseMessagesReturn {
             content: fullContentRef.current,
             attachments: [],
             createdAt: new Date().toISOString(),
+            ...(toolCallsRef.current.length > 0 ? { toolCalls: toolCallsRef.current } : {}),
             ...doneMessageExtra,
           };
           setMessages((prev) => [...prev, assistantMsg]);
@@ -109,6 +141,8 @@ export function useMessages(): UseMessagesReturn {
           setMessages((prev) => [...prev, errorMsg]);
         },
         abortController.signal,
+        handleToolCall,
+        handleToolResult,
       );
     } catch (err) {
       if (!completed) {
@@ -118,7 +152,9 @@ export function useMessages(): UseMessagesReturn {
     } finally {
       setStreaming(false);
       setStreamingContent('');
+      setStreamingToolCalls([]);
       fullContentRef.current = '';
+      toolCallsRef.current = [];
       abortRef.current = null;
       // Re-fetch messages to replace optimistic UUIDs with real server ObjectIds.
       // Without this, fork and regenerate fail because they need real _ids.
@@ -149,8 +185,8 @@ export function useMessages(): UseMessagesReturn {
       const idempotencyKey = crypto.randomUUID();
       await runStreamOperation(
         conversationId,
-        (onChunk, onDone, onError, signal) =>
-          api.sendMessageStream(conversationId, content, model, attachments, onChunk, onDone, onError, signal, idempotencyKey),
+        (onChunk, onDone, onError, signal, onToolCall, onToolResult) =>
+          api.sendMessageStream(conversationId, content, model, attachments, onChunk, onDone, onError, signal, idempotencyKey, onToolCall, onToolResult),
         'errors.streamingFailed',
         { model },
       );
@@ -174,8 +210,8 @@ export function useMessages(): UseMessagesReturn {
       });
       await runStreamOperation(
         conversationId,
-        (onChunk, onDone, onError, signal) =>
-          api.editMessageStream(conversationId, messageId, content, onChunk, onDone, onError, signal),
+        (onChunk, onDone, onError, signal, onToolCall, onToolResult) =>
+          api.editMessageStream(conversationId, messageId, content, onChunk, onDone, onError, signal, onToolCall, onToolResult),
         'errors.editFailed',
       );
     },
@@ -195,8 +231,8 @@ export function useMessages(): UseMessagesReturn {
       });
       await runStreamOperation(
         conversationId,
-        (onChunk, onDone, onError, signal) =>
-          api.regenerateMessageStream(conversationId, messageId, onChunk, onDone, onError, signal),
+        (onChunk, onDone, onError, signal, onToolCall, onToolResult) =>
+          api.regenerateMessageStream(conversationId, messageId, onChunk, onDone, onError, signal, onToolCall, onToolResult),
         'errors.regenerateFailed',
       );
     },
@@ -207,7 +243,9 @@ export function useMessages(): UseMessagesReturn {
     abortRef.current?.abort();
     setMessages([]);
     setStreamingContent('');
+    setStreamingToolCalls([]);
     fullContentRef.current = '';
+    toolCallsRef.current = [];
     setStreaming(false);
     setError(null);
   }, []);
@@ -234,6 +272,7 @@ export function useMessages(): UseMessagesReturn {
     loading,
     streaming,
     streamingContent,
+    streamingToolCalls,
     error,
     fetchMessages,
     sendMessage,

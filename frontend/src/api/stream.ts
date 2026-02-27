@@ -1,4 +1,4 @@
-import type { Attachment, ConversationId, MessageId, ModelId } from '../types';
+import type { Attachment, ConversationId, MessageId, ModelId, ToolCallEvent, ToolResultEvent } from '../types';
 import { getStoredToken, clearStoredToken, BASE_URL } from './client';
 import { getErrorMessage, isAbortError } from '../utils/getErrorMessage';
 
@@ -12,6 +12,8 @@ async function streamFromEndpoint(
   onError?: (error: string, code?: string) => void,
   abortSignal?: AbortSignal,
   headers?: Record<string, string>,
+  onToolCall?: (toolCall: ToolCallEvent) => void,
+  onToolResult?: (toolResult: ToolResultEvent) => void,
 ): Promise<void> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), STREAM_TIMEOUT_MS);
@@ -80,6 +82,12 @@ async function streamFromEndpoint(
           if (parsed.content) {
             onChunk?.(parsed.content);
           }
+          if (parsed.tool_call) {
+            onToolCall?.(parsed.tool_call as ToolCallEvent);
+          }
+          if (parsed.tool_result) {
+            onToolResult?.(parsed.tool_result as ToolResultEvent);
+          }
         } catch {
           // skip malformed lines
         }
@@ -109,6 +117,8 @@ export async function sendMessageStream(
   onError?: (error: string, code?: string) => void,
   abortSignal?: AbortSignal,
   idempotencyKey?: string,
+  onToolCall?: (toolCall: ToolCallEvent) => void,
+  onToolResult?: (toolResult: ToolResultEvent) => void,
 ): Promise<void> {
   const headers: Record<string, string> = {};
   if (idempotencyKey) {
@@ -123,6 +133,8 @@ export async function sendMessageStream(
     onError,
     abortSignal,
     headers,
+    onToolCall,
+    onToolResult,
   );
 }
 
@@ -134,6 +146,8 @@ export async function editMessageStream(
   onDone?: () => void,
   onError?: (error: string, code?: string) => void,
   abortSignal?: AbortSignal,
+  onToolCall?: (toolCall: ToolCallEvent) => void,
+  onToolResult?: (toolResult: ToolResultEvent) => void,
 ): Promise<void> {
   return streamFromEndpoint(
     `${BASE_URL}/conversations/${conversationId}/messages/${messageId}/edit`,
@@ -142,6 +156,9 @@ export async function editMessageStream(
     onDone,
     onError,
     abortSignal,
+    undefined,
+    onToolCall,
+    onToolResult,
   );
 }
 
@@ -152,6 +169,8 @@ export async function regenerateMessageStream(
   onDone?: () => void,
   onError?: (error: string, code?: string) => void,
   abortSignal?: AbortSignal,
+  onToolCall?: (toolCall: ToolCallEvent) => void,
+  onToolResult?: (toolResult: ToolResultEvent) => void,
 ): Promise<void> {
   return streamFromEndpoint(
     `${BASE_URL}/conversations/${conversationId}/messages/${messageId}/regenerate`,
@@ -160,5 +179,8 @@ export async function regenerateMessageStream(
     onDone,
     onError,
     abortSignal,
+    undefined,
+    onToolCall,
+    onToolResult,
   );
 }
