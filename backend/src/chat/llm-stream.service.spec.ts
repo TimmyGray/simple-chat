@@ -5,6 +5,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { LlmStreamService } from './llm-stream.service';
 import { DatabaseService } from '../database/database.service';
 import { FileExtractionService } from './file-extraction.service';
+import { ToolExecutionService } from './tool-execution.service';
 import type { StreamEvent } from './interfaces/stream-event.interface';
 
 describe('LlmStreamService', () => {
@@ -58,6 +59,14 @@ describe('LlmStreamService', () => {
             buildLlmMessages: vi
               .fn()
               .mockResolvedValue([{ role: 'user', content: 'Hello' }]),
+          },
+        },
+        {
+          provide: ToolExecutionService,
+          useValue: {
+            getOpenAITools: vi.fn().mockReturnValue([]),
+            accumulateToolCalls: vi.fn(),
+            executeToolCalls: vi.fn(),
           },
         },
         {

@@ -41,8 +41,6 @@ const MAX_FILE_LINES = 300;
  * Remove the exception when the task is completed.
  */
 const FILE_SIZE_EXCEPTIONS: Record<string, string> = {
-  'chat/llm-stream.service.ts':
-    'FEAT-14a: MCP tool-use streaming loop adds ~25 lines; splitting tracked as B-M14',
   'chat/chat.controller.ts':
     'FEAT-10b: sharing endpoints add ~45 lines; splitting tracked as B-M15',
 };
