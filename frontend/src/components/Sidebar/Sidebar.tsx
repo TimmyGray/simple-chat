@@ -32,6 +32,7 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
   const { t } = useTranslation();
   const {
     conversations,
+    sharedConversations,
     conversationsLoading,
     selectedConversation,
     userEmail,
@@ -119,7 +120,7 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
           <Box sx={{ display: 'flex', justifyContent: 'center', pt: 4 }}>
             <CircularProgress size={LOADING_SPINNER_SM} aria-label={t('sidebar.loading')} />
           </Box>
-        ) : conversations.length === 0 ? (
+        ) : conversations.length === 0 && sharedConversations.length === 0 ? (
           <Typography
             variant="body2"
             color="text.secondary"
@@ -128,17 +129,39 @@ export default function Sidebar({ onMobileClose }: SidebarProps) {
             {t('sidebar.noConversations')}
           </Typography>
         ) : (
-          <List dense disablePadding>
-            {conversations.map((conv) => (
-              <ConversationItem
-                key={conv._id}
-                conversation={conv}
-                selected={conv._id === selectedId}
-                onClick={() => handleSelect(conv._id)}
-                onDelete={() => setDeleteTarget(conv._id)}
-              />
-            ))}
-          </List>
+          <>
+            <List dense disablePadding>
+              {conversations.map((conv) => (
+                <ConversationItem
+                  key={conv._id}
+                  conversation={conv}
+                  selected={conv._id === selectedId}
+                  onClick={() => handleSelect(conv._id)}
+                  onDelete={() => setDeleteTarget(conv._id)}
+                />
+              ))}
+            </List>
+            {sharedConversations.length > 0 && (
+              <>
+                <Divider sx={{ my: 1 }} />
+                <Typography variant="caption" color="text.secondary" sx={{ px: 1, mb: 0.5, display: 'block' }}>
+                  {t('sharing.sharedWithYou')}
+                </Typography>
+                <List dense disablePadding>
+                  {sharedConversations.map((conv) => (
+                    <ConversationItem
+                      key={conv._id}
+                      conversation={conv}
+                      selected={conv._id === selectedId}
+                      onClick={() => handleSelect(conv._id)}
+                      onDelete={() => setDeleteTarget(conv._id)}
+                      shared
+                    />
+                  ))}
+                </List>
+              </>
+            )}
+          </>
         )}
       </Box>
 

@@ -30,7 +30,7 @@ interface ChatAppProps {
 
 export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps) {
   const { t } = useTranslation();
-  const { conversations, loading: convsLoading, error: convsError, clearError: clearConvsError, refresh, create, remove, fork } = useConversations();
+  const { conversations, sharedConversations, loading: convsLoading, error: convsError, clearError: clearConvsError, refresh, create, remove, fork } = useConversations();
   const { models, error: modelsError, clearError: clearModelsError } = useModels();
   const { templates, error: templatesError, clearError: clearTemplatesError, refresh: refreshTemplates } = useTemplates();
   const isOnline = useOnlineStatus();
@@ -56,9 +56,11 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
   // Select conversation and sync template selector to match
   const handleSelectConversation = useCallback((id: ConversationId | null) => {
     setSelectedId(id);
-    const conv = id ? conversations.find((c) => c._id === id) : null;
+    const conv = id
+      ? conversations.find((c) => c._id === id) || sharedConversations.find((c) => c._id === id)
+      : null;
     setSelectedTemplateId(conv?.templateId ?? null);
-  }, [conversations]);
+  }, [conversations, sharedConversations]);
 
   const handleSearchSelect = useCallback((id: ConversationId) => {
     handleSelectConversation(id);
@@ -74,8 +76,8 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
   }, [convsError, modelsError, templatesError, clearConvsError, clearModelsError, clearTemplatesError]);
 
   const selectedConversation = useMemo(
-    () => conversations.find((c) => c._id === selectedId) || null,
-    [conversations, selectedId],
+    () => conversations.find((c) => c._id === selectedId) || sharedConversations.find((c) => c._id === selectedId) || null,
+    [conversations, sharedConversations, selectedId],
   );
 
   const handleNewChat = useCallback(async () => {
@@ -144,8 +146,10 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
   const chatContextValue = useMemo<ChatAppContextValue>(
     () => ({
       conversations,
+      sharedConversations,
       conversationsLoading: convsLoading,
       selectedConversation,
+      currentUserId: user._id,
       userEmail: user.email,
       tokenUsage: user.totalTokensUsed,
       isAdmin: !!user.isAdmin,
@@ -161,8 +165,10 @@ export default function ChatApp({ user, onLogout, onRefreshUser }: ChatAppProps)
     }),
     [
       conversations,
+      sharedConversations,
       convsLoading,
       selectedConversation,
+      user._id,
       user.email,
       user.totalTokensUsed,
       user.isAdmin,

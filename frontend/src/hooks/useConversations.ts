@@ -7,6 +7,7 @@ import { getErrorMessage } from '../utils/getErrorMessage';
 
 export interface UseConversationsReturn {
   conversations: Conversation[];
+  sharedConversations: Conversation[];
   loading: boolean;
   error: string | null;
   clearError: () => void;
@@ -23,6 +24,7 @@ export function useConversations(): UseConversationsReturn {
   tRef.current = t;
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [sharedConversations, setSharedConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const fetchingRef = useRef(false);
@@ -38,8 +40,12 @@ export function useConversations(): UseConversationsReturn {
     }
 
     try {
-      const data = await api.getConversations();
-      setConversations(data);
+      const [owned, shared] = await Promise.all([
+        api.getConversations(),
+        api.getSharedConversations(),
+      ]);
+      setConversations(owned);
+      setSharedConversations(shared);
       initializedRef.current = true;
     } catch (err) {
       // Only surface errors when there's no stale data to show
@@ -122,5 +128,5 @@ export function useConversations(): UseConversationsReturn {
 
   const clearError = useCallback(() => setError(null), []);
 
-  return { conversations, loading, error, clearError, refresh: fetchConversations, create, update, remove, fork };
+  return { conversations, sharedConversations, loading, error, clearError, refresh: fetchConversations, create, update, remove, fork };
 }

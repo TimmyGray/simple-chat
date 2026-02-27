@@ -101,6 +101,22 @@
     "contentRequired": "Template content is required",
     "duplicateName": "A template with this name already exists"
   },
+  "sharing": {
+    "share": "Share",
+    "shareConversation": "Share conversation",
+    "participants": "Participants",
+    "invite": "Invite",
+    "invitePlaceholder": "Enter email address",
+    "roleViewer": "Viewer",
+    "roleEditor": "Editor",
+    "owner": "Owner",
+    "remove": "Remove",
+    "removeParticipant": "Remove participant",
+    "noParticipants": "No participants yet",
+    "inviteSuccess": "Invitation sent",
+    "you": "(you)",
+    "sharedWithYou": "Shared"
+  },
   "models": {
     "free": "Free",
     "local": "Local",
@@ -134,6 +150,10 @@
     "updateTemplate": "Failed to update template",
     "deleteTemplate": "Failed to delete template",
     "forkConversation": "Failed to fork conversation",
+    "fetchParticipants": "Failed to fetch participants",
+    "inviteParticipant": "Failed to invite participant",
+    "revokeParticipant": "Failed to remove participant",
+    "fetchSharedConversations": "Failed to fetch shared conversations",
     "corsOrNetwork": "Cannot reach the server. Check that the backend is running and CORS is configured correctly.",
     "sse": {
       "STREAM_TIMEOUT": "The response took too long and timed out.",

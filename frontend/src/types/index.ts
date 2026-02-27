@@ -47,12 +47,22 @@ export interface ForkedFromRef {
   messageId: MessageId;
 }
 
+export type ParticipantRole = 'viewer' | 'editor';
+
+export interface Participant {
+  userId: string;
+  email: string;
+  role: ParticipantRole;
+  addedAt: string;
+}
+
 export interface Conversation {
   _id: ConversationId;
   title: string;
   model: ModelId;
   templateId?: TemplateId;
   forkedFrom?: ForkedFromRef;
+  participants?: Participant[];
   createdAt: string;
   updatedAt: string;
 }

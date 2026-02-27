@@ -28,8 +28,10 @@ const mockConversations = [
 
 const defaultContext: ChatAppContextValue = {
   conversations: mockConversations,
+  sharedConversations: [],
   conversationsLoading: false,
   selectedConversation: null,
+  currentUserId: 'user1',
   userEmail: undefined,
   tokenUsage: undefined,
   isAdmin: false,

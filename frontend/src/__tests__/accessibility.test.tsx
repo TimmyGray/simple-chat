@@ -62,8 +62,10 @@ const assistantMessage: Message = {
 
 const defaultChatContext: ChatAppContextValue = {
   conversations: mockConversations,
+  sharedConversations: [],
   conversationsLoading: false,
   selectedConversation: null,
+  currentUserId: 'user1',
   userEmail: 'user@example.com',
   tokenUsage: 1500,
   isAdmin: false,

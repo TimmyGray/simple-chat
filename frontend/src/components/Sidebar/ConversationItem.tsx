@@ -9,6 +9,7 @@ import {
 import { alpha } from '@mui/material/styles';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ForkRightIcon from '@mui/icons-material/ForkRight';
+import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 import type { Conversation } from '../../types';
 
 interface ConversationItemProps {
@@ -16,6 +17,7 @@ interface ConversationItemProps {
   selected: boolean;
   onClick: () => void;
   onDelete: () => void;
+  shared?: boolean;
 }
 
 export default function ConversationItem({
@@ -23,6 +25,7 @@ export default function ConversationItem({
   selected,
   onClick,
   onDelete,
+  shared,
 }: ConversationItemProps) {
   const { t, i18n } = useTranslation();
   return (
@@ -66,6 +69,9 @@ export default function ConversationItem({
         <ListItemText
           primary={
             <Typography noWrap variant="body2" fontWeight={selected ? 600 : 400} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              {shared && (
+                <PeopleOutlineIcon sx={{ fontSize: 14, color: 'text.secondary', flexShrink: 0 }} />
+              )}
               {conversation.forkedFrom && (
                 <ForkRightIcon sx={{ fontSize: 14, color: 'text.secondary', flexShrink: 0 }} />
               )}

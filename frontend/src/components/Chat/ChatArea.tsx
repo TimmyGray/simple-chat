@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, Snackbar, Alert, Chip } from '@mui/material';
+import { Box, Snackbar, Alert, Chip, IconButton, Tooltip } from '@mui/material';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import ShareIcon from '@mui/icons-material/Share';
 import type { Attachment, MessageId } from '../../types';
 import { useChatApp } from '../../contexts/ChatAppContext';
 import { useModel } from '../../contexts/ModelContext';
@@ -13,9 +14,10 @@ import type { WsMessagePayload, WsMessageDeletedPayload, WsTypingPayload } from 
 import MessageList from './MessageList';
 import ChatInput from './ChatInput';
 import ExportMenu from './ExportMenu';
+import ShareDialog from './ShareDialog';
 import ConnectionStatus from './ConnectionStatus';
 import EmptyState from '../common/EmptyState';
-import { ERROR_SNACKBAR_AUTO_HIDE_MS } from '../../constants';
+import { ERROR_SNACKBAR_AUTO_HIDE_MS, ICON_SIZE_SM } from '../../constants';
 
 const TYPING_DEBOUNCE_MS = 3000;
 const TYPING_TIMEOUT_MS = 5000;
@@ -23,6 +25,7 @@ const TYPING_TIMEOUT_MS = 5000;
 export default function ChatArea() {
   const {
     selectedConversation: conversation,
+    currentUserId,
     isOnline,
     forkConversation,
     onConversationUpdate,
@@ -49,6 +52,7 @@ export default function ChatArea() {
   } = useMessages();
 
   const [exportError, setExportError] = useState<string | null>(null);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [remoteTypingUsers, setRemoteTypingUsers] = useState<string[]>([]);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
   const typingTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
@@ -259,6 +263,16 @@ export default function ChatArea() {
             aria-label={t('templates.activeTemplate', { name: activeTemplateName })}
           />
         )}
+        <Tooltip title={t('sharing.share')}>
+          <IconButton
+            size="small"
+            aria-label={t('sharing.share')}
+            onClick={() => setShareDialogOpen(true)}
+            sx={{ color: 'text.secondary' }}
+          >
+            <ShareIcon sx={{ fontSize: ICON_SIZE_SM }} />
+          </IconButton>
+        </Tooltip>
         <ExportMenu conversationId={conversation._id} onError={setExportError} />
       </Box>
       <MessageList
@@ -283,6 +297,13 @@ export default function ChatArea() {
         onSend={handleSend}
         disabled={streaming || !isOnline}
         onTyping={handleTyping}
+      />
+      <ShareDialog
+        key={shareDialogOpen ? `share-${conversation._id}` : 'share-closed'}
+        open={shareDialogOpen}
+        conversationId={conversation._id}
+        currentUserId={currentUserId}
+        onClose={() => setShareDialogOpen(false)}
       />
       <Snackbar
         open={!!exportError}

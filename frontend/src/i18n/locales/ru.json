@@ -101,6 +101,22 @@
     "contentRequired": "Содержимое шаблона обязательно",
     "duplicateName": "Шаблон с таким названием уже существует"
   },
+  "sharing": {
+    "share": "Поделиться",
+    "shareConversation": "Поделиться диалогом",
+    "participants": "Участники",
+    "invite": "Пригласить",
+    "invitePlaceholder": "Введите адрес электронной почты",
+    "roleViewer": "Наблюдатель",
+    "roleEditor": "Редактор",
+    "owner": "Владелец",
+    "remove": "Удалить",
+    "removeParticipant": "Удалить участника",
+    "noParticipants": "Участников пока нет",
+    "inviteSuccess": "Приглашение отправлено",
+    "you": "(вы)",
+    "sharedWithYou": "Общий"
+  },
   "models": {
     "free": "Бесплатно",
     "local": "Локальная",
@@ -134,6 +150,10 @@
     "updateTemplate": "Не удалось обновить шаблон",
     "deleteTemplate": "Не удалось удалить шаблон",
     "forkConversation": "Не удалось создать ветку диалога",
+    "fetchParticipants": "Не удалось загрузить участников",
+    "inviteParticipant": "Не удалось пригласить участника",
+    "revokeParticipant": "Не удалось удалить участника",
+    "fetchSharedConversations": "Не удалось загрузить общие диалоги",
     "corsOrNetwork": "Не удаётся подключиться к серверу. Убедитесь, что сервер запущен и CORS настроен правильно.",
     "sse": {
       "STREAM_TIMEOUT": "Ответ занял слишком много времени.",
