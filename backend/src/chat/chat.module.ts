@@ -12,6 +12,7 @@ import { SearchService } from './search.service';
 import { ExportService } from './export.service';
 import { FileExtractionService } from './file-extraction.service';
 import { SharingService } from './sharing.service';
+import { ToolExecutionService } from './tool-execution.service';
 
 @Module({
   imports: [AuthModule, McpModule],
@@ -22,6 +23,7 @@ import { SharingService } from './sharing.service';
     ChatGateway,
     ChatBroadcastService,
     LlmStreamService,
+    ToolExecutionService,
     SearchService,
     ExportService,
     FileExtractionService,
