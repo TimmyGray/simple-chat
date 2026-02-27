@@ -1,21 +1,21 @@
 # Quality Metrics Dashboard
 
-> Last updated: 2026-02-27 (audit #20 + sweep #20)
+> Last updated: 2026-02-27 (audit #20 + sweep #21)
 
 ## Test Summary
 
 | Area | Test Files | Tests | Pass Rate |
 |------|-----------|-------|-----------|
-| Backend | 25 | 270 | 100% |
+| Backend | 27 | 282 | 100% |
 | Frontend | 21 | 212 | 100% |
-| **Total** | **46** | **482** | **100%** |
+| **Total** | **48** | **494** | **100%** |
 
 ## Lint Status
 
 | Area | Errors | Warnings |
 |------|--------|----------|
 | Backend | 0 | 0 |
-| Frontend | 0 | 3 (react-hooks/exhaustive-deps in useMessages.ts) |
+| Frontend | 0 | 0 |
 
 ## Type Check Status
 
@@ -50,7 +50,7 @@
 ## Tech Debt
 - Critical: 0 todo, 4 done (JWT authentication completed)
 - High: 0 todo, 7 done — all high-priority items completed
-- Medium: 4 todo, 31 done, 1 wont-fix (B-M14/B-M15 + F-M24/F-M25 remaining)
+- Medium: 1 todo, 34 done, 1 wont-fix (F-M25 remaining)
 - Low: 0 todo, 15 done — all low-priority items completed
 - Features: 0 todo, 19 done — all features completed (FEAT-10d + FEAT-14b done)
 - Total tracked: 86 (see `docs/exec-plans/tech-debt-tracker.md`)
@@ -62,11 +62,11 @@
 - Total tests: 482 (up from 462, target: 100+ sustained, comfortably exceeded)
 - Completed since last audit: FEAT-10d (Frontend Sharing UI, PR #103), FEAT-14b (MCP Frontend UI, PR #104)
 - All feature tasks now complete (19/19 features done, 0 remaining)
-- 3 lint warnings in useMessages.ts (react-hooks/exhaustive-deps for runStreamOperation)
+- 3 lint warnings in useMessages.ts (react-hooks/exhaustive-deps for runStreamOperation) -- fixed in F-M24 (PR #109)
 - Backend vulnerabilities: 48 (13 moderate, 35 high -- transitive deps, unchanged)
 - Frontend vulnerabilities: 20 (1 moderate, 19 high -- transitive deps, unchanged)
 - Bundle: Backend 1.3 MB, Frontend 7.3 MB (dist/ including source maps)
-- 2 oversized files still tracked: llm-stream.service.ts (315), chat.controller.ts (348) -- B-M14/B-M15 (B-M13 done)
+- 2 oversized files still tracked: llm-stream.service.ts (315), chat.controller.ts (348) -- B-M14/B-M15 (B-M13 done) -- both resolved in PR #107/#108
 - ChatArea.tsx at 304 lines (frontend) -- tracked as F-M25
 - No console.log/warn/error in frontend source (clean)
 - No hardcoded secrets (all from env vars)
@@ -74,6 +74,32 @@
 - Architecture drift fixed: ARCHITECTURE.md updated with sharing endpoints, SharingService, WebSocket/sharing components
 - Product sense updated: FEAT-10 + FEAT-14b moved from P2 to Shipped
 - Overall health: HEALTHY -- all features complete, test coverage growing, no critical issues
+
+## Sweep #21 Findings
+- All validation passing: lint 0 errors, 0 warnings, typecheck 0 errors, 494 tests passing (48 files), build passing
+- Backend tests: 27 files, 282 tests (+2 files, +12 tests from B-M14 ToolExecutionService + B-M15 SharingController extractions)
+- Frontend tests: 21 files, 212 tests (unchanged)
+- Total tests: 494 (up from 482, target: 100+ sustained, comfortably exceeded)
+- Completed since last sweep: B-M14 (Split llm-stream.service.ts, PR #107), B-M15 (Split chat.controller.ts, PR #108), F-M24 (Fix exhaustive-deps warnings, PR #109)
+- Lint warnings fixed: react-hooks/exhaustive-deps in useMessages.ts resolved (was 3, now 0) -- F-M24 complete
+- i18n: all 4 locales in sync (134 leaf keys each, unchanged)
+- Frontend bundle: index 408 KB, vendor-mui 318 KB, vendor-i18n 63 KB, markdown 808 KB (unchanged)
+- Backend dist: 1.3 MB, Frontend dist: 7.3 MB (including source maps) (unchanged)
+- All former file size violations resolved: llm-stream.service.ts (231 lines, was 315), chat.controller.ts (220 lines, was 348), chat.service.ts (289 lines)
+- 1 remaining file size violation: ChatArea.tsx (304 lines, F-M25 in tracker)
+- No console.log/warn/error in source (clean)
+- No dangerouslySetInnerHTML (clean)
+- No hardcoded secrets (clean)
+- No `any` types in non-test source files (clean)
+- No hardcoded user-facing strings in .tsx files (all use t())
+- No i18n gaps (all 4 locales perfectly in sync at 134 keys)
+- All cross-module imports follow approved patterns (chat->auth, chat->mcp, templates->auth, mcp->auth)
+- No raw HTML elements except known exception (hidden file input in FileAttachment.tsx)
+- All hex/rgba colors in theme.ts only (exempt per convention)
+- Express Response imports in chat.controller.ts, sse-stream.helper.ts, upload.controller.ts for SSE/binary streaming -- acceptable per convention
+- 137 production files scanned (76 backend, 61 frontend), 48 test files
+- 0 auto-fix PRs needed, 0 new tasks added to tracker
+- Overall health: HEALTHY -- cleanest sweep yet: 0 lint warnings, all file size violations resolved (except F-M25), all features shipped
 
 ## Sweep #20 Findings
 - All validation passing: lint 0 errors (3 warnings), typecheck 0 errors, 482 tests passing (46 files), build passing
