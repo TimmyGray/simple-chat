@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Conversation, Message, ModelInfo, Attachment, AuthResponse, User, ConversationId, MessageId, ModelId, Template, TemplateId, CreateTemplateDto, UpdateTemplateDto } from '../types';
+import type { Conversation, Message, ModelInfo, Attachment, AuthResponse, User, ConversationId, MessageId, ModelId, Template, TemplateId, CreateTemplateDto, UpdateTemplateDto, Participant, ParticipantRole } from '../types';
 
 export const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -173,4 +173,32 @@ export async function updateTemplate(id: TemplateId, dto: UpdateTemplateDto): Pr
 
 export async function deleteTemplate(id: TemplateId): Promise<void> {
   await api.delete(`/templates/${id}`);
+}
+
+// Sharing
+
+export async function getSharedConversations(): Promise<Conversation[]> {
+  const { data } = await api.get('/conversations/shared');
+  return data;
+}
+
+export async function getParticipants(conversationId: ConversationId): Promise<Participant[]> {
+  const { data } = await api.get(`/conversations/${conversationId}/participants`);
+  return data;
+}
+
+export async function inviteParticipant(
+  conversationId: ConversationId,
+  email: string,
+  role?: ParticipantRole,
+): Promise<Participant> {
+  const { data } = await api.post(`/conversations/${conversationId}/participants`, { email, role });
+  return data;
+}
+
+export async function revokeParticipant(
+  conversationId: ConversationId,
+  userId: string,
+): Promise<void> {
+  await api.delete(`/conversations/${conversationId}/participants/${userId}`);
 }

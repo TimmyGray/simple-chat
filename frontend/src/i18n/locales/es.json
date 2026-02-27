@@ -101,6 +101,20 @@
     "contentRequired": "El contenido de la plantilla es obligatorio",
     "duplicateName": "Ya existe una plantilla con este nombre"
   },
+  "sharing": {
+    "share": "Compartir",
+    "shareConversation": "Compartir conversación",
+    "participants": "Participantes",
+    "invite": "Invitar",
+    "invitePlaceholder": "Ingresa el correo electrónico",
+    "roleViewer": "Lector",
+    "roleEditor": "Editor",
+    "removeParticipant": "Eliminar participante",
+    "noParticipants": "No hay participantes aún",
+    "inviteSuccess": "Invitación enviada",
+    "you": "(tú)",
+    "sharedWithYou": "Compartido"
+  },
   "models": {
     "free": "Gratis",
     "local": "Local",
@@ -134,6 +148,9 @@
     "updateTemplate": "Error al actualizar la plantilla",
     "deleteTemplate": "Error al eliminar la plantilla",
     "forkConversation": "Error al bifurcar la conversación",
+    "fetchParticipants": "Error al obtener los participantes",
+    "inviteParticipant": "Error al invitar al participante",
+    "revokeParticipant": "Error al eliminar al participante",
     "corsOrNetwork": "No se puede conectar al servidor. Verifica que el backend esté en ejecución y que CORS esté configurado correctamente.",
     "sse": {
       "STREAM_TIMEOUT": "La respuesta tardó demasiado y se agotó el tiempo.",

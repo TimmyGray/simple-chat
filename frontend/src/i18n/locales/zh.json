@@ -101,6 +101,20 @@
     "contentRequired": "模板内容不能为空",
     "duplicateName": "已存在同名模板"
   },
+  "sharing": {
+    "share": "分享",
+    "shareConversation": "分享对话",
+    "participants": "参与者",
+    "invite": "邀请",
+    "invitePlaceholder": "输入邮箱地址",
+    "roleViewer": "查看者",
+    "roleEditor": "编辑者",
+    "removeParticipant": "移除参与者",
+    "noParticipants": "暂无参与者",
+    "inviteSuccess": "邀请已发送",
+    "you": "（你）",
+    "sharedWithYou": "共享"
+  },
   "models": {
     "free": "免费",
     "local": "本地",
@@ -134,6 +148,9 @@
     "updateTemplate": "更新模板失败",
     "deleteTemplate": "删除模板失败",
     "forkConversation": "创建对话分支失败",
+    "fetchParticipants": "获取参与者列表失败",
+    "inviteParticipant": "邀请参与者失败",
+    "revokeParticipant": "移除参与者失败",
     "corsOrNetwork": "无法连接服务器。请检查后端是否正在运行以及 CORS 是否配置正确。",
     "sse": {
       "STREAM_TIMEOUT": "响应时间过长，已超时。",

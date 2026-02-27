@@ -4,8 +4,10 @@ import type { Conversation, ConversationId, MessageId } from '../types';
 
 export interface ChatAppContextValue {
   conversations: Conversation[];
+  sharedConversations: Conversation[];
   conversationsLoading: boolean;
   selectedConversation: Conversation | null;
+  currentUserId: string;
   userEmail: string | undefined;
   tokenUsage: number | undefined;
   isAdmin: boolean;
