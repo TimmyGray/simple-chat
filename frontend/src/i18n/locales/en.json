@@ -115,6 +115,15 @@
     "you": "(you)",
     "sharedWithYou": "Shared"
   },
+  "tools": {
+    "calling": "Calling {{name}}…",
+    "completed": "{{name}} completed",
+    "error": "{{name}} failed",
+    "arguments": "Arguments",
+    "result": "Result",
+    "showDetails": "Show details",
+    "hideDetails": "Hide details"
+  },
   "models": {
     "free": "Free",
     "local": "Local",

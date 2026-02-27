@@ -115,6 +115,15 @@
     "you": "(вы)",
     "sharedWithYou": "Общий"
   },
+  "tools": {
+    "calling": "Вызов {{name}}…",
+    "completed": "{{name}} завершено",
+    "error": "{{name}} ошибка",
+    "arguments": "Аргументы",
+    "result": "Результат",
+    "showDetails": "Показать детали",
+    "hideDetails": "Скрыть детали"
+  },
   "models": {
     "free": "Бесплатно",
     "local": "Локальная",

@@ -82,6 +82,23 @@ export interface Attachment {
   fileSize: number;
 }
 
+export interface ToolCallEvent {
+  name: string;
+  arguments: string;
+}
+
+export interface ToolResultEvent {
+  name: string;
+  content: string;
+  isError: boolean;
+}
+
+export interface ToolCallEntry {
+  name: string;
+  arguments: string;
+  result?: { content: string; isError: boolean };
+}
+
 export interface Message {
   _id: MessageId;
   conversationId: ConversationId;
@@ -90,6 +107,7 @@ export interface Message {
   model?: ModelId;
   attachments: Attachment[];
   isEdited?: boolean;
+  toolCalls?: ToolCallEntry[];
   createdAt: string;
 }
 
