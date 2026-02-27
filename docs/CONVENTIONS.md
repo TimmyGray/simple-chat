@@ -43,6 +43,7 @@ These rules are enforced by ESLint custom rules with remediation messages and st
 7. **No hardcoded user-facing strings:** All strings must use `t()` from react-i18next. Error messages, prefixes, and labels included.
 8. **No inline `instanceof Error` checks:** Use `getErrorMessage(err, fallback)` from `utils/getErrorMessage` for consistent error extraction in catch blocks.
 9. **Lifecycle hook completeness:** Services managing persistent connections (transports, clients) must implement both `OnModuleInit` (startup recovery) and `OnModuleDestroy` (graceful shutdown). Architecture test enforces this.
+10. **Context file co-located hooks:** React context files in `contexts/*.tsx` may export both a Provider component and a `use*` hook. The `react-refresh/only-export-components` rule is disabled for this directory via ESLint config — do not add inline eslint-disable comments.
 
 ## Environment
 

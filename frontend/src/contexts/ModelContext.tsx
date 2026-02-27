@@ -20,7 +20,6 @@ export function ModelProvider({
   return <ModelContext.Provider value={value}>{children}</ModelContext.Provider>;
 }
 
-// eslint-disable-next-line react-refresh/only-export-components -- co-located hook is standard for context files
 export function useModel(): ModelContextValue {
   const ctx = useContext(ModelContext);
   if (!ctx) {

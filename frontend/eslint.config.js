@@ -130,4 +130,11 @@ export default defineConfig([
       ],
     },
   },
+  {
+    // Context files co-locate a custom hook (e.g., useWebSocket) with the provider — this is idiomatic React
+    files: ['src/contexts/*.tsx', '**/src/contexts/*.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
 ])

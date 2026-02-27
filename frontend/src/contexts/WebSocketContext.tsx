@@ -28,7 +28,6 @@ export function WebSocketProvider({
   );
 }
 
-// eslint-disable-next-line react-refresh/only-export-components -- co-located hook is standard for context files
 export function useWebSocketContext(): WebSocketContextValue {
   const ctx = useContext(WebSocketContext);
   if (!ctx) {

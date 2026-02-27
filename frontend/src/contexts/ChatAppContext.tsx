@@ -36,7 +36,6 @@ export function ChatAppProvider({
   );
 }
 
-// eslint-disable-next-line react-refresh/only-export-components -- co-located hook is standard for context files
 export function useChatApp(): ChatAppContextValue {
   const ctx = useContext(ChatAppContext);
   if (!ctx) {

@@ -23,7 +23,6 @@ export function ThemeModeProvider({
   );
 }
 
-// eslint-disable-next-line react-refresh/only-export-components -- co-located hook is standard for context files
 export function useThemeModeContext(): ThemeModeContextValue {
   const ctx = useContext(ThemeModeContext);
   if (!ctx) {
