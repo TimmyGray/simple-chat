@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { McpModule } from '../mcp/mcp.module';
 import { ChatController } from './chat.controller';
+import { SharingController } from './sharing.controller';
 import { UploadController } from './upload.controller';
 import { ChatService } from './chat.service';
 import { ConversationForkService } from './conversation-fork.service';
@@ -16,7 +17,7 @@ import { ToolExecutionService } from './tool-execution.service';
 
 @Module({
   imports: [AuthModule, McpModule],
-  controllers: [ChatController, UploadController],
+  controllers: [ChatController, SharingController, UploadController],
   providers: [
     ChatService,
     ConversationForkService,

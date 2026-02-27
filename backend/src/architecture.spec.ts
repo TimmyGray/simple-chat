@@ -40,10 +40,7 @@ const MAX_FILE_LINES = 300;
  * Each exception MUST reference a tech-debt-tracker task ID.
  * Remove the exception when the task is completed.
  */
-const FILE_SIZE_EXCEPTIONS: Record<string, string> = {
-  'chat/chat.controller.ts':
-    'FEAT-10b: sharing endpoints add ~45 lines; splitting tracked as B-M15',
-};
+const FILE_SIZE_EXCEPTIONS: Record<string, string> = {};
 
 function getAllTsFiles(dir: string): string[] {
   const files: string[] = [];
