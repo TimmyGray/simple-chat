@@ -3,6 +3,7 @@ import { ObjectId } from 'mongodb';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
+import { ConversationForkService } from './conversation-fork.service';
 import { SearchService } from './search.service';
 import { ExportService } from './export.service';
 import { SharingService } from './sharing.service';
@@ -64,6 +65,12 @@ describe('ChatController', () => {
         {
           provide: ChatService,
           useValue: chatService,
+        },
+        {
+          provide: ConversationForkService,
+          useValue: {
+            forkConversation: vi.fn().mockResolvedValue(mockConversation),
+          },
         },
         {
           provide: SearchService,

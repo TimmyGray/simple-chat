@@ -17,6 +17,7 @@ import {
 import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { ChatService } from './chat.service';
+import { ConversationForkService } from './conversation-fork.service';
 import { SearchService } from './search.service';
 import { ExportService } from './export.service';
 import { SharingService } from './sharing.service';
@@ -44,6 +45,7 @@ export class ChatController {
 
   constructor(
     private readonly chatService: ChatService,
+    private readonly conversationForkService: ConversationForkService,
     private readonly searchService: SearchService,
     private readonly exportService: ExportService,
     private readonly sharingService: SharingService,
@@ -106,7 +108,11 @@ export class ChatController {
     @Param('messageId', ParseObjectIdPipe) messageId: string,
   ) {
     this.logger.log(`Forking conversation ${id} at message ${messageId}`);
-    return this.chatService.forkConversation(id, messageId, user._id);
+    return this.conversationForkService.forkConversation(
+      id,
+      messageId,
+      user._id,
+    );
   }
 
   @Get('conversations/shared')
