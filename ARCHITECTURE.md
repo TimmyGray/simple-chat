@@ -66,11 +66,15 @@ AppModule
 │   └── AdminGuard (admin-only route protection)
 ├── ChatModule (imports AuthModule, McpModule)
 │   ├── ChatController (REST + SSE endpoints, JWT-protected)
+│   ├── SharingController (shared conversations, participants CRUD)
+│   ├── UploadController (file upload endpoint, Multer disk storage)
 │   ├── ChatGateway (Socket.IO WebSocket gateway, JWT auth, room-based conversations)
 │   ├── ChatService (conversations CRUD, userId-scoped)
+│   ├── ConversationForkService (fork conversations from a specific message)
 │   ├── ChatBroadcastService (WebSocket event broadcasting for real-time sync)
 │   ├── SharingService (conversation sharing: invite/revoke participants, role-based access)
-│   ├── LlmStreamService (LLM streaming via OpenAI SDK + OpenRouter, MCP tool-use loop)
+│   ├── LlmStreamService (LLM streaming via OpenAI SDK + OpenRouter)
+│   ├── ToolExecutionService (MCP tool-use loop, OpenAI function-calling conversion)
 │   ├── SearchService (full-text conversation/message search)
 │   ├── ExportService (conversation export: Markdown, JSON, PDF)
 │   └── FileExtractionService (PDF/text/CSV file content extraction)
@@ -329,6 +333,7 @@ Custom hooks with five React Contexts (`ChatAppContext`, `ModelContext`, `Templa
 | `useTemplates`     | Fetch available templates on mount. Error state.                    |
 | `useAdminTemplates`| Admin template CRUD operations (create, update, delete). Used by `AdminTemplatePanel`. |
 | `useWebSocket`     | Socket.IO client lifecycle: connect with JWT auth, auto-reconnect, room management, real-time message/typing event handling. |
+| `useConversationWebSocket` | Per-conversation WebSocket lifecycle: joins/leaves rooms on conversation change, routes incoming message events to useMessages callbacks, manages typing indicators. Extracted from ChatArea. |
 | `useSharing`       | Conversation sharing: fetch participants, invite by email, revoke access. Used by `ShareDialog`. |
 | `useFocusRevalidation` | Shared hook: refetches data on window focus/visibility change. Throttled (default 30s). Used by `useConversations` and `useModels`. |
 | `useOnlineStatus`  | Detects browser online/offline state. Returns `isOnline` boolean. Drives offline Snackbar and ChatInput disabled state. |
