@@ -69,6 +69,7 @@ AppModule
 │   ├── ChatGateway (Socket.IO WebSocket gateway, JWT auth, room-based conversations)
 │   ├── ChatService (conversations CRUD, userId-scoped)
 │   ├── ChatBroadcastService (WebSocket event broadcasting for real-time sync)
+│   ├── SharingService (conversation sharing: invite/revoke participants, role-based access)
 │   ├── LlmStreamService (LLM streaming via OpenAI SDK + OpenRouter, MCP tool-use loop)
 │   ├── SearchService (full-text conversation/message search)
 │   ├── ExportService (conversation export: Markdown, JSON, PDF)
@@ -146,6 +147,7 @@ The project uses the **MongoDB native driver** (not Mongoose). `DatabaseModule` 
 | `model`     | string   | Default LLM model ID             |
 | `templateId`| ObjectId (optional) | Reference to templates._id (system prompt template) |
 | `forkedFrom`| object (optional) | Fork origin: `{ conversationId: ObjectId, messageId: ObjectId }` |
+| `participants`| ParticipantRef[] (optional) | Shared access: `[{ userId: ObjectId, role: "viewer"\|"editor", addedAt: Date }]` |
 | `createdAt` | Date     | Creation timestamp               |
 | `updatedAt` | Date     | Last modification timestamp      |
 
@@ -200,6 +202,7 @@ Created programmatically in `DatabaseService.onModuleInit()`:
 - `messages(conversationId: 1)` -- optimizes message count and delete operations.
 - `messages(idempotencyKey: 1)` unique, sparse -- prevents duplicate message creation.
 - `conversations(userId: 1, updatedAt: -1)` -- optimizes user-scoped conversation listing.
+- `conversations("participants.userId": 1, updatedAt: -1)` sparse -- optimizes shared conversation listing.
 - `users(email: 1)` unique -- fast lookup by email, enforces uniqueness.
 
 ### API Endpoints
@@ -222,6 +225,10 @@ All routes are prefixed with `/api`.
 | `POST`   | `/conversations/:id/fork/:messageId` | **10/min** | JWT      | Fork conversation from a specific message |
 | `GET`    | `/conversations/search`             | **30/min**   | JWT      | Search conversations and messages |
 | `GET`    | `/conversations/:id/export`         | **10/min**   | JWT      | Export conversation (Markdown/JSON/PDF) |
+| `GET`    | `/conversations/shared`             | 60/min       | JWT      | List conversations shared with current user |
+| `GET`    | `/conversations/:id/participants`   | 60/min       | JWT      | List participants of a shared conversation |
+| `POST`   | `/conversations/:id/participants`   | **10/min**   | JWT      | Invite a participant to a conversation   |
+| `DELETE` | `/conversations/:id/participants/:userId` | 60/min | JWT      | Revoke a participant from a conversation |
 | `GET`    | `/templates`                        | 60/min       | JWT      | List all system prompt templates         |
 | `GET`    | `/templates/:id`                    | 60/min       | JWT      | Get a single template                    |
 | `POST`   | `/templates`                        | **10/min**   | JWT+Admin| Create a template (admin only)           |
@@ -272,27 +279,33 @@ App (useAuth + useThemeMode hooks)
 │           │   ├── ChatAppProvider (React Context for shared state)
 │           │   │   └── ModelProvider (React Context for model selection)
 │           │   │       └── TemplateProvider (React Context for template selection)
-│           │   │           └── Layout (pure layout, no data props)
-│           │   │               ├── Sidebar (reads from ChatAppContext)
-│           │   │               │   ├── LanguageSwitcher
-│           │   │               │   ├── ThemeToggle
-│           │   │               │   ├── NewChatButton
-│           │   │               │   ├── ConversationItem[] (list with delete)
-│           │   │               │   └── User email + Logout button
-│           │   │               └── ChatArea (reads from ChatAppContext + ModelContext + TemplateContext)
-│           │   │                   ├── ModelSelector (reads from ModelContext)
-│           │   │                   ├── TemplateSelector (reads from TemplateContext)
-│           │   │                   ├── SearchDialog (Cmd+K full-text search)
-│           │   │                   ├── ExportMenu (Markdown/JSON/PDF export)
-│           │   │                   ├── AdminTemplatePanel (admin template CRUD)
-│           │   │                   ├── MessageList
-│           │   │                   │   ├── MessageBubble[] (lazy-loads MarkdownRenderer)
-│           │   │                   │   │   ├── MessageActions (copy, edit, regenerate)
-│           │   │                   │   │   └── MessageEditForm (inline edit UI)
-│           │   │                   │   └── TypingIndicator (during streaming)
-│           │   │                   ├── EmptyState (no conversation selected)
-│           │   │                   └── ChatInput
-│           │   │                       └── FileAttachment (upload UI)
+│           │   │           └── WebSocketProvider (React Context for real-time sync)
+│           │   │               └── Layout (pure layout, no data props)
+│           │   │                   ├── Sidebar (reads from ChatAppContext)
+│           │   │                   │   ├── LanguageSwitcher
+│           │   │                   │   ├── ThemeToggle
+│           │   │                   │   ├── NewChatButton
+│           │   │                   │   ├── ConversationItem[] (list with delete)
+│           │   │                   │   ├── Shared conversations section
+│           │   │                   │   └── User email + Logout button
+│           │   │                   └── ChatArea (reads from ChatAppContext + ModelContext + TemplateContext)
+│           │   │                       ├── ModelSelector (reads from ModelContext)
+│           │   │                       ├── TemplateSelector (reads from TemplateContext)
+│           │   │                       ├── SearchDialog (Cmd+K full-text search)
+│           │   │                       ├── ExportMenu (Markdown/JSON/PDF export)
+│           │   │                       ├── AdminTemplatePanel (admin template CRUD)
+│           │   │                       ├── ShareDialog (invite/revoke participants)
+│           │   │                       ├── ShareButton (opens ShareDialog)
+│           │   │                       ├── ConnectionStatus (WebSocket connection indicator)
+│           │   │                       ├── MessageList
+│           │   │                       │   ├── MessageBubble[] (lazy-loads MarkdownRenderer)
+│           │   │                       │   │   ├── MessageActions (copy, edit, regenerate)
+│           │   │                       │   │   ├── MessageEditForm (inline edit UI)
+│           │   │                       │   │   └── ToolCallDisplay (inline MCP tool-call results)
+│           │   │                       │   └── TypingIndicator (during streaming)
+│           │   │                       ├── EmptyState (no conversation selected)
+│           │   │                       └── ChatInput
+│           │   │                           └── FileAttachment (upload UI)
 │           │   └── ConfirmDialog (shared delete confirmation)
 │           │   └── Snackbar + Alert (error display, auto-dismiss 4s)
 │           └── Loading spinner (during auth session restore)
@@ -300,7 +313,7 @@ App (useAuth + useThemeMode hooks)
 
 ### State Management
 
-Custom hooks with four React Contexts (`ChatAppContext`, `ModelContext`, `TemplateContext`, `ThemeModeContext`). No Redux, Zustand, or other external state library.
+Custom hooks with five React Contexts (`ChatAppContext`, `ModelContext`, `TemplateContext`, `ThemeModeContext`, `WebSocketContext`). No Redux, Zustand, or other external state library.
 
 | Hook / Context     | Responsibilities                                                    |
 |--------------------|---------------------------------------------------------------------|
@@ -308,12 +321,15 @@ Custom hooks with four React Contexts (`ChatAppContext`, `ModelContext`, `Templa
 | `ModelContext`     | Model selection state (models list, selectedModel, changeModel). Split from ChatAppContext to prevent full-page re-renders on model change. Consumed via `useModel()`. |
 | `TemplateContext`  | Template selection state (templates list, selectedTemplateId, changeTemplate). Syncs template selection with conversations. Consumed via `useTemplate()`. |
 | `ThemeModeContext` | Dark/light/system theme mode. Wraps `useThemeMode` hook. Consumed via `useThemeModeContext()`. |
+| `WebSocketContext` | Socket.IO connection state (connected, disconnected, error). Provides socket instance, join/leave room helpers, typing indicators. Consumed via `useWebSocketContext()`. |
 | `useAuth`          | JWT token management (localStorage), login, register, logout, session restore on mount. |
 | `useConversations` | Fetch, create, update, delete conversations. Error state. Auto-fetch on mount. |
 | `useMessages`      | Fetch messages, send with SSE streaming, optimistic user message insertion, stop streaming. Manages `streaming`, `streamingContent`, abort controller. |
 | `useModels`        | Fetch available models on mount. Error state.                       |
 | `useTemplates`     | Fetch available templates on mount. Error state.                    |
 | `useAdminTemplates`| Admin template CRUD operations (create, update, delete). Used by `AdminTemplatePanel`. |
+| `useWebSocket`     | Socket.IO client lifecycle: connect with JWT auth, auto-reconnect, room management, real-time message/typing event handling. |
+| `useSharing`       | Conversation sharing: fetch participants, invite by email, revoke access. Used by `ShareDialog`. |
 | `useFocusRevalidation` | Shared hook: refetches data on window focus/visibility change. Throttled (default 30s). Used by `useConversations` and `useModels`. |
 | `useOnlineStatus`  | Detects browser online/offline state. Returns `isOnline` boolean. Drives offline Snackbar and ChatInput disabled state. |
 | `useSearch`        | Manages search state for Cmd+K dialog. Debounced query, results, loading state. |

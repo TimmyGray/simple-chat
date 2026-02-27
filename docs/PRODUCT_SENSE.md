@@ -32,8 +32,7 @@ No remaining P0 items.
 No remaining P1 items.
 
 ### Nice to Have (P2) — Polish and delight
-1. **Real-time Collaboration** — WebSocket-based shared conversations for teams
-2. **MCP Frontend UI** — Inline tool-call display with collapsible results (FEAT-14b, backend done)
+No remaining P2 items.
 
 ### Shipped
 - **Authentication** — JWT auth + userId-scoped data (FEAT-1)
@@ -49,6 +48,8 @@ No remaining P1 items.
 - **Conversation Branching** — Fork conversations from any message to explore alternatives (FEAT-12)
 - **Ollama / Local Model Support** — Direct Ollama connection for fully offline, zero-cost usage (FEAT-13)
 - **MCP Tool Integration (Backend)** — Connect to MCP servers for external tools with admin CRUD and tool-use streaming (FEAT-14)
+- **Real-time Collaboration** — WebSocket gateway, conversation sharing with invite/revoke, live message sync, typing indicators, presence (FEAT-10)
+- **MCP Frontend UI** — Inline tool-call display with collapsible results, streaming status indicators (FEAT-14b)
 
 ## Design Principles
 1. **Simple first** — Don't build features users haven't asked for
