@@ -73,7 +73,7 @@ export default function MessageList({
   }, [items.length]);
 
   useEffect(() => {
-    if (!isAtBottomRef.current || !streaming || !streamingContent || items.length === 0) return;
+    if (!isAtBottomRef.current || !streaming || (!streamingContent && !hasStreamingToolCalls) || items.length === 0) return;
 
     const elapsed = Date.now() - lastScrollRef.current;
     if (elapsed >= SCROLL_THROTTLE_MS) {
@@ -91,7 +91,7 @@ export default function MessageList({
         scrollTimerRef.current = null;
       }
     };
-  }, [streamingContent, streaming, items.length, scrollToBottom]);
+  }, [streamingContent, hasStreamingToolCalls, streaming, items.length, scrollToBottom]);
 
   // Deliver final scroll when streaming ends (pending timer would be cleared)
   useEffect(() => {

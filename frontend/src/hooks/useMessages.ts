@@ -150,6 +150,9 @@ export function useMessages(): UseMessagesReturn {
         setError(msg);
       }
     } finally {
+      const savedToolCalls = toolCallsRef.current.length > 0
+        ? [...toolCallsRef.current]
+        : undefined;
       setStreaming(false);
       setStreamingContent('');
       setStreamingToolCalls([]);
@@ -160,6 +163,13 @@ export function useMessages(): UseMessagesReturn {
       // Without this, fork and regenerate fail because they need real _ids.
       if (completed) {
         const data = await api.getMessages(conversationId);
+        // Merge tool calls into the last assistant message (backend doesn't persist them)
+        if (savedToolCalls && data.length > 0) {
+          const lastMsg = data[data.length - 1];
+          if (lastMsg.role === 'assistant') {
+            data[data.length - 1] = { ...lastMsg, toolCalls: savedToolCalls };
+          }
+        }
         setMessages(data);
       }
     }
