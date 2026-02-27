@@ -81,7 +81,7 @@ export function useMessages(): UseMessagesReturn {
   }, []);
 
   /** Shared streaming boilerplate for send, edit, and regenerate operations. */
-  const runStreamOperation = async (
+  const runStreamOperation = useCallback(async (
     conversationId: ConversationId,
     streamFn: (
       onChunk: (chunk: string) => void,
@@ -173,7 +173,7 @@ export function useMessages(): UseMessagesReturn {
         setMessages(data);
       }
     }
-  };
+  }, [handleToolCall, handleToolResult]);
 
   const sendMessage = useCallback(
     async (
@@ -201,7 +201,7 @@ export function useMessages(): UseMessagesReturn {
         { model },
       );
     },
-    [],
+    [runStreamOperation],
   );
 
   const editMessage = useCallback(
@@ -225,7 +225,7 @@ export function useMessages(): UseMessagesReturn {
         'errors.editFailed',
       );
     },
-    [],
+    [runStreamOperation],
   );
 
   const regenerateMessage = useCallback(
@@ -246,7 +246,7 @@ export function useMessages(): UseMessagesReturn {
         'errors.regenerateFailed',
       );
     },
-    [],
+    [runStreamOperation],
   );
 
   const clear = useCallback(() => {
