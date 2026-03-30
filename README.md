@@ -75,6 +75,24 @@ This starts both services concurrently:
 - **Frontend:** http://localhost:5173
 - **Backend API:** http://localhost:3001/api
 
+### 5. Run with Docker Compose
+
+```bash
+cp .env.docker.example .env
+docker compose up --build -d
+```
+
+Services:
+- **Frontend:** http://localhost:5173
+- **Backend API:** http://localhost:3001/api
+- **MongoDB:** mongodb://localhost:27017/simple-chat
+
+Stop stack:
+
+```bash
+docker compose down
+```
+
 ## Environment Variables
 
 ### Backend (`backend/.env`)
