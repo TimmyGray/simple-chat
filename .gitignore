@@ -6,6 +6,12 @@ node_modules
 
 dist
 
+# Backend stray tsc / incremental artifacts (not source)
+backend/tsconfig.build.tsbuildinfo
+backend/vitest.config.js
+backend/vitest.config.d.ts
+backend/vitest.config.js.map
+
 .claude/settings.local.json
 .claude/worktrees/
 
